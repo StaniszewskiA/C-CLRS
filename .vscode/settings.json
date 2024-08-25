@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "complexity_table.h": "c"
+        "complexity_table.h": "c",
+        "type_traits": "c"
     }
 }

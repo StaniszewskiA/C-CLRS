@@ -53,3 +53,6 @@ dkms.conf
 
 # compiler files
 tasks.json
+
+# vscode
+.vscode/

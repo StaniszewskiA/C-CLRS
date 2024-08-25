@@ -19,5 +19,6 @@ long long quadratic_time(long long time);
 long long cubic_time(long long time);
 long long exponential_time(long long time);
 long long factorial_time(long long time);
+long long factorial(long long n);
 
 #endif
