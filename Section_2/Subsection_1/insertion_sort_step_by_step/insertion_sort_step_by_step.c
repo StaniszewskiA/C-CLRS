@@ -28,7 +28,7 @@ void insertionSortStepByStep(int arr[], int N) {
 }
 
 int main() {
-    int arr[] = {12, 11, 13, 5, 6};
+    int arr[] = {31, 41, 59, 26, 41, 58};
     int N = sizeof(arr) / sizeof(arr[0]);
 
     printf("Initial array:\n");
