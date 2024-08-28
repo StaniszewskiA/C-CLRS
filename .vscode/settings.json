@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "complexity_table.h": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "insertion_sort.h": "c",
+        "stdio.h": "c",
+        "insertion_sort_step_by_step.h": "c"
     }
 }
