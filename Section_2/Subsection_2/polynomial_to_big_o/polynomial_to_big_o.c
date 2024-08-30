@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 int findHighestDegree(const char *polynomial) {
     int i = 0, maxExponent = 0;
@@ -48,7 +49,7 @@ void determinBigO(int maxExponent) {
 }
 
 int main() {
-    const char *polynomial = "3x^5 + 2x^3 - 7x + 10";
+    const char *polynomial = "3x^7 + 2x^3 - 7x + 10";
     int maxExponent = findHighestDegree(polynomial);
     determinBigO(maxExponent);
 
