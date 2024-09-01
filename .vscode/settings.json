@@ -5,6 +5,8 @@
         "insertion_sort.h": "c",
         "stdio.h": "c",
         "insertion_sort_step_by_step.h": "c",
-        "add_binary_numbers.h": "c"
+        "add_binary_numbers.h": "c",
+        "selection_sort.h": "c",
+        "recursive_insertion_sort.h": "c"
     }
 }
