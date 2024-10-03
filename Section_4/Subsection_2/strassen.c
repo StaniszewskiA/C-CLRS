@@ -1,128 +1,185 @@
-#include "strassen.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "strassen.h"
 
-void print_matrix(char *display, int matrix[ROW_1][COL_1], int start_row, int start_column, int end_row, int end_column) {
-    printf("\n%s =>\n", display);
-    for (int i = start_row; i <= end_row; i++) {
-        for (int j = start_column; j <= end_column; j++) {
-            printf("%d ", matrix[i][j]);
+#define MAX 64
+
+double** allocate_matrix(int size) {
+    double** matrix = (double**)malloc(size * sizeof(double*));
+    for (int i = 0; i < size; i++) {
+        matrix[i] = (double*)malloc(size * sizeof(double));
+    }
+    return matrix;
+}
+
+void input_matrix(double** matrix, int size, const char* name) {
+    printf("Enter elements of matrix %s:\n", name);
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            scanf("%lf", &matrix[i][j]);
+        }
+    }
+}
+
+void free_matrix(double** matrix, int size) {
+    for (int i = 0; i < size; i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
+}
+
+void add_matrices(double** A, double** B, double** C, int size, int multiplier) {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            C[i][j] = A[i][j] + multiplier* B[i][j];
+        }
+    }
+}
+
+void strassen(double** A, double** B, double** C, int size) {
+    if (size == 1) {
+        C[0][0] = A[0][0] * B[0][0];
+        return;
+    }
+
+    int newSize = size / 2;
+    double** A11 = allocate_matrix(newSize);
+    double** A12 = allocate_matrix(newSize);
+    double** A21 = allocate_matrix(newSize);
+    double** A22 = allocate_matrix(newSize);
+    double** B11 = allocate_matrix(newSize);
+    double** B12 = allocate_matrix(newSize);
+    double** B21 = allocate_matrix(newSize);
+    double** B22 = allocate_matrix(newSize);
+
+    for (int i = 0; i < newSize; i++) {
+        for (int j = 0; j < newSize; j++) {
+            A11[i][j] = A[i][j];
+            A12[i][j] = A[i][j + newSize];
+            A21[i][j] = A[i + newSize][j];
+            A22[i][j] = A[i + newSize][j + newSize];
+            B11[i][j] = B[i][j];
+            B12[i][j] = B[i][j + newSize];
+            B21[i][j] = B[i + newSize][j];
+            B22[i][j] = B[i + newSize][j + newSize];
+        }
+    }
+
+    double** S1 = allocate_matrix(newSize);
+    double** S2 = allocate_matrix(newSize);
+    double** S3 = allocate_matrix(newSize);
+    double** S4 = allocate_matrix(newSize);
+    double** S5 = allocate_matrix(newSize);
+    double** S6 = allocate_matrix(newSize);
+    double** S7 = allocate_matrix(newSize);
+    double** S8 = allocate_matrix(newSize);
+    double** S9 = allocate_matrix(newSize);
+    double** S10 = allocate_matrix(newSize);
+    double** P1 = allocate_matrix(newSize);
+    double** P2 = allocate_matrix(newSize);
+    double** P3 = allocate_matrix(newSize);
+    double** P4 = allocate_matrix(newSize);
+    double** P5 = allocate_matrix(newSize);
+    double** P6 = allocate_matrix(newSize);
+    double** P7 = allocate_matrix(newSize);
+
+    // S1 = B12 - B22
+    add_matrices(B12, B22, S1, newSize, -1);
+    // S2 = A11 + A12
+    add_matrices(A11, A12, S2, newSize, 1);
+    // S3 = A21 + A22
+    add_matrices(A21, A22, S3, newSize, 1);
+    // S4 = B21 + B11
+    add_matrices(B21, B11, S4, newSize, -1);
+    // S5 = A11 + A22
+    add_matrices(A11, A22, S5, newSize, 1);
+    // S6 = B11 + B22
+    add_matrices(B11, B22, S6, newSize, 1);
+    // S7 = A12 - A22
+    add_matrices(A12, A22, S7, newSize, -1);
+    // S8 = B21 + B22
+    add_matrices(B21, B22, S8, newSize, 1);
+    // S9 = A11 - A21
+    add_matrices(A11, A21, S9, newSize, -1);
+    // S10 = B11 + B11
+    add_matrices(B11, B11, S10, newSize, 1);
+
+    // P1 = A11 * S1
+    strassen(A11, S1, P1, newSize);
+    // P2 = S2 * B22
+    strassen(S2, B22, P2, newSize);
+    // P3 = S3 * B11
+    strassen(S3, B11, P3, newSize);
+    // P4 = A22 * S4
+    strassen(A22, S4, P4, newSize);
+    // P5 = S5 * S6
+    strassen(S5, S6, P5, newSize);
+    // P6 = S7 * S8
+    strassen(S7, S8, P6, newSize);
+    // P7 = S9 * S10
+    strassen(S9, S10, P7, newSize);
+
+    for (int i = 0; i < newSize; i++) {
+        for (int j = 0; j < newSize; j++) {
+            C[i][j] = P1[i][j] + P4[i][j] - P5[i][j] + P6[i][j]; // C11
+            C[i][j + newSize] = P2[i][j] + P4[i][j]; // C12
+            C[i + newSize][j] = P3[i][j] + P5[i][j]; // C21
+            C[i + newSize][j + newSize] = P1[i][j] - P2[i][j] + P3[i][j] + P4[i][j]; // C22
+        }
+    }
+
+    free_matrix(A11, newSize);
+    free_matrix(A12, newSize);
+    free_matrix(A21, newSize);
+    free_matrix(A22, newSize);
+    free_matrix(B11, newSize);
+    free_matrix(B12, newSize);
+    free_matrix(B21, newSize);
+    free_matrix(B22, newSize);
+    free_matrix(S1, newSize);
+    free_matrix(S2, newSize);
+    free_matrix(S3, newSize);
+    free_matrix(S4, newSize);
+    free_matrix(S5, newSize);
+    free_matrix(S6, newSize);
+    free_matrix(S7, newSize);
+    free_matrix(S8, newSize);
+    free_matrix(S9, newSize);
+    free_matrix(S10, newSize);
+    free_matrix(P1, newSize);
+    free_matrix(P2, newSize);
+    free_matrix(P3, newSize);
+    free_matrix(P4, newSize);
+    free_matrix(P5, newSize);
+    free_matrix(P6, newSize);
+    free_matrix(P7, newSize);
+}
+
+void print_matrix(double** matrix, int size, const char* name) {
+    printf("Matrix %s:\n", name);
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            printf("%lf ", matrix[i][j]);
         }
         printf("\n");
     }
 }
 
-void add_matrices(int matrix_A[ROW_1][COL_1], int matrix_B[ROW_2][COL_2], int result[ROW_1][COL_1], int split_index, int multiplier) {
-    for (int i = 0; i < split_index; i++)
-        for (int j = 0; j < split_index; j++)
-        result[i][j] = matrix_A[i][j] + multiplier * matrix_B[i][j];
-}
-
-void multiply_matrices(int matrix_A[ROW_1][COL_1], int matrix_B[ROW_2][COL_2], int result_matrix[ROW_1][COL_2]) {
-    int col_1 = COL_1;
-    int row_1 = ROW_1;
-    int col_2 = COL_2;
-    int row_2 = ROW_2;
-
-    if (col_1 != row_2) {
-        printf("\nError: The number of columns in Matrix A must be equal to the number of rows in Matrix B\n");
-        return;
-    }
-
-    if (col_1 == 1) {
-        result_matrix[0][0] = matrix_A[0][0] * matrix_B[0][0];
-    } else {
-        int split_index = col_1 / 2;
-
-        int a00[ROW_1 / 2][COL_1 / 2], a01[ROW_1 / 2][COL_1 / 2];
-        int a10[ROW_1 / 2][COL_1 / 2], a11[ROW_1 / 2][COL_1 / 2];
-        int b00[ROW_2 / 2][COL_2 / 2], b01[ROW_2 / 2][COL_2 / 2];
-        int b10[ROW_2 / 2][COL_2 / 2], b11[ROW_2 / 2][COL_2 / 2];
-
-        for (int i = 0; i < split_index; i++) {
-            for (int j = 0; j < split_index; j++) {
-                a00[i][j] = matrix_A[i][j];
-                a01[i][j] = matrix_A[i][j + split_index];
-                a10[i][j] = matrix_A[split_index + i][j];
-                a11[i][j] = matrix_A[i + split_index][j + split_index];
-                b00[i][j] = matrix_B[i][j];
-                b01[i][j] = matrix_B[i][j + split_index];
-                b10[i][j] = matrix_B[split_index + i][j];
-                b11[i][j] = matrix_B[i + split_index][j + split_index];
-            }
-        }
-
-        int p[ROW_1 / 2][COL_2 / 2], q[ROW_1 / 2][COL_2 / 2], r[ROW_1 / 2][COL_2 / 2], s[ROW_1 / 2][COL_2 / 2];
-        int t[ROW_1 / 2][COL_2 / 2], u[ROW_1 / 2][COL_2 / 2], v[ROW_1 / 2][COL_2 / 2];
-
-        int temp1[ROW_1 / 2][COL_1 / 2], temp2[ROW_1 / 2][COL_1 / 2];
-
-        add_matrices(b01, b11, temp1, split_index, -1);
-        multiply_matrices(a00, temp1, p);
-
-        add_matrices(a00, a01, temp1, split_index, 1);
-        multiply_matrices(temp1, b11, q);
-
-        add_matrices(a10, a11, temp1, split_index, 1);
-        multiply_matrices(temp1, b00, r);
-
-        add_matrices(b10, b00, temp1, split_index, -1);
-        multiply_matrices(a11, temp1, s);
-
-        add_matrices(a00, a11, temp1, split_index, 1);
-        add_matrices(b00, b11, temp2, split_index, 1);
-        multiply_matrices(temp1, temp2, t);
-
-        add_matrices(a01, a11, temp1, split_index, -1);
-        add_matrices(b10, b11, temp2, split_index, 1);
-        multiply_matrices(temp1, temp2, u);
-
-        add_matrices(a00, a10, temp1, split_index, -1);
-        add_matrices(b00, b01, temp2, split_index, 1);
-        multiply_matrices(temp1, temp2, v);
-
-        int result_matrix_00[ROW_1 / 2][COL_2 / 2], result_matrix_01[ROW_1 / 2][COL_2 / 2];
-        int result_matrix_10[ROW_1 / 2][COL_2 / 2], result_matrix_11[ROW_1 / 2][COL_2 / 2];
-
-        add_matrices(t, s, temp1, split_index, 1);
-        add_matrices(temp1, u, temp2, split_index, 1);
-        add_matrices(temp2, q, result_matrix_00, split_index, -1);
-
-        add_matrices(p, q, result_matrix_01, split_index, 1);
-        add_matrices(r, s, result_matrix_10, split_index, 1);
-
-        add_matrices(t, p, temp1, split_index, 1);
-        add_matrices(temp1, r, temp2, split_index, -1);
-        add_matrices(temp2, v, result_matrix_11, split_index, -1);
-
-        for (int i = 0; i < split_index; i++) {
-            for (int j = 0; j < split_index; j++) {
-                result_matrix[i][j] = result_matrix_00[i][j];
-                result_matrix[i][j + split_index] = result_matrix_01[i][j];
-                result_matrix[split_index + i][j] = result_matrix_10[i][j];
-                result_matrix[split_index + i][j + split_index] = result_matrix_11[i][j];
-            }
-        }
-    }
-}
-
 int main() {
-    int matrix_A[ROW_1][COL_1] = { {1, 1, 1, 1},
-                                    {2, 2, 2, 2},
-                                    {3, 3, 3, 3},
-                                    {2, 2, 2, 2} };
+    int n;
+    printf("Enter the size of the matrices (must be a power of 2): ");
+    scanf("%d", &n);
 
-    print_matrix("Matrix A", matrix_A, 0, 0, ROW_1 - 1,  COL_1 - 1);
+    double** A = allocate_matrix(n);
+    double** B = allocate_matrix(n);
+    double** C = allocate_matrix(n);
 
-    int matrix_B[ROW_2][COL_2] = { {1, 1, 1, 1},
-                                   {2, 2, 2, 2},
-                                   {3, 3, 3, 3},
-                                   {2, 2, 2, 2} };
+    input_matrix(A, n, "A");
+    print_matrix(A, n, "A");
 
-    print_matrix("Matrix B", matrix_B, 0, 0, ROW_2 - 1, COL_2 - 1);
+    input_matrix(B, n, "B");
+    print_matrix(B, n, "B");
 
-    int result_matrix[ROW_1][COL_2] = {0};
-    multiply_matrices(matrix_A, matrix_B, result_matrix);
-
-    return 0;
+    strassen(A, B, C, n);
+    print_matrix(C, n, "C");
 }
