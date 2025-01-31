@@ -42,7 +42,7 @@ int main() {
     }
     printf("\n");
 
-    int result = scrambleSearch(A, n, x);  // Search in shuffled array
+    int result = scrambleSearch(A, n, x);  
 
     printf("Shuffled array (searched in this order): ");
     for (int i = 0; i < n; i++) {
