@@ -1,3 +1,0 @@
-
-
-bool isDeqeuEmpty(Deque *dq) {
