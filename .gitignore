@@ -56,3 +56,6 @@ tasks.json
 
 # vscode
 .vscode/
+
+# temp
+tempCodeRunnerFile.c
