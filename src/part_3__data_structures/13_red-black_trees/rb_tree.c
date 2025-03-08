@@ -230,6 +230,18 @@ void rb_enumerate(RedBlackTree *tree, Node *r, int a, int b) {
     if (r->data <= b) rb_enumerate(tree, r->right, a, b);
 }
 
+Node* rb_join(RedBlackTree *tree, Node *T1, Node *x, Node *T2) {
+    rb_transplant(tree, T1, x);
+
+    x->left = T1;
+    x->right = T2;
+
+    if (T1 != tree->NIL) T1->parent = x;
+    if (T2 != tree->NIL) T2->parent = x;
+
+    return x;
+}
+
 int main(void) {
     RedBlackTree *tree = malloc(sizeof(RedBlackTree));
     tree->NIL = malloc(sizeof(Node));
