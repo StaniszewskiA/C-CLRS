@@ -163,6 +163,31 @@ void inorder(AVLNode *root) {
     }
 }
 
+void balance(AVLNode **root) {
+    AVLNode *node = *root;
+    while (node != NULL) {
+        int balance = get_balance_factor(node);
+
+        if (balance > 1) {
+            if (get_balance_factor(node->left) >= 0) node = right_rotate(node);
+            else {
+                node->left = left_rotate(node->left);
+                node = right_rotate(node);
+            }
+        } else if (balance < -1) {
+            if (get_balance_factor(node->right) <= 0) node = left_rotate(node);
+            else {
+                node->right = right_rotate(node->right);
+                node = left_rotate(node);
+            }
+        }
+
+        node = node->left ? node->left : node->right;
+    }
+
+    *root = node;
+}
+
 int main(void) {
     switch (TASK)
     {
