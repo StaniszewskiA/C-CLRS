@@ -260,8 +260,8 @@ int main(void) {
     rb_enumerate(tree, tree->root, 10, 25);
     printf("\n");
 
-    Node *delNode = tree->root->right;
-    rb_delete(tree, delNode);
+    Node *target = tree->root->right;
+    rb_delete(tree, target);
 
     printf("Nodes in range [10, 25] after deletion: ");
     rb_enumerate(tree, tree->root, 10, 25);
