@@ -3,8 +3,8 @@
 #include <float.h>
 #include <stdlib.h>
 
-#define TASK 3
-#define N 6
+#define TASK 5
+#define N 3
 
 //----------BST utils----------
 typedef struct Node {
@@ -88,6 +88,47 @@ Node* construct_optimal_bst(int root[][N+1], int i, int j) {
     return node;
 }
 
+//----------14.5-4----------
+void knuthian_optimal_bst(float p[], float q[], int n, int root[][n + 1]) {
+    float costs[n + 1][n + 1]; 
+    float weights[n + 1][n + 1];
+
+    // Initialize tables
+    for (int i = 0; i <= n; i++) {
+        for (int j = 0; j <= n; j++) {
+            costs[i][j] = FLT_MAX; 
+            weights[i][j] = 0;
+            root[i][j] = 0;
+        }
+    }
+
+    // Initialize dummy keys
+    for (int i = 0; i <= n; i++) {
+        costs[i][i] = q[i];
+        weights[i][i] = q[i];
+    }
+
+    for (int l = 1; l <= n; l++) { 
+        for (int i = 0; i <= n - l; i++) { 
+            int j = i + l; 
+            weights[i][j] = weights[i][j - 1] + p[j] + q[j];
+
+            // Constant time(?)
+            for (int r = root[i][j - 1]; r <= root[i + 1][j]; r++) { 
+                float tempCost = costs[i][r - 1] + costs[r + 1][j] + weights[i][j]; 
+
+                if (tempCost < costs[i][j]) {
+                    costs[i][j] = tempCost;
+                    root[i][j] = r; 
+                    printf("Updated root[%d][%d] to %d\n", i, j, root[i][j]);
+                }
+            }
+        }
+    }
+    
+    printf("Minimum cost of Optimal BST: %f\n", costs[0][n]);
+}
+
 //----------Print Root Table (debug)----------
 void print_root_table(int root[][N+1], int n) {
     printf("\nRoot Table:\n");
@@ -127,6 +168,11 @@ int main(void) {
             float q[] = {0.06, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.05, 0.05}; 
             int root[N + 1][N + 1] = {0};
             optimal_bst(p, q, N, root);
+            break;
+        }
+        case 5:{
+            // 14.5-4
+            knuthian_optimal_bst(p, q, N, root);
             break;
         }
         case -1: {
