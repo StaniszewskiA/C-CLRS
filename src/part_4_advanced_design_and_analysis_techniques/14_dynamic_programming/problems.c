@@ -3,9 +3,10 @@
 #include <limits.h>
 #include <math.h>
 #include <string.h>
+#include <float.h>
 
 #define MAX_VERTICES 10
-#define TASK 2
+#define TASK 3
 
 /*
 14-1: Longest simple path in a DAG (Kahn's algorithm + DP)
@@ -152,7 +153,94 @@ void longest_palindrome_subseq(char *s) {
 
 /*
 14-3: Bitonic euclidean
+
+Sort the points based on their x coordinate, store
+backtrack paths.
 */
+typedef struct Point {
+    double x, y;
+} Point;
+
+// Euclidean distance between two points.
+double euc_dist(Point a, Point b) {
+    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+
+// Sort based on euclidean distance
+int compare(const void *a, const void *b) {
+    Point *p1 = (Point *)a;
+    Point *p2 = (Point *)b;
+    // Return 1, 0 or -1
+    return (p1->x > p2->x) - (p1->x < p2->x);
+}
+
+void bitonic_tsp(Point points[], int n) {
+    // O(n*log(n))
+    qsort(points, n, sizeof(Point), compare);
+
+    // DP for minimum costs.
+    double dp[n][n];
+    int path[n][n];
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++) 
+            dp[i][j] = DBL_MAX;
+
+    // Base case
+    dp[0][1] = euc_dist(points[0], points[1]);
+
+    // Fill the DP (O(n^2))
+    for (int j = 2; j < n; j++) {
+        for (int i = 0; i < j; i++) {
+            if (i == j - 1) {
+                // Use intermediate point k
+                double min_cost = DBL_MAX;
+                int best_k = -1;
+                for (int k = 0; k < i; k++) {
+                    double cost = dp[k][i] + euc_dist(points[k], points[j]);
+                    if (cost < min_cost) {
+                        min_cost = cost;
+                        best_k = k;
+                    }
+                }
+                dp[i][j] = min_cost;
+                path[i][j] = best_k;
+            } else {
+                // Rightmost extension
+                dp[i][j] = dp[i][j - 1] + euc_dist(points[j - 1], points[j]);
+                path[i][j] = j - 1;
+            }
+        }
+    }
+
+    double min_cost = DBL_MAX;
+    int best_i = -1;
+
+    for (int i = 0; i < n - 1; i++) {
+        double cost = dp[i][n - 1] + euc_dist(points[i], points[n - 1]);
+        if (cost < min_cost) {
+            min_cost = cost;
+            best_i = i;
+        }
+    }
+
+    printf("Minimum Bitonic Tour Cost: %lf\n", min_cost);
+
+    printf("Bitonic Tour: ");
+    int tour[n];
+    int idx = 0;
+    tour[idx++] = best_i;
+
+    for (int j = n - 1; j > best_i; j = path[best_i][j]) tour[idx++] = j;
+    
+    tour[idx++] = n - 1;
+
+    for (int i = 0; i < idx; i++) {
+        printf("(%lf, %lf) ", points[tour[i]].x, points[tour[i]].y);
+    }
+    printf("\n");
+}
+
 
 /*
 14-4: Printing neatly
@@ -222,6 +310,13 @@ int main(void) {
 
         case 3:
             // 14-3
+            Point points[] = {
+                {0, 0}, {1, 2}, {2, 1}, {3, 5}, {4, 3}, {5, 2}, {6, 4}
+            };
+            int num_points = sizeof(points) / sizeof(points[0]);
+
+            bitonic_tsp(points, num_points);
+
             break;
 
         case 4:
