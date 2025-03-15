@@ -1,12 +1,16 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include <limits.h>
+#include <math.h>
+#include <string.h>
 
 #define MAX_VERTICES 10
-#define TASK 1
+#define TASK 2
 
 /*
 14-1: Longest simple path in a DAG (Kahn's algorithm + DP)
+
+Time: O(|V| + |E|)
 */
 typedef struct Edge {
     int dest, weight;
@@ -91,8 +95,60 @@ int longest_path_dag(int n, int s, int t) {
 }
 
 /*
-14-2: Longest palindrome subsequence
+14-2: Longest palindrome subsequence (LCS)
+
+Time: O(n^2)
 */
+void longest_palindrome_subseq(char *s) {
+    int n = strlen(s);
+    int dp[n][n];
+
+    // Single character is a palindrome of length 1. O(n)
+    for (int i = 0; i < n; i++) dp[i][i] = 1;
+
+    // Filling the DP.
+    for (int len = 2; len <= n; len++) { // O(n)
+        for (int i = 0; i <= n - len; i++) { // O(n)
+            int j = i + len - 1;
+            if (s[i] == s[j] && len == 2) dp[i][j] = 2;
+            else if (s[i] == s[j]) dp[i][j] = 2 + dp[i + 1][j - 1];
+            /*
+                Recursive formula:
+                LPS(i, j) = max(LPS(i + 1, j), LPS(i, j - 1))
+            */
+            else dp[i][j] = fmax(dp[i + 1][j], dp[i][j - 1]);
+        }
+    }
+
+    // Length of the LPS.
+    int lps_length = dp[0][n - 1];
+
+    // Reconstruct the result (two pointers).
+    char *lps = (char *)malloc((lps_length + 1) * sizeof(char));
+    if (!lps) {
+        printf("Memory allocation failed!\n");
+        return;
+    }
+    lps[lps_length] = '\0';
+    
+    int i = 0;
+    int j = n - 1;
+    int start_idx = 0;
+    int end_idx = lps_length - 1;
+
+    while (i <= j) {
+        if (s[i] == s[j]) {
+            lps[start_idx++] = s[i];
+            lps[end_idx--] = s[j];
+            i++;
+            j--;
+        } 
+        else if (dp[i + 1][j] > dp[i][j - 1]) i++;
+        else j--;
+    }
+
+    printf("LPS: %s\n", lps);
+}
 
 /*
 14-3: Bitonic euclidean
@@ -159,6 +215,9 @@ int main(void) {
 
         case 2:
             // 14-2
+            char target[] = "character";
+            longest_palindrome_subseq(target);
+
             break;
 
         case 3:
