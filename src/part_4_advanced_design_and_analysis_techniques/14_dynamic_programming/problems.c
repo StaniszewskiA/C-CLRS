@@ -5,14 +5,15 @@
 #include <string.h>
 #include <float.h>
 
-#define MAX_VERTICES 10
-#define TASK 3
+#define TASK 4
 
 /*
 14-1: Longest simple path in a DAG (Kahn's algorithm + DP)
 
 Time: O(|V| + |E|)
 */
+#define MAX_VERTICES 10
+
 typedef struct Edge {
     int dest, weight;
 } Edge;
@@ -240,11 +241,58 @@ void bitonic_tsp(Point points[], int n) {
     }
     printf("\n");
 }
-
-
 /*
 14-4: Printing neatly
+
+Just DP.
+O(n^3).
 */
+#define MAX_LINE_WIDTH 10
+
+void print_neatly(int *lengths, int n) {
+    int C[n + 1], P[n + 1];
+
+    for (int i = 0; i <= n; i++) {
+        C[i] = pow(MAX_LINE_WIDTH, 2); // Instead of INT_MAX to avoid overflow.
+        P[i] = -1;
+    }
+    // Base case
+    C[n] = 0;
+
+    for (int k = n - 1; k >= 0; k--) {
+        int total_len = 0;
+        // Try placing j-th word on the current line.
+        for (int j = 0; k + j < n; j++) {
+            total_len += lengths[k + j] + (j > 0); // Spaces between lines.
+            if (total_len > MAX_LINE_WIDTH) break;
+
+            int diff = MAX_LINE_WIDTH - total_len;
+            int diffSquared = pow(diff, 3);
+            int cost = diffSquared + C[k + j + 1];
+
+            printf("Total len: %d, diff: %d, diff squared: %d, cost: %d\n", 
+                total_len, diff, diffSquared, cost);
+
+            if (cost < C[k]) {
+                C[k] = cost;
+                P[k] = k + j + 1;
+            }
+
+            printf("%d\n", C[k]);
+        }
+    }
+
+    int i = 0;
+    while (i < n) {
+        printf("Line: ");
+        for (int j = i; j < P[i]; j++) printf("%d ", j + 1);  
+        printf("\n");
+        i = P[i];
+    }
+
+    printf("Executed properly");
+}
+
 
 /*
 14-5: Edit distance
@@ -321,6 +369,10 @@ int main(void) {
 
         case 4:
             // 14-4
+            int lengths[] = {3, 2, 2, 5, 4, 3};
+            int num_lines = sizeof(lengths) / sizeof(lengths[0]);
+
+            print_neatly(lengths, num_lines);
             break;
 
         case 5:
