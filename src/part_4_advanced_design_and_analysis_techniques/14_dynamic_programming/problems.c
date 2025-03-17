@@ -5,7 +5,7 @@
 #include <string.h>
 #include <float.h>
 
-#define TASK 4
+#define TASK 5
 
 /*
 14-1: Longest simple path in a DAG (Kahn's algorithm + DP)
@@ -296,7 +296,118 @@ void print_neatly(int *lengths, int n) {
 
 /*
 14-5: Edit distance
+
+Time: O(m*n), where:
+    - m = len of first seq,
+    - n = len of second seq,
+
+Space: O(m*n), same as time.
+
+We need only the previous row.
 */
+#define INF (INT_MAX / 2)
+
+#define COST_COPY -1
+#define COST_REPLACE 1
+#define COST_DELETE 2
+#define COST_INSERT 2
+#define COST_TWIDDLE INF
+#define COST_KILL INF
+
+typedef enum { 
+    COPY, 
+    REPLACE, 
+    DELETE, 
+    INSERT, 
+    TWIDDLE, 
+    KILL,
+    NONE
+} Operation;
+
+void edit_distance(char *x, char *y) {
+    int m = strlen(x);
+    int n = strlen(y);
+    
+    int *prev = (int*)malloc((n + 1) * sizeof(int));
+    int *curr = (int*)malloc((n + 1) * sizeof(int));
+    Operation *ops = (Operation *)malloc((m + 1) * (n + 1) * sizeof(Operation));
+
+    if (!prev || !curr || !ops) {
+        fprintf(stderr, "Malloc failed\n");
+        free(prev);
+        free(curr);
+        free(ops);
+        return;
+    }
+
+    // Base case
+    for (int j = 0; j <= n; j++) prev[j] = j * COST_INSERT;
+    for (int i = 0; i <= m; i++) ops[i * (n + 1)] = COST_DELETE;
+
+    for (int i = 1; i <= m; i++) {
+        curr[0] = i * COST_DELETE;
+        for (int j = 1; j <= n; j++) {
+            int cost = INF;
+            Operation op = NONE;
+
+            // Copy
+            if (x[i - 1] == y[j - 1]) {
+                cost = prev[j - 1] + COST_COPY;
+                op = COPY;
+            }
+            // Replace
+            if (cost > prev[j - 1] + COST_REPLACE) {
+                cost = prev[j - 1] + COST_REPLACE;
+                op = REPLACE;
+            }
+            // Delete
+            if (cost > prev[j] + COST_DELETE) {
+                cost = prev[j] + COST_DELETE;
+                op = DELETE;
+            }
+            // Insert
+            if (cost > curr[j - 1] + COST_INSERT) {
+                cost = curr[j - 1] + COST_INSERT;
+                op = INSERT;
+            }
+
+            curr[j] = cost;
+            ops[i * (n + 1) + j] = op;
+        }
+        int *temp = prev;
+        prev = curr;
+        curr = temp;
+    }
+
+    // Reconstruct
+    int i = m, j = n;
+    while (i > 0 || j > 0) {
+        switch (ops[i * (n + 1) + j]) {
+            case COPY:
+                printf("COPY %c\n", x[i - 1]);
+                i--; j--;
+                break;
+            case REPLACE:
+                printf("REPLACE %c -> %c\n", x[i - 1], y[j - 1]);
+                i--; j--;
+                break;
+            case DELETE:
+                printf("DELETE %c\n", x[i - 1]);
+                i--;
+                break;
+            case INSERT:
+                printf("INSERT %c\n", y[j - 1]);
+                j--;
+                break;
+            default:
+                break;
+        }
+    }
+
+    free(prev);
+    free(curr);
+    free(ops);
+}
 
 /*
 14-6: Planning a company party
@@ -377,6 +488,10 @@ int main(void) {
 
         case 5:
             // 14-5
+            char x[] = "algorithm";
+            char y[] = "algebra";
+            edit_distance(x, y);
+
             break;
 
         case 6:
