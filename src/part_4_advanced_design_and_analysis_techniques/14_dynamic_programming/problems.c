@@ -5,7 +5,7 @@
 #include <string.h>
 #include <float.h>
 
-#define TASK 5
+#define TASK 6
 
 /*
 14-1: Longest simple path in a DAG (Kahn's algorithm + DP)
@@ -412,6 +412,79 @@ void edit_distance(char *x, char *y) {
 /*
 14-6: Planning a company party
 */
+#define MAX_EMPLOYEES 10
+
+
+typedef struct Employee {
+    char name[50];
+    double conviviality;
+    struct Employee *leftChild;
+    struct Employee *rightSibling;
+} Employee;
+
+typedef struct {
+    double C[MAX_EMPLOYEES];
+    int included[MAX_EMPLOYEES];
+} DPResult;
+
+int idx_map[MAX_EMPLOYEES];
+Employee *employees[MAX_EMPLOYEES];
+int employee_count = 0;
+
+Employee* create_employee(const char* name, double conviviality) {
+    Employee* emp = (Employee*)malloc(sizeof(Employee));
+    strcpy(emp->name, name);
+    emp->conviviality = conviviality;
+    emp->leftChild = NULL;
+    emp->rightSibling = NULL;
+    employees[employee_count] = emp;
+    idx_map[employee_count] = employee_count;
+    return emp;
+}
+
+double max_convivality(Employee* root, DPResult* dp, int idx) {
+    if (!root) return 0;
+    
+    double exclude_root = 0, include_root = root->conviviality;
+    Employee *child = root->leftChild;
+    
+    while (child) {
+        exclude_root += max_convivality(child, dp, idx + 1);
+        
+        Employee *grandchild = child->leftChild;
+        while (grandchild) {
+            include_root += max_convivality(grandchild, dp, idx + 2);
+            grandchild = grandchild->rightSibling;
+        }
+        
+        child = child->rightSibling;
+    }
+    
+    dp->C[idx] = fmax(exclude_root, include_root);
+    dp->included[idx] = (exclude_root > include_root) ? 0 : 1;
+    
+    return dp->C[idx];
+}
+
+void print_guest_list(Employee* root, DPResult* dp, int idx) {
+    if (!root) return;
+    
+    if (dp->included[idx]) {
+        printf("%s\n", root->name);
+        Employee *child = root->leftChild;
+        while (child) {
+            print_guest_list(child->leftChild, dp, idx + 2);
+            child = child->rightSibling;
+        }
+    } else {
+        Employee *child = root->leftChild;
+        while (child) {
+            print_guest_list(child, dp, idx + 1);
+            child = child->rightSibling;
+        }
+    }
+}
+
 
 /*
 14-7: Viterbi algorithm
@@ -496,6 +569,27 @@ int main(void) {
 
         case 6:
             // 14-6
+            Employee* president = create_employee("President", 10);
+            Employee* manager1 = create_employee("Manager1", 5);
+            Employee* manager2 = create_employee("Manager2", 6);
+            Employee* worker1 = create_employee("Worker1", 4);
+            Employee* worker2 = create_employee("Worker2", 7);
+            Employee* worker3 = create_employee("Worker3", 3);
+            
+            president->leftChild = manager1;
+            manager1->rightSibling = manager2;
+            manager1->leftChild = worker1;
+            manager2->leftChild = worker2;
+            worker2->rightSibling = worker3;
+            
+            DPResult dp;
+            memset(&dp, 0, sizeof(dp));
+            
+            printf("Maximum conviviality: %.2f\n", 
+                max_convivality(president, &dp, 0));
+            printf("Guest List:\n");
+            print_guest_list(president, &dp, 0);
+
             break;
 
         case 7:
