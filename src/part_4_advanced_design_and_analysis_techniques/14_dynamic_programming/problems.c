@@ -5,7 +5,7 @@
 #include <string.h>
 #include <float.h>
 
-#define TASK 6
+#define TASK 7
 
 /*
 14-1: Longest simple path in a DAG (Kahn's algorithm + DP)
@@ -411,6 +411,8 @@ void edit_distance(char *x, char *y) {
 
 /*
 14-6: Planning a company party
+
+O(n)
 */
 #define MAX_EMPLOYEES 10
 
@@ -485,10 +487,106 @@ void print_guest_list(Employee* root, DPResult* dp, int idx) {
     }
 }
 
-
 /*
 14-7: Viterbi algorithm
 */
+#define NO_SUCH_PATH NULL
+#define MAX_SEQ_LEN 100 
+
+typedef struct ViterbiEdge {
+    int dest;
+    int sigma;
+    double proba; // Transition probability
+} ViterbiEdge;
+
+typedef struct ViterbiVertex {
+    int id;
+    int edgeCount;
+    ViterbiEdge* edges;
+} ViterbiVertex;
+
+typedef struct ViterbiSolution {
+    int* seq; // Sequence of states
+    int seqLen; 
+    double proba; // Probability of sequence
+} ViterbiSolution;
+
+ViterbiVertex* create_viterbi_vertex(int id, int edgeCount) {
+    ViterbiVertex* vertex = (ViterbiVertex*)malloc(sizeof(ViterbiVertex));
+    vertex->id = id;
+    vertex->edgeCount = edgeCount;
+    vertex->edges = (ViterbiEdge*)malloc(sizeof(ViterbiEdge) * edgeCount);
+    printf("Created vertex with id %d and edge count of %d\n", id, edgeCount);
+    return vertex;
+}
+
+void add_viterbi_edge(
+    ViterbiVertex* from, 
+    int dest, 
+    int sigma, 
+    double proba, 
+    int edgeIdx
+) {
+    from->edges[edgeIdx].dest = dest;
+    from->edges[edgeIdx].sigma = sigma;
+    from->edges[edgeIdx].proba = proba;
+    printf(
+        "Created edge with id %d leading from vertex %d to vertex %d. "
+        "Edge has sigma value of %d and transition probability of %f.\n",
+        edgeIdx, from->id, dest, sigma, proba
+    );    
+}
+
+ViterbiSolution viterbi(
+    ViterbiVertex **graph, 
+    int numNodes, 
+    int *sigma, 
+    int sigmaLen, 
+    int v0
+) {
+    // Base case - empty sigma seq
+    if (sigmaLen == 0) {
+        ViterbiSolution result = {NULL, 0, 1.0}; 
+        result.seq = (int*)malloc(sizeof(int)); // Only the current state
+        result.seq[0] = v0;
+        result.seqLen = 1;
+        return result;
+    }
+
+    // Init solution with no sequence and zero proba
+    ViterbiSolution result = {NULL, 0, 0};
+
+    for (int i = 0; i < graph[v0]->edgeCount; i++) {
+        ViterbiEdge currEdge = graph[v0]->edges[i];
+
+        // Find path with matching sigma
+        if (currEdge.sigma == sigma[0]) {
+            ViterbiSolution res = viterbi(
+                graph, 
+                numNodes, 
+                sigma + 1, 
+                sigmaLen - 1, 
+                currEdge.dest
+            );
+
+            // Update the solution if we find better proba
+            double newProba = currEdge.proba * res.proba;
+            if (newProba > result.proba) { 
+                int *newSeq = (int*)malloc(sizeof(int) * (res.seqLen + 1));
+                if (newSeq) {
+                    newSeq[0] = v0;
+                    memcpy(newSeq + 1, res.seq, sizeof(int) * res.seqLen);
+                    free(result.seq);
+                    result.seq = newSeq;
+                    result.seqLen = res.seqLen + 1;
+                }
+                result.proba = newProba;
+            }            
+        }
+    }
+
+    return result;
+}
 
 /*
 14-8: Image compression by seam carving
@@ -594,6 +692,36 @@ int main(void) {
 
         case 7:
             // 14-7
+            ViterbiVertex* graph[3]; 
+
+            graph[0] = create_viterbi_vertex(0, 2);
+            graph[1] = create_viterbi_vertex(1, 1);  
+            graph[2] = create_viterbi_vertex(2, 0);
+
+            add_viterbi_edge(graph[0], 1, 1, 0.9, 0);  
+            add_viterbi_edge(graph[0], 2, 2, 0.8, 1);  
+            add_viterbi_edge(graph[1], 2, 1, 0.7, 0);  
+
+            int sigma[] = {1, 1}; 
+
+            ViterbiSolution viterbiResult = viterbi(graph, 3, sigma, 2, 0);
+
+            if (viterbiResult.seq != NULL) {
+                printf("Best sequence: ");
+                for (int i = 0; i < viterbiResult.seqLen; i++) {
+                    printf("%d ", viterbiResult.seq[i]);
+                }
+                printf("\nProbability: %lf\n", viterbiResult.proba);
+            } else {
+                printf("No valid path found.\n");
+            }
+
+            for (int i = 0; i < 3; i++) {
+                free(graph[i]->edges);
+                free(graph[i]);
+            }
+            free(viterbiResult.seq);
+
             break;
 
         case 8:
