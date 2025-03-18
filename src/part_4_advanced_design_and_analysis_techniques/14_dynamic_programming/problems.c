@@ -5,7 +5,7 @@
 #include <string.h>
 #include <float.h>
 
-#define TASK 7
+#define TASK 8
 
 /*
 14-1: Longest simple path in a DAG (Kahn's algorithm + DP)
@@ -591,9 +591,125 @@ ViterbiSolution viterbi(
 /*
 14-8: Image compression by seam carving
 */
+#define MAX_M 100
+#define MAX_N 100
+
+typedef struct Pixel{
+    int row;
+    int col;
+} Pixel;
+
+typedef struct Seam {
+    Pixel* pixels;
+    int size;
+    int capacity;
+} Seam;
+
+void init_seam(Seam* seam, int capacity) {
+    seam->pixels = (Pixel*)malloc(sizeof(Pixel) * capacity);
+    seam->size = 0;
+    seam->capacity = capacity;
+}
+
+void add_to_seam(Seam* seam, int row, int col) {
+    if (seam->size == seam->capacity) {
+        seam->capacity *= 2;
+        seam->pixels = (Pixel *)realloc(seam->pixels, sizeof(Pixel) * seam->capacity);
+    }
+    seam->pixels[seam->size].row = row;
+    seam->pixels[seam->size].col = col;
+    seam->size++;
+}
+
+void free_seam(Seam* seam) {
+    free(seam->pixels);
+}
+
+int min_of_three(int a, int b, int c) {
+    if (a <= b && a <= c) return a;
+    else if (b <= a && b <= c) return b;
+    else return c;
+}
+
+void seam_carving(int **d, int m, int n) {
+    int D[MAX_M][MAX_N];
+    Seam S[MAX_M][MAX_N];
+    int seamCap = 10;
+
+    printf("Initializing...");
+    // Init first rows.
+    for (int i = 0; i < n; i++) {
+        D[0][i] = d[0][i];
+        init_seam(&S[0][i], seamCap);
+        add_to_seam(&S[0][i], 0, i);
+    }
+
+    for (int i = 1; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            int prevVal;
+            Seam prevSeam;
+
+            if (j == 0) { // Left edge case
+                if (D[i - 1][j] < D[i - 1][j + 1]) {
+                    prevVal = D[i - 1][j];
+                    prevSeam = S[i - 1][j];
+                } else {
+                    prevVal = D[i - 1][j + 1];
+                    prevSeam = S[i - 1][j + 1];
+                }
+            }
+            else if (j == n - 1) { // Right edge case
+                if (D[i - 1][j - 1] < D[i - 1][j]) {
+                    prevVal = D[i - 1][j - 1];
+                    prevSeam = S[i - 1][j - 1]; 
+                } else {
+                    prevVal = D[i - 1][j];
+                    prevSeam = S[i - 1][j];  
+                }
+            }
+            else {
+                int minVal = min_of_three(
+                    D[i - 1][j - 1],
+                    D[i - 1][j],
+                    D[i - 1][j + 1]
+                );
+                if (minVal == D[i - 1][j - 1]) {
+                    prevVal = D[i - 1][j - 1];
+                    prevSeam = S[i - 1][j - 1];  // Seam from left diagonal
+                } else if (minVal == D[i - 1][j]) {
+                    prevVal = D[i - 1][j];
+                    prevSeam = S[i - 1][j];  // Seam from above
+                } else {
+                    prevVal = D[i - 1][j + 1];
+                    prevSeam = S[i - 1][j + 1];  // Seam from right diagonal
+                }
+            }
+
+            D[i][j] = prevVal + d[i][j];
+            S[i][j] = prevSeam;
+            add_to_seam(&S[i][j], i, j);
+        }
+    }
+
+    int q = 0;
+    for (int j = 1; j < n; j++) {
+        if (D[m - 1][j] < D[m - 1][q]) q = j;
+    }
+
+    printf("Optimal seam: \n");
+    for (int i = 0; i < m; i++) 
+        printf("(%d, %d)\n", S[i][q].pixels[i].row, S[i][q].pixels[i].col);
+
+    printf("Freeing up the seam...\n");
+    for (int i = 0; i < m; i++) free_seam(&S[i][q]);
+}
 
 /*
 14-9: Breaking a string
+*/
+
+/*
+14-10: Planning an investment strategy
 */
 
 /*
@@ -726,6 +842,29 @@ int main(void) {
 
         case 8:
             // 14-8
+            int m8 = 5, n8 = 6;
+
+            int **A8 = (int **)malloc(m8 * sizeof(int *));
+            for (int i = 0; i < m8; i++) {
+                A8[i] = (int *)malloc(n8 * sizeof(int));
+            }
+
+            int values[5][6] = {
+                {1, 2, 3, 4, 5, 6},
+                {2, 3, 4, 5, 6, 7},
+                {3, 4, 5, 6, 7, 8},
+                {4, 5, 6, 7, 8, 9},
+                {5, 6, 7, 8, 9, 10}
+            };
+
+            for (int i = 0; i < m8; i++) {
+                for (int j = 0; j < n8; j++) {
+                    A8[i][j] = values[i][j];
+                }
+            }
+
+            seam_carving(A8, m8, n8);
+
             break;
 
         case 9:
