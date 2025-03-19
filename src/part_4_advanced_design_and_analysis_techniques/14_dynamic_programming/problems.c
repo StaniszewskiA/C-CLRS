@@ -5,7 +5,7 @@
 #include <string.h>
 #include <float.h>
 
-#define TASK 9
+#define TASK 10
 
 /*
 14-1: Longest simple path in a DAG (Kahn's algorithm + DP)
@@ -757,6 +757,47 @@ void reconstruct_break_seq(int i, int j) {
 /*
 14-10: Planning an investment strategy
 */
+#define YEARS 10
+
+void invest(
+    int r[YEARS + 1][YEARS + 1], 
+    int dr[YEARS + 1][YEARS + 1], 
+    int fees[2], 
+    int n, 
+    int I[YEARS + 1], 
+    int R[YEARS + 1]
+) {
+    int k, i, q;
+
+    for (k = 1; k <= YEARS; k++) {
+        I[k] = 0;
+        R[k] = 0;
+    }
+
+    for (k = YEARS; k >= 1; k--) {
+        int q = 1;
+
+        // Find the investment with the highest return for year k.
+        for (i = 1; i <= n; i++) {
+            if (r[i][k] > r[q][k]) q = i;
+        }
+
+        // Check if it is better to not move the money.
+        if (R[k + 1] + dr[I[k + 1]][k] - fees[1] > R[k + 1] + dr[q][k] - fees[2]) {
+            R[k] = R[k + 1] + dr[I[k + 1]][k] - fees[1];
+            I[k] = I[k + 1];
+        } else {
+            R[k] = R[k + 1] + dr[q][k] - fees[2];
+            I[k] = q;
+        }
+    }
+
+    printf("Optimal Investment Strategy: ");
+    for (k = 1; k <= YEARS; k++) {
+        printf("%d ", I[k]);
+    }
+    printf("\nTotal Return: %d\n", R[1]);
+}
 
 /*
 14-11: Inventory planning
@@ -938,6 +979,15 @@ int main(void) {
 
         case 10:
             // 14-10
+            int r10[YEARS+1][YEARS+1];
+            int dr10[YEARS+1][YEARS+1];
+            int f10[2] = { 10, 20 }; 
+            int I10[YEARS+1]; 
+            int R10[YEARS+1]; 
+            int n10 = 5; 
+
+            invest(r10, dr10, f10, n10, I10, R10);
+
             break;
 
         case 11:
