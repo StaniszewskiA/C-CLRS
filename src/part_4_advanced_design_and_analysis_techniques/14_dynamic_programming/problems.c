@@ -5,7 +5,7 @@
 #include <string.h>
 #include <float.h>
 
-#define TASK 8
+#define TASK 9
 
 /*
 14-1: Longest simple path in a DAG (Kahn's algorithm + DP)
@@ -707,6 +707,52 @@ void seam_carving(int **d, int m, int n) {
 /*
 14-9: Breaking a string
 */
+#define MAX_M9 100
+#define INF9 1000
+
+int dp9[MAX_M9][MAX_M9];
+int breakSeq[MAX_M9][MAX_M9];
+int breaks[MAX_M9];
+
+int break_string(int L[], int i, int j, int l, int r) {
+    if (i >= j) return 0;
+    if (dp9[i][j] != -1) return dp9[i][j];
+
+    int minCost = INF9; 
+    int minIdx = -1;
+
+    for (int k = i; k < j; k++) {
+        int leftCost = break_string(L, i, k, l, L[k]);
+        int rightCost = break_string(L, k + 1, j, L[k], r);
+
+        printf("leftCost at k=%d: %d\n", k, leftCost);
+        printf("rightCost at k=%d: %d\n", k, rightCost);
+
+        if (leftCost < INF9 && rightCost < INF9) {  
+            int cost = (r - l) + leftCost + rightCost;
+            printf("Evaluating cut at L[k]=%d, cost: %d\n", L[k], cost);
+
+            if (cost < minCost) {
+                minCost = cost;
+                minIdx = k;
+            }
+        }
+    }
+
+    dp9[i][j] = minCost;
+    breakSeq[i][j] = minIdx;
+    return minCost;
+}
+
+
+void reconstruct_break_seq(int i, int j) {
+    if (i >= j) return;
+    int k = breakSeq[i][j];
+    if (k == -1) return;
+    printf("%d ", breaks[k]);
+    reconstruct_break_seq(i, k);
+    reconstruct_break_seq(k + 1, j);
+}
 
 /*
 14-10: Planning an investment strategy
@@ -869,6 +915,25 @@ int main(void) {
 
         case 9:
             // 14-9
+            int n9 = 10;
+            int m9 = 3;
+            int L9[] = {0, 3, 7, 10};
+
+            for (int i = 0; i < MAX_M9; i++) {
+                for (int j = 0; j < MAX_M9; j++) {
+                    dp9[i][j] = -1;
+                    breakSeq[i][j] = -1;
+                }
+            }
+
+            for (int i = 0; i < m9; i++) breaks[i] = L9[i + 1];
+
+            int minCost = break_string(L9, 0, m9 + 1, 0, n9);
+            printf("Minimum Cost: %d\n", minCost);
+            printf("Cut Sequence: ");
+            reconstruct_break_seq(0, m9 + 1);
+            printf("\n");
+
             break;
 
         case 10:
