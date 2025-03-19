@@ -5,7 +5,7 @@
 #include <string.h>
 #include <float.h>
 
-#define TASK 10
+#define TASK 11
 
 /*
 14-1: Longest simple path in a DAG (Kahn's algorithm + DP)
@@ -801,7 +801,51 @@ void invest(
 
 /*
 14-11: Inventory planning
+
+O(nD^2)
 */
+#define INF11 INT_MAX
+
+void inventory_planning(int n, int m, int c, int* demand, int* inventoryCost) {
+    int D = 0;
+    for (int i = 0; i < n; i++) D += demand[i];
+    
+    int dp[n + 1][D + 1];
+    int i, j, k;
+
+    for (i = 0; i <= n; i++) {
+        for (j = 0; j <= D; j++) dp[i][j] = INF11;
+    }
+
+    // Base case
+    dp[0][0] = 0;
+
+    for (i = 1; i <= n; i++) {
+        for (j = 0; j <= D; j++) {
+            if (dp[i - 1][j] != INF11) { // Process if previous state is valid.
+                for (k = 0; k <= D; k++) {
+                    if (k < demand[i - 1]) continue;
+                    int newInv = j + k - demand[i - 1];
+                    if (newInv > D) continue;
+
+                    int partTimeCost = (k > m) ? c * (k - m) : 0;
+                    int totalCost = dp[i - 1][j]
+                        + partTimeCost
+                        + inventoryCost[newInv];
+
+                    if (totalCost < dp[i][newInv]) dp[i][newInv] = totalCost;
+                }
+            }
+        }
+    }
+
+    int result = INF11;
+    for (j = 0; j <= D; j++) {
+        if (dp[n][j] < result) result = dp[n][j];
+    }
+
+    printf("Minimum cost to fulfill demand: %d\n", result);
+}
 
 /*
 14-12: Signing free-agent baseball players
@@ -992,6 +1036,15 @@ int main(void) {
 
         case 11:
             // 14-11
+            int n11 = 3; // Number of months
+            int m11 = 5; // Max production per month by full-time staff
+            int c11 = 10; // Cost per machine produced with part-time labor
+
+            int demand[] = {3, 6, 2};
+            int inventoryCost[] = {0, 1, 2, 3, 4, 5, 6}; 
+
+            inventory_planning(n11, m11, c11, demand, inventoryCost);
+
             break;
 
         case 12:
