@@ -5,7 +5,7 @@
 #include <string.h>
 #include <float.h>
 
-#define TASK 11
+#define TASK 12
 
 /*
 14-1: Longest simple path in a DAG (Kahn's algorithm + DP)
@@ -849,7 +849,70 @@ void inventory_planning(int n, int m, int c, int* demand, int* inventoryCost) {
 
 /*
 14-12: Signing free-agent baseball players
+
+N - number of players
+B - budget
+P - players per position
+
+O(NBP)
 */
+typedef struct Player {
+    int cost;
+    int war;
+    int pos;
+} Player;
+
+void sign_players(int N, int B, int P, Player players[N][P]) {    
+    int dp[N + 1][B + 1];
+    int i, j, k;
+
+    for (i = 0; i <= N; i++) {
+        for (j = 0; j <= B; j++) dp[i][j] = 0;
+    } 
+    printf("DP table initialized");
+
+    for (i = 1; i <= N; i++) {
+        for (j = 1; j <= B; j++) {
+            dp[i][j] = dp[i - 1][j]; // Sign last player just in case.
+
+            // Try to sign a player
+            for (k = 0; k < P; k++) {
+                if (j >= players[i - 1][k].cost) {
+                    int newWar = dp[i - 1][j 
+                        - players[i - 1][k].cost]
+                        + players[i - 1][k].war;
+                    if (newWar > dp[i][j]) dp[i][j] = newWar;
+                }
+            }
+        }
+    }
+
+    printf("The total WAR is %d\n", dp[N][B]);
+
+    // Reconstruct chosen players
+    int totalCost = 0;
+    int playerCost = 0;
+    j = B;
+    printf("The players selected are:\n");
+
+    for (i = N; i > 0; i--) {
+        for (k = 0; k < P; k++) {
+            if (j >= players[i - 1][k].cost 
+                && dp[i][j] == dp[i - 1][j - players[i - 1][k].cost] 
+                    + players[i - 1][k].war
+            ) {
+                printf("Position %d: Player with cost %d and WAR %d\n", 
+                    players[i - 1][k].pos, players[i - 1][k].cost, players[i - 1][k].war);
+                playerCost = players[i - 1][k].cost;
+                j -= playerCost;
+                totalCost += playerCost;
+                break;
+            }
+        }
+    }
+
+    printf("The total cost is %d\n", totalCost);
+}
 
 // Driver code
 int main(void) {
@@ -1049,6 +1112,18 @@ int main(void) {
 
         case 12:
             // 14-12
+            int n12 = 3;
+            int x12 = 10; // in $100.00
+            int p12 = 3;
+
+            Player players[3][3] = {
+                {{2, 8, 0}, {4, 12, 0}, {3, 10, 0}}, 
+                {{3, 6, 1}, {2, 5, 1}, {6, 15, 1}}, 
+                {{5, 10, 2}, {7, 13, 2}, {4, 9, 2}}  
+            };
+
+            sign_players(n12, x12, p12, players);
+
             break;
         
         default:
