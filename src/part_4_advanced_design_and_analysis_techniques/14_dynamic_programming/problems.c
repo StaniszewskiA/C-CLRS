@@ -1113,7 +1113,7 @@ int main(void) {
         case 12:
             // 14-12
             int n12 = 3;
-            int x12 = 10; // in $100.00
+            int x12 = 10; // in $100.000
             int p12 = 3;
 
             Player players[3][3] = {
