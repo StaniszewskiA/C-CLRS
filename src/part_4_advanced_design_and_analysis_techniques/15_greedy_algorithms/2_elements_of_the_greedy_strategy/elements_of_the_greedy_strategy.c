@@ -1,7 +1,8 @@
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#define TASK 1
+#define TASK 2
 
 /*
     15.2-2
@@ -45,18 +46,57 @@ int discrete_knapsack(int W, Item items[], int n) {
     return dp[n][W];
 }
 
-int main(void) {
-    int W = 50;
-    Item items[] = {{10, 60}, {20, 10}, {30, 120}};
-    int n = sizeof(items) / sizeof(items[0]);
+/*
+    15.2-5
 
+    O(n*log(n))
+
+    n - number of points in the input set.
+*/
+int compare(const void* a, const void* b) {
+    return (*(double*)a > *(double*)b) - (*(double*)a < *(double*)b);
+}
+
+size_t min_intervals(double points[], int n) {
+    if (n == 0) return 0;
+
+    qsort(points, n, sizeof(double), compare);
+
+    size_t count = 0;
+    int i = 0;
+
+    while (i < n) {
+        count++;
+        double leftmost = points[i];
+        while (i < n && points[i] <= leftmost + 1.0) i++;
+    }
+
+    return count;
+}
+
+int main(void) {
     switch (TASK)
     {
         case 1: {
             // 15.2-2
+            int W1 = 50;
+            Item items[] = {{10, 60}, {20, 10}, {30, 120}};
+            int n1 = sizeof(items) / sizeof(items[0]);
+
             printf("Maximum value in Knapsack = %d\n", 
-                discrete_knapsack(W, items, n));
+                discrete_knapsack(W1, items, n1));
             
+            break;
+        }
+
+        case 2: {
+            // 15.2-5
+            double points[] = {0.1, 1.2, 1.0, 0.75};
+            int n2 = sizeof(points) / sizeof(points[0]);
+            
+            printf("Minimum num of intervals: %d",
+                min_intervals(points, n2));
+
             break;
         }
         
