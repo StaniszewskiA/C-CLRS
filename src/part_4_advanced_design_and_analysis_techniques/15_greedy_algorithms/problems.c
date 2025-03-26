@@ -98,7 +98,6 @@ typedef struct {
     int id;
     int pTime;
     int rTime; // Abb. for release time
-    int remainingTime; // In case of stoppped execution
 } OnlineTask;
 
 int compare_online_p_times(const void* a, const void* b) {
@@ -107,10 +106,6 @@ int compare_online_p_times(const void* a, const void* b) {
 
 int compare_online_r_times(const void* a, const void* b) {
     return ((OnlineTask*)a)->rTime - ((OnlineTask*)b)->rTime;
-}
-
-int compare_online_remaining_times(const void* a, const void* b) {
-    return ((OnlineTask*)a)->remainingTime - ((OnlineTask*)b)->remainingTime;
 }
 
 void schedule_online_tasks(OnlineTask tasks[], int n) {
@@ -134,25 +129,13 @@ void schedule_online_tasks(OnlineTask tasks[], int n) {
             qsort(q, qSize, sizeof(OnlineTask), compare_online_p_times);
             OnlineTask currTask = q[0];
 
-            if (currTask.remainingTime == 0) {
-                currTask.remainingTime = currTask.pTime; 
-            }
+            // Execute
+            currTime += currTask.pTime;
+            totalCompletionTime += currTime;
 
-            unsigned timeSlice = 1;
-            currTask.remainingTime -= timeSlice;
-            currTime += timeSlice;
-
-            if (currTask.remainingTime > 0) {
-                q[0] = q[qSize - 1];
-                qSize--;
-                tasks[completedTasks - 1] = currTask;
-                qsort(q, qSize, sizeof(OnlineTask), compare_online_p_times);
-            } else {
-                totalCompletionTime += currTime;
-                for (i = 1; i < qSize; i++) q[i - 1] = q[1];
-                qSize--;
-            }
-
+            // Deque task
+            for (i = 1; i < qSize; i++) q[i - 1] = q[i];
+            qSize--;
         } else {
             // No executable tasks.
             currTime++;
