@@ -72,6 +72,9 @@ int heap_pop(MinHeap* heap) {
 
 /*
     Aggregate analysis - each operation takes at most T(n)/n.
+
+    The accounting method - assuming a cost of 2 for push, 0 for pop, 
+    and 0 for multipush—we can estimate the overall cost to be O(n).
 */
 void heap_multipop(MinHeap* heap, int k) {
     int i;
@@ -98,12 +101,14 @@ void print_heap(MinHeap* heap) {
 typedef struct {
     int bits[MAX_BITS];
     unsigned size;
+    int high; // Highest order "on" bit
 } BinaryCounter;
 
 void init_counter(BinaryCounter* bCounter) {
     int i;
     for (i = 0; i < MAX_BITS; i++) bCounter->bits[i] = 0;
     bCounter->size = MAX_BITS;
+    bCounter->high = -1;
 }
 
 /*
@@ -114,6 +119,13 @@ void init_counter(BinaryCounter* bCounter) {
     e.g., for n increments, the first bit is modified n times, 
     the second n/2 times, etc. This yields an amortized cost of each 
     operation equal to O(n) / n = O(1).
+
+    The accounting method - let's assume a cost of 1 for modifying a bit. 
+    Amortize changing a bit to 1 with an additional 1, yielding an overall 
+    amortized cost of 2 for this operation. Then, changing a bit to 0 can 
+    be paid for using the accumulated amortization from setting bits to 1. 
+    Since every bit is initially 0, the amortization balance never goes 
+    negative. This results in an overall cost of O(n)."
 */
 void increment_counter(BinaryCounter* bCounter) {
     int carry = 1;
@@ -124,10 +136,21 @@ void increment_counter(BinaryCounter* bCounter) {
         bCounter->bits[i] = sum % 2;
         carry = sum / 2;
 
-        if (carry == 0) break;
+        if (carry == 0) {
+            bCounter->high = i;
+            break;
+        }
     }
 
     if (carry) printf("Counter overflow");
+}
+
+void reset_counter(BinaryCounter* counter) {
+    int i;
+    for (int i = counter->high + 1; i < counter->size; i++) 
+        counter->bits[i] = 0;
+    
+    counter->high = -1;
 }
 
 void print_counter(BinaryCounter* bCounter) {
@@ -178,6 +201,9 @@ int main(void) {
                 increment_counter(&bCounter);
                 print_counter(&bCounter);
             }
+
+            reset_counter(&bCounter);
+            print_counter(&bCounter);
 
             break;
         }
