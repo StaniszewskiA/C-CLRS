@@ -351,9 +351,8 @@ void delete_larger_half(DynamicMultiset* dms) {
     
     j = 0;
 
-    for (i = 0; i < dms->size; i++) {
+    for (i = 0; i < dms->size; i++) 
         if (dms->data[i] <= threshold) dms->data[j++] = dms->data[i];
-    }
 
     dms->size = j;
 
@@ -367,10 +366,6 @@ void print_dms(DynamicMultiset* dms) {
     for(i = 0; i < dms->size; i++) printf("%d, ", dms->data[i]);
     printf("\n");
 }
-
-/*
-    16.4 - Dynamic Tables
-*/
 
 int main(void) {
     int i;
