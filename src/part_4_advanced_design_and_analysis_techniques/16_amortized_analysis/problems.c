@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define TASK 2
+#define TASK 3
 
 /*
     16-1: Binary Gray codes.
 */
 typedef unsigned int uint;
 
-static inline unsigned int gray_code(uint i) {
+static inline uint gray_code(uint i) {
     return i ^ (i >> 1);
 }
 
@@ -141,6 +141,67 @@ void print_dbs(DynamicBinarySearch* dbs) {
     printf("\n");
 }
 
+/*
+    16.3: Amortized weight-balanced trees.
+*/
+typedef struct TreeNode {
+    int val;
+    int size;
+    struct TreeNode* left;
+    struct TreeNode* right;
+} TreeNode;
+
+TreeNode* create_node(int val) {
+    TreeNode* newNode = (TreeNode*)malloc(sizeof(TreeNode));
+    newNode->val = val;
+    newNode->size = 1;
+    newNode->left = newNode->right = NULL;
+    printf("Created a node with value: %d\n", val);
+    return newNode;
+}
+
+void update_size(TreeNode* node) {
+    if (node) {
+        node->size = 1;
+        if (node->left) node->size += node->left->size;
+        if (node->right) node->size += node->right->size;
+    }
+}
+
+void inorder_traversal(TreeNode* root, int* nodes, int* idx) {
+    if (root) {
+        inorder_traversal(root->left, nodes, idx);
+        nodes[(*idx)++] = root->val;
+        inorder_traversal(root->right, nodes, idx);
+    }
+}
+
+TreeNode* build_balanced_BST(int* nodes, int start, int end) {
+    if (start > end) return NULL;
+
+    int mid = (start + end) / 2;
+
+    TreeNode* node = create_node(nodes[mid]);
+    node->left = build_balanced_BST(nodes, start, mid - 1);
+    node->right = build_balanced_BST(nodes, mid + 1, end);
+    update_size(node);
+    return node;
+}
+
+TreeNode* rebuild_tree(TreeNode* root) {
+    if (root == NULL) return NULL;
+
+    int size = root->size;
+    int* nodes = (int*)malloc(size * sizeof(int));
+    int idx = 0;
+
+    inorder_traversal(root, nodes, &idx);
+    TreeNode* newRoot = build_balanced_BST(nodes, 0, size - 1);
+
+    free(nodes);
+    return newRoot;
+}
+
 int main(void) {
     switch (TASK)
     {
@@ -182,6 +243,22 @@ int main(void) {
             delete(&dbs, 30);
             printf("After deletion:\n");
             print_dbs(&dbs);
+
+            break;
+        }
+
+        case 3: {
+            // 16.3
+            TreeNode* root = create_node(15);
+            root->left = create_node(10);
+            root->right = create_node(20);
+            root->left->left = create_node(7);
+            root->left->right = create_node(12);
+            root->right->left = create_node(17);
+            root->right->right = create_node(22);
+
+            root = rebuild_tree(root);
+            printf("Tree rebuild successfuly");
 
             break;
         }
