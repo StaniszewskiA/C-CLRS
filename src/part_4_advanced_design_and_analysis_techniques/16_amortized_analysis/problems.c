@@ -1,9 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
-#define TASK 1
+#define TASK 2
 
 /*
-    16-1: Binary Grya codes.
+    16-1: Binary Gray codes.
 */
 typedef unsigned int uint;
 
@@ -29,6 +31,115 @@ void generate_gray_codes(int k) {
 /*
     16.2: Making binary search dynamic.
 */
+#define MAX_ARRAYS 20
+
+typedef struct {
+    int* data;
+    uint size;
+    uint capacity;
+} DynamicArray;
+
+typedef struct {
+    DynamicArray* arrays[MAX_ARRAYS];
+    uint k;
+} DynamicBinarySearch;
+
+void init_dynamic_array(DynamicArray* arr, uint capacity) {
+    arr->data = (int*)malloc(capacity * sizeof(int));
+    arr->size = 0;
+    arr->capacity = capacity;
+}
+
+void init_dbs(DynamicBinarySearch* dbs, uint n) {
+    uint i;
+    
+    dbs->k = (int)ceil(log2(n + 1));
+    for (i = 0; i < dbs->k; i++) {
+        dbs->arrays[i] = (DynamicArray*)malloc(sizeof(DynamicArray));
+        init_dynamic_array(dbs->arrays[i], 1 << i);
+    } 
+}
+
+int binary_search(DynamicArray* arr, int target) {
+    int low = 0, high = arr->size - 1;
+
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+        if (arr->data[mid] == target) return mid;
+        else if (arr->data[mid] < target) low = mid + 1;
+        else high = mid - 1;
+    }
+
+    return -1;
+}
+
+int search(DynamicBinarySearch* dbs, int target) {
+    int i, idx;
+
+    for (i = 0; i < dbs->k; i++) {
+        idx = binary_search(dbs->arrays[i], target);
+        if (idx != -1) return idx;
+    }
+
+    return -1;
+}
+
+void insert(DynamicBinarySearch* dbs, int val) {
+    DynamicArray* arr = dbs->arrays[0];
+    int i, idx;
+
+    if (arr->size < arr->capacity) {
+        idx = arr->size - 1;
+        while (idx >= 0 && arr->data[idx] > val) {
+            arr->data[idx + 1] = arr->data[idx];
+            idx--;
+        }
+        arr->data[idx + 1] = val;
+        arr->size++;
+    } else {
+        for (i = 1; i < dbs->k; i++) {
+            DynamicArray* curr = dbs->arrays[i];
+            if (curr->size < curr->capacity) {
+                idx = curr->size - 1;
+                while (idx >= 0 && curr->data[idx] > val) {
+                    curr->data[idx + 1] = curr->data[idx];
+                    idx--;
+                }
+                curr->data[idx + 1] = val;
+                curr->size++;
+                break;
+            }
+        }
+    }
+}
+
+void delete(DynamicBinarySearch* dbs, int val) {
+    int i, idx, j;
+
+    for (i = 0; i < dbs->k; i++) {
+        DynamicArray* arr = dbs->arrays[i];
+        idx = binary_search(arr, val);
+        if (idx != -1) {
+            for (j = idx; j < arr->size - 1; j++) 
+                arr->data[j] = arr->data[j + 1];
+            arr->size--;
+            break;
+        }
+    }
+}
+
+void print_dbs(DynamicBinarySearch* dbs) {
+    int i, j;
+
+    for (i = 0; i < dbs->k; i++) {
+        printf("Array A%d (size %d): ", i, dbs->arrays[i]->size);
+        for (j = 0; j < dbs->arrays[i]->size; j++) {
+            printf("%d ", dbs->arrays[i]->data[j]);  
+        }
+        printf("\n"); 
+    }
+    printf("\n");
+}
 
 int main(void) {
     switch (TASK)
@@ -43,6 +154,35 @@ int main(void) {
 
         case 2:{
             // 16.2
+            uint n2 = 16;
+            DynamicBinarySearch dbs;
+            init_dbs(&dbs, n2);
+
+            insert(&dbs, 10);
+            insert(&dbs, 20);
+            insert(&dbs, 30);
+            insert(&dbs, 40);
+            insert(&dbs, 50);
+            insert(&dbs, 60);
+            insert(&dbs, 70);
+            insert(&dbs, 80);
+            insert(&dbs, 90);
+
+            print_dbs(&dbs);
+
+            uint target = 30;
+            int idx = search(&dbs, target);
+
+            if (idx != -1) {
+                printf("Element %d found at index %d\n", target, idx);
+            } else {
+                printf("Element %d not found\n", target);
+            }
+
+            delete(&dbs, 30);
+            printf("After deletion:\n");
+            print_dbs(&dbs);
+
             break;
         }
         
