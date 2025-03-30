@@ -5,13 +5,15 @@
 /*
     16-1: Binary Grya codes.
 */
-static inline unsigned int gray_code(unsigned int i) {
+typedef unsigned int uint;
+
+static inline unsigned int gray_code(uint i) {
     return i ^ (i >> 1);
 }
 
 void generate_gray_codes(int k) {
-    unsigned int n = 1 << k;
-    unsigned int i, j, gray;
+    uint n = 1 << k;
+    uint i, j, gray;
     printf("<");
 
     for (i = 0; i < n; i++) {
@@ -24,14 +26,23 @@ void generate_gray_codes(int k) {
     printf(">\n");
 }
 
+/*
+    16.2: Making binary search dynamic.
+*/
+
 int main(void) {
     switch (TASK)
     {
         case 1: {
             // 16.1
-            unsigned int k1 = 3;
+            uint k1 = 3;
             generate_gray_codes(k1);
 
+            break;
+        }
+
+        case 2:{
+            // 16.2
             break;
         }
         
