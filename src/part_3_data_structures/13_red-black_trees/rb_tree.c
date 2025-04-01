@@ -11,7 +11,7 @@ typedef struct Node {
 
 typedef struct RedBlackTree {
     Node *root;
-    Node *NIL; // guardian
+    Node *NIL; // sentinel
 } RedBlackTree;
 
 Node* create_node(RedBlackTree *tree, int data) {
