@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#define TASK 2
+#define TASK 3
 
 #define RED 0
 #define BLACK 1
@@ -512,6 +512,29 @@ void josephus(uint n, uint m) {
 
 #pragma endregion Josephus Problem
 
+#pragma region Array based Josephus problem
+
+void print_victims(int n, int k) {
+    uint survivors = n;
+    uint circle[n];
+    uint i;
+
+    for (i = 0; i < n; i++) circle[i] = i + 1;
+    
+    uint idx = 0;
+
+    while (survivors > 1) {
+        idx = (idx + k - 1) % survivors;
+        printf("Next victim: %d\n", circle[idx]);
+        for (i = idx; i < survivors - 1; i++) circle[i] = circle[i + 1];
+        survivors--;
+    } 
+
+    printf("The chosen place is %d\n", circle[0]);
+}
+
+#pragma endregion Array based Josephus problem
+
 int main(void) {
     switch (TASK)
     {
@@ -534,6 +557,12 @@ int main(void) {
             uint n2 = 7, m2 = 3;
             josephus(n2, m2);
 
+            break;
+        }
+
+        case 3: {
+            uint n3 = 7, m3 = 3;
+            print_victims(n3, m3);
             break;
         }
         
