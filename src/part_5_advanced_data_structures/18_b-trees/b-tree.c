@@ -21,6 +21,13 @@ void insert_non_full(BTreeNode* x, int k);
 void insert(BTreeNode** root, int k);
 int get_predecessor(BTreeNode* x);
 int get_successor(BTreeNode* x);
+void merge(BTreeNode* x, int i);
+void fill(BTreeNode* x, int i);
+void delete_from_node(BTreeNode* x, int k);
+void delete_key(BTreeNode** root_ref, int k);
+void free_tree(BTreeNode* node);
+
+#pragma region Basic operations on B-trees
 
 BTreeNode* create_node(int isLeaf) {
     BTreeNode* x = (BTreeNode*)malloc(sizeof(BTreeNode));
@@ -115,6 +122,10 @@ void insert(BTreeNode** root, int k) {
     } else insert_non_full(r, k);
 }
 
+#pragma endregion Basic operations on B-trees
+
+#pragma region Deleting a key from a B-tree
+
 int get_predecessor(BTreeNode* x) {
     while (!x->isLeaf) x = x->children[x->numKeys];
     return x->keys[x->numKeys - 1];
@@ -124,6 +135,137 @@ int get_successor(BTreeNode* x) {
     while (!x->isLeaf) x = x->children[0];
     return x->keys[0];
 }
+
+void merge(BTreeNode* x, int i) {
+    /*
+        Merge i-th and (i + 1)-th nodes.
+    */
+    BTreeNode* c1 = x->children[i];
+    BTreeNode* c2 = x->children[i + 1];
+    int j;
+
+    c1->keys[DEGREE - 1] = x->keys[i];
+    for (int j = 0; j < c2->numKeys; j++) c1->keys[j + DEGREE] = c2->keys[j];
+
+    if (!c1->isLeaf) {
+        for (j = 0; j <= c2->numKeys; j++) 
+            c1->children[j + DEGREE] = c2->children[j];
+    } 
+
+    for (j = i + 1; j < x->numKeys; j++) {
+        x->keys[j - 1] = x->keys[j];
+        x->children[j] = x->children[j + 1];
+    }
+
+    c1->numKeys += c2->numKeys + 1;
+    x->numKeys--;
+    free(c2);
+}
+
+void fill(BTreeNode* x, int i) {
+    int j;
+
+    if (i > 0 && x->children[i - 1]->numKeys >= DEGREE) {
+        // Borrow a key from the previous child.
+        BTreeNode* child = x->children[i];
+        BTreeNode* sibling = x->children[i - 1];
+
+        // Shift keys and children to the right
+        for (j = child->numKeys - 1; j >= 0; j--) 
+            child->keys[j + 1] = child->keys[j];
+        if (!child->isLeaf) {
+            for (j = child->numKeys; j >= 0; j--)
+                child->children[j + 1] = child->children[j];
+        }
+        child->keys[0] = x->keys[i - 1];
+        if (!child->isLeaf) 
+            child->children[0] = sibling->children[sibling->numKeys];
+        x->keys[i - 1] = sibling->keys[sibling->numKeys - 1];
+        child->numKeys++;
+        sibling->numKeys--;
+    } else if (i < x->numKeys && x->children[i + 1]->numKeys >= DEGREE) {
+        // Borrow a key from the next child.
+        BTreeNode* child = x->children[i];
+        BTreeNode* sibling = x->children[i - 1];
+        child->keys[child->numKeys] = x->keys[i];
+        if (!child->isLeaf)
+            child->children[child->numKeys + 1] = sibling->children[0];
+        x->keys[i] = sibling->keys[0];
+        for (j = 1; j < sibling->numKeys; j++)
+            sibling->keys[j - 1] = sibling->keys[j];
+        if (!sibling->isLeaf) {
+            for (j = 1; j <= sibling->numKeys; j++)
+                sibling->children[j - 1] = sibling->children[j];
+        }
+        child->numKeys++;
+        sibling->numKeys--;
+    } else {
+        // Merge the siblings.
+        if (i < x->numKeys) merge(x, i);
+        else merge(x, i - 1);
+    }
+}
+
+void delete_from_node(BTreeNode* x, int k) {
+    int i = 0;
+    int j;
+    while (i < x->numKeys && k > x->keys[i]) i++;
+
+    if (i < x->numKeys && x->keys[i] == k) {
+        if (x->isLeaf) {
+            // Case 1: Key is in a leaf node
+            for (j = i + 1; j < x->numKeys; j++) x->keys[j - 1] = x->keys[j];
+            x->numKeys--;
+        } else {
+            // Case 2: key is in an internal node
+            BTreeNode* pred = x->children[i];
+            BTreeNode* succ = x->children[i + 1];
+            if (pred->numKeys >= DEGREE) {
+                int predKey = get_predecessor(pred);
+                x->keys[i] = predKey;
+                delete_from_node(pred, predKey);
+            } else if (succ->numKeys >= DEGREE) {
+                int succKey = get_successor(succ);
+                x->keys[i] = succKey;
+                delete_from_node(succ, succKey);
+            } else {
+                merge(x, i);
+                delete_from_node(pred, k);
+            }
+        }
+    } else {
+        if (x->isLeaf) {
+            printf("Key %d not found in the B-tree.\n", k);
+            return;
+        }
+        int flag = (i == x->numKeys);
+        if (x->children[i]->numKeys < DEGREE) fill(x, i);
+
+        if (flag && i > x->numKeys) delete_from_node(x->children[i - 1], k);
+        else delete_from_node(x->children[i], k);
+    }
+}
+
+void delete_key(BTreeNode** rootRef, int k) {
+    BTreeNode* root = *rootRef;
+    delete_from_node(root, k);
+    if (root->numKeys == 0) {
+        BTreeNode* temp = root;
+        if (root->isLeaf) *rootRef = NULL;
+        else *rootRef = root->children[0];
+        free(temp);
+    }
+}
+
+void free_tree(BTreeNode* node) {
+    if (!node) return;
+    if (!node->isLeaf) {
+        for (int i = 0; i < node->numKeys; i++) free_tree(node->children[i]);
+    }
+    free(node);
+}
+
+#pragma endregion Deleting a key from a B-tree
 
 int main(void) {
     BTreeNode* root = init_btree();
@@ -136,4 +278,22 @@ int main(void) {
     printf("Initial B-tree: ");
     traverse(root);
     printf("\n");
+
+    delete_key(&root, 6);
+    printf("After deleting 6: ");
+    traverse(root);
+    printf("\n");
+
+    delete_key(&root, 13); 
+    delete_key(&root, 7);
+    delete_key(&root, 4); 
+    delete_key(&root, 17);
+    delete_key(&root, 10);
+
+    printf("After more deletions: ");
+    traverse(root);
+    printf("\n");
+
+    free_tree(root);
+    return 0;
 }
