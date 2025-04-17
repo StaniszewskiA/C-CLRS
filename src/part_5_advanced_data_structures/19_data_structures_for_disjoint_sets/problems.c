@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <string.h>
 
-#define TASK 2
+#define TASK 3
 
 #pragma region Off-line minimum
 
@@ -161,6 +162,105 @@ void determinant_graft(DeterminantNode* r, DeterminantNode* v) {
 
 #pragma endregion Depth determination
 
+#pragma region Tarjans off-line least-common-ancestors algorithm
+
+typedef struct TarjanDSNode {
+    int parent;
+    int rank;
+    int ancestor;
+} TarjanDSNode;
+
+typedef struct ListNode {
+    int value;
+    struct ListNode* next;
+} ListNode;
+
+TarjanDSNode tarjanSets[MAX_N];
+ListNode* tree[MAX_N];
+ListNode* queries[MAX_N];
+ListNode* lcaResult[MAX_N];
+int color[MAX_N];
+int n;
+
+void tarjan_add_edge(int u, int v);
+void tarjan_add_query(int u, int v);
+void tarjan_make_set(int u);
+int tarjan_find_set(int u);
+void tarjan_union_sets(int u, int v);
+void tarjan_lca(int u);
+
+void tarjan_add_edge(int u, int v) {
+    ListNode* node = (ListNode*)malloc(sizeof(ListNode));
+    node->value = v;
+    node->next = tree[u];
+    tree[u] = node;
+}
+
+void tarjan_add_query(int u, int v) {
+    ListNode* q1 = (ListNode*)malloc(sizeof(ListNode));
+    q1->value = v;
+    q1->next = queries[u];
+    queries[u] = q1;
+
+    ListNode* q2 = (ListNode*)malloc(sizeof(ListNode));
+    q2->value = u;
+    q2->next = queries[v];
+    queries[v] = q2;
+}
+
+void tarjan_make_set(int u) {
+    tarjanSets[u].parent = u;
+    tarjanSets[u].rank = 0;
+    tarjanSets[u].ancestor = u;
+}
+
+int tarjan_find_set(int u) {
+    if (tarjanSets[u].parent != u) 
+        tarjanSets[u].parent = tarjan_find_set(tarjanSets[u].parent);
+    return tarjanSets[u].parent;
+}
+
+void tarjan_union_sets(int u, int v) {
+    int uRoot = tarjan_find_set(u);
+    int vRoot = tarjan_find_set(v);
+    if (uRoot == vRoot) return;
+
+    if (tarjanSets[uRoot].rank < tarjanSets[vRoot].rank) {
+        tarjanSets[uRoot].parent = vRoot;
+    } else {
+        tarjanSets[vRoot].rank = uRoot;
+        if (tarjanSets[uRoot].rank == tarjanSets[vRoot].rank) 
+            tarjanSets[uRoot].rank++;
+    }
+}
+
+void tarjan_lca(int u) {
+    tarjan_make_set(u);
+    tarjanSets[tarjan_find_set(u)].ancestor = u;
+
+    ListNode* child = tree[u];
+    while (child != NULL) {
+        int v = child->value;
+        tarjan_lca(v);
+        tarjan_union_sets(u, v);
+        tarjanSets[tarjan_find_set(u)].ancestor = u;
+        child = child->next;
+    }
+
+    color[u] = 1;
+
+    ListNode* q = queries[u];
+    while (q != NULL) {
+        int v = q->value;
+        if (color[v] == 1) 
+            printf("The least common ancestor of %d and %d is %d\n", 
+                u, v, tarjanSets[tarjan_find_set(v)].ancestor);
+        q = q->next;
+    }
+}
+
+#pragma endregion Tarjans off-line least-common-ancestors algorithm
+
 int main(void) {
     switch (TASK)
     {
@@ -194,6 +294,26 @@ int main(void) {
             free(a);
             free(b);
             free(c);
+
+            break;
+        }
+        case 3: {
+            // 19-3
+            int n3 = 7;
+
+            tarjan_add_edge(0, 1);
+            tarjan_add_edge(0, 2);
+            tarjan_add_edge(1, 3);
+            tarjan_add_edge(1, 4);
+            tarjan_add_edge(2, 5);
+            tarjan_add_edge(2, 6);
+
+            tarjan_add_query(3, 4);
+            tarjan_add_query(3, 5);
+            tarjan_add_query(2, 6);
+
+            memset(color, 0, sizeof(color));
+            tarjan_lca(0);
 
             break;
         }
