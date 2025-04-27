@@ -3,11 +3,11 @@
 #include <string.h>
 #include <math.h>
 
-#define TASK 1
+#define TASK 2
 
 #pragma region Graph utils
 
-#define MAX_VERTICES 1000
+#define MAX_VERTICES 10
 
 typedef struct MatGraph {
     // Graph represented by adjacency matrix
@@ -304,6 +304,45 @@ void find_bccs(MatGraph* g) {
 
 #pragma endregion 20.2
 
+#pragma region 20.3
+
+void find_euler_tour(MatGraph* g, int source) {
+    int edgeColor[MAX_VERTICES][MAX_VERTICES];
+    memset(edgeColor, 0, sizeof(edgeColor));
+    int currPathStack[MAX_VERTICES * MAX_VERTICES];
+    int top = -1;
+    int circuit[MAX_VERTICES * MAX_VERTICES];
+    int circuitIdx = 0;
+
+    currPathStack[++top] = source;
+
+    while (top >= 0) {
+        int v = currPathStack[top];
+        int foundWhite = 0;
+
+        for (int w = 0; w < g->numVertices; w++) {
+            if (g->adjMat[v][w] && edgeColor[v][w] == 0) {
+                edgeColor[v][w] = edgeColor[w][v] = 1;
+                currPathStack[++top] = w;
+                foundWhite = 1;
+                break;
+            }
+        }
+
+        if (!foundWhite) {
+            circuit[circuitIdx++] = v;
+            top--;
+        }
+    }
+
+    printf("Euler Circuit:\n");
+    for (int i = circuitIdx - 1; i >= 0; i--)
+        printf("%d ", circuit[i]);
+    printf("\n");
+}
+
+#pragma endregion 20.3
+
 int main(void) {
     switch (TASK)
     {
@@ -325,6 +364,24 @@ int main(void) {
             find_bridges(g);
             find_bccs(g);
 
+            mat_graph_free(g);
+            break;
+        }
+
+        case 2: {
+            // 20.3
+            int numVertices = 6;
+            MatGraph* g = mat_graph_create(numVertices);
+
+            mat_graph_add_undirected_edge(g, 0, 1);
+
+            mat_graph_add_undirected_edge(g, 1, 2);
+            mat_graph_add_undirected_edge(g, 2, 0);
+            mat_graph_add_undirected_edge(g, 3, 1);
+            mat_graph_add_undirected_edge(g, 3, 4);
+            mat_graph_add_undirected_edge(g, 4, 5);
+
+            find_euler_tour(g, 5);
             mat_graph_free(g);
             break;
         }
