@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#define TASK 2
+#define TASK 3
 
 #pragma region Graph utils
 
@@ -343,6 +343,145 @@ void find_euler_tour(MatGraph* g, int source) {
 
 #pragma endregion 20.3
 
+#pragma region 20.4
+
+void dfs(MatGraph* g, int u, int visited[], int stack[], int* stackIdx) {
+    visited[u] = 1;
+    for (int v = 0; v < g->numVertices; v++) {
+        if (g->adjMat[u][v] && !visited[v]) {
+            dfs(g, v, visited, stack, stackIdx);
+        }
+    }
+    stack[(*stackIdx)++] = u;
+}
+
+void assign_scc(
+    MatGraph* gt, 
+    int v, 
+    int visited[], 
+    int component[], 
+    int compId
+) {
+    visited[v] = 1;
+    component[v] = compId;
+    for (int u = 0; u < gt->numVertices; u++) {
+        if (gt->adjMat[v][u] && !visited[u])
+            assign_scc(gt, u, visited, component, compId);
+    } 
+}
+
+int kosaraju(MatGraph* g, int component[]) {
+    int stack[MAX_VERTICES];
+    int stackIdx = 0;
+    int visited[MAX_VERTICES] = {0};
+
+    // DFS
+    for (int v = 0; v < g->numVertices; v++) {
+        if (!visited[v]) dfs(g, v, visited, stack, &stackIdx);
+    }
+
+    // Transposition
+    MatGraph* gt = transpose_graph(g);
+
+    // Assignment
+    memset(visited, 0, sizeof(visited));
+    int compId = 0;
+    for (int i = stackIdx - 1; i >= 0; i--) {
+        int v = stack[i];
+        if (!visited[v]) {
+            assign_scc(gt, v, visited, component, compId);
+            compId++;
+        }
+    }
+
+    printf("SCCs:\n");
+    for (int v = 0; v < g->numVertices; v++) {
+        printf("Vertex %d -> Component %d\n", v, component[v]);
+    }
+
+    mat_graph_free(gt);
+    return compId;
+}
+
+MatGraph* build_component_graph(
+    MatGraph* g, 
+    int component[], 
+    int numComponents
+) {
+    MatGraph* cg = mat_graph_create(numComponents);
+
+    for (int u = 0; u < g->numVertices; u++) {
+        for (int v = 0; v < g->numVertices; v++) {
+            if (g->adjMat[u][v] && component[u] != component[v])
+                mat_graph_add_directed_edge(cg, component[u], component[v]);
+        }
+    }
+
+    printf("Component Graph Adjacency Matrix:\n");
+    for (int u = 0; u < numComponents; u++) {
+        for (int v = 0; v < numComponents; v++) {
+            printf("%d ", cg->adjMat[u][v]);
+        }
+        printf("\n");
+    }
+
+    return cg;
+}
+
+int reachability(
+    MatGraph* gSCC, 
+    int u, 
+    int* minValues, 
+    int* visited, 
+    int* sccMinLabels
+) {
+    if (visited[u]) return minValues[u];
+    visited[u] = 1;
+    int minVal = sccMinLabels[u];
+    
+    for (int v = 0; v < gSCC->numVertices; v++) {
+        if (gSCC->adjMat[u][v]) {
+            int reachableMin = reachability(gSCC, v, minValues, visited, sccMinLabels);
+            if (reachableMin < minVal) minVal = reachableMin;
+        }
+    }
+
+    minValues[u] = minVal; 
+    printf("Reachability: Component %d -> Min Value %d\n", u, minVal);
+
+    return minVal;
+}
+
+void compute_min_labels(MatGraph* g, int* labels) {
+    int components[MAX_VERTICES];
+    int numComponents = kosaraju(g, components);
+
+    // Label SCCs
+    int sccMinLabels[MAX_VERTICES];
+    for (int i = 0; i < numComponents; i++) sccMinLabels[i] = INT_MAX;
+    for (int v = 0; v < g->numVertices; v++)
+        sccMinLabels[components[v]] = fmin(sccMinLabels[components[v]], labels[v]);
+
+    // Component graph
+    MatGraph* gSCC = build_component_graph(g, components, numComponents);
+
+    // Reachability on the component graph
+    int minValues[MAX_VERTICES];
+    int visited[MAX_VERTICES] = {0};
+    memset(minValues, -1, sizeof(minValues));
+    for (int u = 0; u < numComponents; u++) {
+        if (!visited[u]) reachability(gSCC, u, minValues, visited, sccMinLabels);
+    }
+
+    // Map to the original graph
+    for (int u = 0; u < g->numVertices; u++)
+        printf("min(%d) = %d\n", u, minValues[components[u]]);
+
+    mat_graph_free(gSCC);
+}
+
+#pragma endregion 20.4
+
 int main(void) {
     switch (TASK)
     {
@@ -383,6 +522,29 @@ int main(void) {
 
             find_euler_tour(g, 5);
             mat_graph_free(g);
+            break;
+        }
+
+        case 3: {
+            // 20.4
+            int numVertices = 8;
+            MatGraph* g = mat_graph_create(numVertices);
+
+            mat_graph_add_directed_edge(g, 0, 1);
+            mat_graph_add_directed_edge(g, 1, 2);
+            mat_graph_add_directed_edge(g, 2, 0);
+            mat_graph_add_directed_edge(g, 3, 4);
+            mat_graph_add_directed_edge(g, 4, 5);
+            mat_graph_add_directed_edge(g, 5, 3);
+            mat_graph_add_directed_edge(g, 2, 3);
+            mat_graph_add_directed_edge(g, 5, 6);
+            mat_graph_add_directed_edge(g, 6, 7);
+
+            int labels[MAX_VERTICES] = {8, 7, 6, 5, 4, 3, 2, 1};
+
+            compute_min_labels(g, labels);
+            mat_graph_free(g);
+
             break;
         }
         
