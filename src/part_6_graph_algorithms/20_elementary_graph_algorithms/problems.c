@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#define TASK 3
+#define TASK 4
 
 #pragma region Graph utils
 
@@ -482,6 +482,50 @@ void compute_min_labels(MatGraph* g, int* labels) {
 
 #pragma endregion 20.4
 
+#pragma region 20.5
+
+typedef struct PlanarGraph {
+    int adjList[MAX_VERTICES][MAX_VERTICES];
+    int adjSize[MAX_VERTICES];
+    int newestNei[MAX_VERTICES];
+    int stack[MAX_VERTICES];
+    int stackTop;
+} PlanarGraph;
+
+PlanarGraph* planar_graph_create() {
+    PlanarGraph* pg = malloc(sizeof(PlanarGraph));
+    for (int i = 0; i < MAX_VERTICES; i++) {
+        pg->adjSize[i] = 0;
+        pg->newestNei[i] = -1;
+    }
+    pg->stackTop = -1;
+    return pg;
+}
+
+void planar_graph_insert(PlanarGraph* pg, int v, int* neis, int numNeis) {
+    pg->stack[++pg->stackTop] = v;
+
+    for (int i = 0; i < numNeis; i++) {
+        int nei = neis[i];
+        pg->adjList[v][pg->adjSize[v]++] = nei;
+        pg->adjList[nei][pg->adjSize[nei]++] = v;
+        pg->newestNei[nei] = v;
+    }
+
+    if (numNeis > 0) pg->newestNei[v] = neis[numNeis - 1];
+    else pg->newestNei[v] = -1;
+}
+
+int planar_graph_newest_nei(PlanarGraph* pg, int v) {
+    return pg->newestNei[v];
+}
+
+void planar_graph_free(PlanarGraph* pg) {
+    free(pg);
+}
+
+#pragma endregion 20.5
+
 int main(void) {
     switch (TASK)
     {
@@ -545,6 +589,23 @@ int main(void) {
             compute_min_labels(g, labels);
             mat_graph_free(g);
 
+            break;
+        }
+
+        case 4: {
+            // 20.5
+            PlanarGraph* g = planar_graph_create();
+
+            int neighbors1[] = {0};
+            planar_graph_insert(g, 1, neighbors1, 1);
+
+            int neighbors2[] = {1};
+            planar_graph_insert(g, 2, neighbors2, 1);
+
+            printf("Newest neighbor of 1: %d\n", planar_graph_newest_nei(g, 1));
+            printf("Newest neighbor of 2: %d\n", planar_graph_newest_nei(g, 2));
+
+            planar_graph_free(g);
             break;
         }
         
