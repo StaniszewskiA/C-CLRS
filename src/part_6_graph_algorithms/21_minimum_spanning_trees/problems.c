@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TASK 1
+#define TASK 2
 
 #pragma region Graph utils
 
@@ -43,9 +43,20 @@ void mat_graph_remove_undirected_edge(MatGraph* g, int u, int v) {
     g->adjMat[v][u] = 0;
 }
 
+void mat_graph_print(MatGraph* g) {
+    printf("Graph with %d vertices:\n", g->numVertices);
+    for (int i = 0; i < g->numVertices; i++) {
+        printf("Vertex %d is connected to: ", i);
+        for (int j = 0; j < g->numVertices; j++) {
+            if (g->adjMat[i][j] > 0) printf("%d(w:%d) ", j, g->adjMat[i][j]);
+        }
+        printf("\n");
+    }
+}
+
 #pragma endregion Graph utils
 
-#pragma region 21-1
+#pragma region 21-1 Second best MST
 
 int parent[MAX_VERTICES], depth[MAX_VERTICES];
 int maxEdge[MAX_VERTICES][MAX_VERTICES];
@@ -179,7 +190,182 @@ int find_second_best_mst_weight(
     return secondBestW;
 }
 
-#pragma endregion 21-1
+#pragma region 21-1 Second best MST
+
+#pragma region 21-2
+
+typedef struct {
+    int u;
+    int v;
+    int weight;
+} OrigEdge;
+
+void mst_reduce(MatGraph* g, MatGraph** gPrimePtr, Edge* t, int* tSize) {
+    int n = g->numVertices;
+    int marked[MAX_VERTICES] = {0};
+
+    make_set(n);
+
+    *tSize = 0;
+    for (int u = 0; u < n; u++) {
+        if (marked[u] == 0) {
+            int minV = -1;
+            int minW = INT_MAX;
+            // Adj with min weight
+            for (int v = 0; v < n; v++) {
+                if (g->adjMat[u][v] > 0 && g->adjMat[u][v] < minW) {
+                    minW = g->adjMat[u][v];
+                    minV = v;
+                }
+            }
+            if (minV != -1) {
+                union_sets(u, minV);
+                t[*tSize].u = u;
+                t[*tSize].v = minV;
+                t[*tSize].weight = minW;
+                (*tSize)++;
+                marked[u] = marked[minV] = 1;
+            }
+        }
+    }
+
+    // Find reps
+    int repMap[MAX_VERTICES];
+    int repCnt = 0;
+    int rep2idx[MAX_VERTICES];
+
+    for (int v = 0; v < n; v++) {
+        int rep = find_set(v);
+        int i;
+
+        for (i = 0; i <repCnt; i++) if (repMap[i] == rep) break;
+
+        if (i == repCnt) {
+            repMap[repCnt] = rep;
+            rep2idx[rep] = repCnt;
+            repCnt++;
+        }
+    }
+
+    // Create reduced graph
+    MatGraph* gPrime = mat_graph_create(repCnt);
+    *gPrimePtr = gPrime;
+
+    for (int u = 0; u < n; u++) {
+        for (int v = u + 1; v < n; v++) {
+            if (g->adjMat[u][v] > 0) {
+                int repU = find_set(u);
+                int repV = find_set(v);
+
+                if (repU != repV) {
+                    int uIdx = rep2idx[repU];
+                    int vIdx = rep2idx[repV];
+
+                    if (gPrime->adjMat[uIdx][vIdx] == 0 ||
+                        g->adjMat[u][v] == gPrime->adjMat[uIdx][vIdx]) 
+                        mat_graph_add_undirected_edge(
+                                gPrime, 
+                                uIdx, 
+                                vIdx, 
+                                g->adjMat[u][v]
+                            ); 
+                }
+            }
+        }
+    }
+}
+
+void print_mst_edges(Edge* t, int tSize) {
+    printf("MST edges:\n");
+    int totalW = 0;
+    for (int i = 0; i < tSize; i++) {
+        printf("(%d, %d) weight: %d\n", t[i].u, t[i].v, t[i].weight);
+        totalW += t[i].weight;
+    }
+    printf("Total MST weight: %d\n", totalW);
+}
+
+void mst_reduce_optimized(MatGraph* g, MatGraph** gPrimePtr, Edge* t, int* tSize) {
+    int n = g->numVertices;
+    int marked[MAX_VERTICES] = {0};
+    int components[MAX_EDGES]; // replacement for a disjoint set
+
+    for (int i = 0; i < n; i++) components[i] = i;
+
+    *tSize = 0;
+    for (int u = 0; u < n; u++) {
+        if (marked[u] == 0) {
+            int minV = -1;
+            int minW = INT_MAX;
+            // Adj with min weight
+            for (int v = 0; v < n; v++) {
+                if (g->adjMat[u][v] > 0 && g->adjMat[u][v] < minW) {
+                    minW = g->adjMat[u][v];
+                    minV = v;
+                }
+            }
+            if (minV != -1) {
+                int compU = components[u];
+                int compV = components[minV];
+
+                for (int i = 0; i < n; i++) 
+                    if (components[i] == compV) components[i] = compU;
+                
+                t[*tSize].u = u;
+                t[*tSize].v = minV;
+                t[*tSize].weight = minW;
+                (*tSize)++;
+                marked[u] = marked[minV] = 1;
+            }
+        }
+    }
+
+    int uniqueComps[MAX_VERTICES];
+    int compCnt = 0;
+    int comp2idx[MAX_VERTICES];
+
+    for (int v = 0; v < n; v++) {
+        int comp = components[v];
+        int i;
+
+        for (i = 0; i < compCnt; i++) if (uniqueComps[i] == comp) break;
+
+        if (i == compCnt) {
+            uniqueComps[compCnt] = comp;
+            comp2idx[comp] = compCnt;
+            compCnt++; 
+        }
+    }
+
+    MatGraph* gPrime = mat_graph_create(compCnt);
+    *gPrimePtr = gPrime;
+
+    for (int u = 0; u < n; u++) {
+        for (int v = u + 1; v < n; v++) {
+            if (g->adjMat[u][v] > 0) {
+                int compU = components[u];
+                int compV = components[v];
+
+                if (compU != compV) {
+                    int uIdx = comp2idx[compU];
+                    int vIdx = comp2idx[compV];
+
+                    if (gPrime->adjMat[uIdx][vIdx] != 0 ||
+                        g->adjMat[u][v] < gPrime->adjMat[uIdx][vIdx]) {
+                            mat_graph_add_undirected_edge(
+                                gPrime,
+                                uIdx,
+                                vIdx,
+                                g->adjMat[u][v]
+                            );
+                    }
+                }
+            }
+        }
+    }
+}
+
+#pragma endregion 21-2
 
 int main(void) {
     switch (TASK)
@@ -225,6 +411,41 @@ int main(void) {
             else printf("No second-best MST exists.\n");
 
             mat_graph_free(mst);
+            mat_graph_free(g);
+            break;
+        }
+
+        case 2: {
+            // 21.2
+            MatGraph* g = mat_graph_create(6);
+
+            mat_graph_add_undirected_edge(g, 0, 1, 4);
+            mat_graph_add_undirected_edge(g, 0, 2, 3);
+            mat_graph_add_undirected_edge(g, 1, 2, 5);
+            mat_graph_add_undirected_edge(g, 1, 3, 2);
+            mat_graph_add_undirected_edge(g, 2, 3, 6);
+            mat_graph_add_undirected_edge(g, 2, 4, 2);
+            mat_graph_add_undirected_edge(g, 3, 4, 3);
+            mat_graph_add_undirected_edge(g, 3, 5, 4);
+            mat_graph_add_undirected_edge(g, 4, 5, 5);
+
+            printf("Original graph:\n");
+            mat_graph_print(g);
+
+            MatGraph* gPrime = NULL;
+            Edge T[MAX_VERTICES];
+            int T_size = 0; 
+
+            // mst_reduce(g, &gPrime, T, &T_size);
+            mst_reduce_optimized(g, &gPrime, T, &T_size);
+
+            printf("Reduced graph:\n");
+            mat_graph_print(gPrime);
+
+            printf("\n");
+            print_mst_edges(T, T_size);
+
+            mat_graph_free(gPrime);
             mat_graph_free(g);
             break;
         }
