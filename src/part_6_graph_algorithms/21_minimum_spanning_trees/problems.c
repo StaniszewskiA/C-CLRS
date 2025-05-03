@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TASK 3
+#define TASK 4
 
 #pragma region Graph utils
 
@@ -650,6 +650,216 @@ void maybe_mst_c(MatGraph* g, Edge* resultEdges, int* resultSize) {
 
 #pragma endregion 21-3 Alternative minimum-spanning-tree algorithms
 
+#pragma region 21-4 Bottleneck spanning tree
+
+int has_bottleneck_spanning_tree(MatGraph* g, int b) {
+    MatGraph* filtered = mat_graph_create(g->numVertices);
+
+    for (int u = 0; u < g->numVertices; u++) {
+        for (int v = u + 1; v < g->numVertices; v++) {
+            if (g->adjMat[u][v] > 0 && g->adjMat[u][v] <= b)
+                mat_graph_add_undirected_edge(filtered, u, v, g->adjMat[u][v]);
+        }
+    } 
+
+    int isConnected = is_connected(filtered);
+    mat_graph_free(filtered);
+    return isConnected;
+}
+
+int median_of_five(int arr[], int n) {
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+    return arr[n / 2];
+}
+
+int select_kth(int arr[], int left, int right, int k) {
+    if (right - left <= 5) {
+        for (int i = left + 1; i <= right; i++) {
+            int key = arr[i];
+            int j = i - 1;
+            while (j >= left && arr[j] > key) {
+                arr[j + 1] = arr[j];
+                j--;
+            }
+            arr[j + 1] = key;
+        }
+        return arr[left + k];
+    }
+
+    int groupCnt = (right - left + 5) / 4;
+    int medians[groupCnt];
+
+    for (int i = 0; i < groupCnt; i++) {
+        int groupLeft = left + i * 5;
+        int groupRight = (groupLeft + 4 < right) ? groupLeft + 4 : right;
+        
+        for (int j = groupLeft + 1; j <= groupRight; j++) {
+            int key = arr[j];
+            int m = j - 1;
+            while (m >= groupLeft && arr[m] > key) {
+                arr[m + 1] = arr[m];
+                m--;
+            }
+            arr[m + 1] = key;
+        }
+        
+        medians[i] = arr[groupLeft + (groupRight - groupLeft) / 2];
+    }
+
+    int pivot;
+    if (groupCnt == 1) pivot = medians[0];
+    else pivot = select_kth(medians, 0, groupCnt - 1, groupCnt / 2);
+
+    int pivotIdx = left;
+    for (int i = left; i <= right; i++) {
+        if (arr[i] == pivot) {
+            int temp = arr[i];
+            arr[i] = arr[left];
+            arr[left] = temp;
+            pivotIdx = left;
+            break;
+        }
+    }
+
+    int storeIdx = left + 1;
+    for (int i = left + 1; i <= right; i++) {
+        if (arr[i] < pivot) {
+            int tmp = arr[i];
+            arr[i] = arr[storeIdx];
+            arr[storeIdx] = tmp;
+            storeIdx++;
+        }
+    }
+
+    int tmp = arr[pivotIdx];
+    arr[pivotIdx] = arr[storeIdx - 1];
+    arr[storeIdx - 1] = tmp;
+    
+    pivotIdx = storeIdx - 1;
+
+    int pivotRank = pivotIdx - left;
+    if (k == pivotRank) return arr[pivotIdx];
+    else if (k < pivotRank) return select_kth(arr, left, pivotIdx - 1, k);
+    else return select_kth(arr, pivotIdx + 1, right, k - pivotRank - 1);
+}
+
+
+
+void contract_edges(MatGraph* g, int threshold, MatGraph** contractedGraph) {
+    int n = g->numVertices;
+    int components[MAX_VERTICES];
+    for (int i = 0; i < n; i++) components[i] = i;
+
+    for (int u = 0; u < n; u++) {
+        for (int v = 0; v < n; v++) {
+            if (g->adjMat[u][v] > 0 && g->adjMat[u][v] <= threshold) {
+                int uComp = components[u];
+                int vComp = components[v];
+
+                if (uComp != vComp) {
+                    for (int i = 0; i < n; i++) {
+                        if (components[i] == vComp) components[i] = uComp;
+                    }
+                }
+            }
+        }
+    }
+
+    int uniqueComps[MAX_VERTICES];
+    int compCnt = 0;
+    int comp2idx[MAX_VERTICES];
+
+    for (int v = 0; v < n; v++) {
+        int comp = components[v];
+        int i;
+        for (i = 0; i < compCnt; i++) if (uniqueComps[i] == comp) break;
+        if (i == compCnt) {
+            uniqueComps[compCnt] = comp;
+            comp2idx[comp] = compCnt;
+            compCnt++;
+        }
+    }
+
+    MatGraph* gPrime = mat_graph_create(compCnt);
+    *contractedGraph = gPrime;
+
+    for (int u = 0; u < n; u++) {
+        for (int v = u + 1; v < n; v++) {
+            if (g->adjMat[u][v] > threshold) {
+                int uComp = components[u];
+                int vComp = components[v];
+                if (uComp != vComp) {
+                    int uIdx = comp2idx[uComp];
+                    int vIdx = comp2idx[vComp];
+                    if (gPrime->adjMat[uIdx][vIdx] == 0 ||
+                        g->adjMat[u][v] < gPrime->adjMat[uIdx][vIdx])
+                            mat_graph_add_undirected_edge(
+                                gPrime, 
+                                uIdx, 
+                                vIdx, 
+                                g->adjMat[u][v]
+                            );
+                }
+            }
+        }
+    }
+}
+
+int find_bottleneck_spanning_tree(MatGraph* g) {
+    int n = g->numVertices;
+    int edgeCnt = 0;
+    int edgeWeights[MAX_EDGES];
+
+    for (int u = 0; u < n; u++) {
+        for (int v = u + 1; v < n; v++) {
+            if (g->adjMat[u][v] > 0) edgeWeights[edgeCnt++] = g->adjMat[u][v];
+        }
+    }
+
+    if (edgeCnt == 0) return -1;
+    if (edgeCnt == 1) return edgeWeights[0];
+
+    int medianIdx = edgeCnt / 2;
+    int median = select_kth(edgeWeights, 0, edgeCnt - 1, medianIdx);
+
+    printf("Median edge weight: %d\n", median);
+
+    if (has_bottleneck_spanning_tree(g, median)) {
+        printf("Found botteleneck spanning tree weight weight <= %d\n", median);
+        MatGraph* filtered = mat_graph_create(n);
+        for (int u = 0; u < n; u++) {
+            for (int v = u + 1; v < n; v++) {
+                if (g->adjMat[u][v] > 0 && g->adjMat[u][v] <= median)
+                    mat_graph_add_undirected_edge(filtered, u, v, g->adjMat[u][v]);
+            }
+        }
+        int result = find_bottleneck_spanning_tree(filtered);
+        mat_graph_free(filtered);
+        return result;
+    } else {
+        printf("No bottleneck spanning tree with weight <= %d\n", median);
+
+        MatGraph* contracted;
+        contract_edges(g, median, &contracted);
+
+        printf("Contracted graph has %d vertices\n", contracted->numVertices);
+        
+        int result = find_bottleneck_spanning_tree(contracted);
+        mat_graph_free(contracted);
+        return result == -1 ? median + 1 : result;
+    }
+}
+
+#pragma endregion 21-4 Bottleneck spanning tree
+
 int main(void) {
     switch (TASK)
     {
@@ -773,6 +983,30 @@ int main(void) {
             int resultSizeC = 0;
             maybe_mst_c(g, resultEdgesC, &resultSizeC);
             print_maybe_mst_edges(resultEdgesC, resultSizeC);
+
+            mat_graph_free(g);
+            break;
+        }
+
+        case 4: {
+            // 21-4
+            MatGraph* g = mat_graph_create(6);
+        
+            mat_graph_add_undirected_edge(g, 0, 1, 4);
+            mat_graph_add_undirected_edge(g, 0, 2, 3);
+            mat_graph_add_undirected_edge(g, 1, 2, 5);
+            mat_graph_add_undirected_edge(g, 1, 3, 2);
+            mat_graph_add_undirected_edge(g, 2, 3, 6);
+            mat_graph_add_undirected_edge(g, 2, 4, 2);
+            mat_graph_add_undirected_edge(g, 3, 4, 3);
+            mat_graph_add_undirected_edge(g, 3, 5, 4);
+            mat_graph_add_undirected_edge(g, 4, 5, 5);
+
+            printf("Original graph:\n");
+            mat_graph_print(g);
+
+            int bottleneck = find_bottleneck_spanning_tree(g);
+            printf("Bottleneck spanning tree value: %d\n", bottleneck);
 
             mat_graph_free(g);
             break;
