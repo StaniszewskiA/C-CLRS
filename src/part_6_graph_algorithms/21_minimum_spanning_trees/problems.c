@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TASK 2
+#define TASK 3
 
 #pragma region Graph utils
 
@@ -190,9 +190,9 @@ int find_second_best_mst_weight(
     return secondBestW;
 }
 
-#pragma region 21-1 Second best MST
+#pragma endregion 21-1 Second best MST
 
-#pragma region 21-2
+#pragma region 21-2 Minimum spanning tree in sparse graphs
 
 typedef struct {
     int u;
@@ -365,7 +365,290 @@ void mst_reduce_optimized(MatGraph* g, MatGraph** gPrimePtr, Edge* t, int* tSize
     }
 }
 
-#pragma endregion 21-2
+#pragma endregion 21-2 Minimum spanning tree in sparse graphs
+
+#pragma region 21-3 Alternative minimum-spanning-tree algorithms
+
+int compare_edges_descending(const void* a, const void* b) {
+    Edge* ea = (Edge*)a;
+    Edge* eb = (Edge*)b;
+    return eb->weight - ea->weight;
+}
+
+int is_connected(MatGraph* g) {
+    int visited[MAX_VERTICES] = {0};
+    int stack[MAX_VERTICES];
+    int stackTop = -1;
+    int startVertex = 0;
+    int visitedCnt = 0;
+
+    stack[++stackTop] = startVertex;
+    visited[startVertex] = 1;
+    visitedCnt++;
+
+    while (stackTop >= 0) {
+        int u = stack[stackTop--];
+        for (int v = 0; v < g->numVertices; v++) {
+            if (g->adjMat[u][v] > 0 && !visited[v]) {
+                stack[++stackTop] = v;
+                visited[v] = 1;
+                visitedCnt++;
+            }
+        }
+    }
+
+    return (visitedCnt == g->numVertices);
+}
+
+void print_maybe_mst_edges(Edge* edges, int size) {
+    printf("\nMST edges from a maybe-mst:\n");
+    int totalW = 0;
+    for (int i = 0; i < size; i++) {
+        printf("(%d, %d) weight: %d\n", edges[i].u, edges[i].v, edges[i].weight);
+        totalW += edges[i].weight;
+    }
+    printf("Total MST weight: %d\n", totalW);
+}
+
+void maybe_mst_a(MatGraph* g, Edge* resultEdges, int* resultSize) {
+    /*
+        Returns the MST.
+        Time complexity: O(E^2).
+    */
+    Edge edges[MAX_EDGES];
+    int edgeCnt = 0;
+
+    for (int u = 0; u < g->numVertices; u++) {
+        for (int v = u + 1; v < g->numVertices; v++) {
+            if (g->adjMat[u][v] > 0) {
+                edges[edgeCnt].u = u;
+                edges[edgeCnt].v = v;
+                edges[edgeCnt].weight = g->adjMat[u][v];
+                edgeCnt++;
+            }
+        }
+    }
+
+    qsort(edges, edgeCnt, sizeof(Edge), compare_edges_descending);
+
+    MatGraph* T = mat_graph_create(g->numVertices);
+    for (int i = 0; i < edgeCnt; i++) {
+        mat_graph_add_undirected_edge(T, edges[i].u, edges[i].v, edges[i].weight);
+    }
+
+    printf("Starting with all %d edges\n", edgeCnt);
+
+    for (int i = 0; i < edgeCnt; i++) {
+        int u = edges[i].u;
+        int v = edges[i].v;
+        int w = edges[i].weight;
+
+        mat_graph_remove_undirected_edge(T, u, v);
+
+        if (is_connected(T)) 
+            printf("Removed edge (%d, %d) with weight %d\n", u, v, w);
+        else {
+            mat_graph_add_undirected_edge(T, u, v, w);
+            printf("Kept edge (%d, %d) with weight %d\n", u, v, w);
+        }
+    }
+
+    *resultSize = 0;
+    for (int u = 0; u < T->numVertices; u++) {
+        for (int v = u + 1; v < T->numVertices; v++) {
+            if (T->adjMat[u][v] > 0) {
+                resultEdges[*resultSize].u = u;
+                resultEdges[*resultSize].v = v;
+                resultEdges[*resultSize].weight = T->adjMat[u][v];
+                (*resultSize)++;
+            }
+        }
+    }
+
+    mat_graph_free(T);
+}
+
+void maybe_mst_b(MatGraph* g, Edge* resultEdges, int* resultSize) {
+    /*
+        Does not return the MST.
+        Time complexity: O(E*α(V)), 
+        where α is the inverse Ackermann function.
+    */
+    int n = g->numVertices;
+    make_set(n);
+
+    *resultSize = 0;
+    Edge edges[MAX_EDGES];
+    int edgeCnt = 0;
+
+    for (int u = 0; u < n; u++) {
+        for (int v = u + 1; v < n; v++) {
+            if (g->adjMat[u][v] > 0) {
+                edges[edgeCnt].u = u;
+                edges[edgeCnt].v = v;
+                edges[edgeCnt].weight = g->adjMat[u][v];
+                edgeCnt++;
+            }
+        }
+    }
+    
+    printf("Processing %d edges in arbitrary order\n", edgeCnt); 
+
+    for (int i = 0; i < edgeCnt; i++) {
+        int u = edges[i].u;
+        int v = edges[i].v;
+        int w = edges[i].weight;
+
+        if (!same_component(u, v)) {
+            union_sets(u, v);
+            resultEdges[*resultSize] = edges[i];
+            (*resultSize)++;
+            printf("Added edge (%d, %d) with weight %d\n", u, v, w);
+        } else printf("Skipped edge (%d, %d) with weight %d\n", u, v, w);
+    }
+} 
+
+int check_path_exists(MatGraph* g, int source, int target) {
+    int visited[MAX_VERTICES] = {0};
+    int stack[MAX_VERTICES];
+    int stackTop = -1;
+
+    stack[++stackTop] = source;
+    visited[source] = 1;
+
+    while (stackTop >= 0) {
+        int u = stack[stackTop--];
+        if (u == target) return 1;
+        for (int v = 0; v < g->numVertices; v++) {
+            if (g->adjMat[u][v] >0 && !visited[v]) {
+                stack[++stackTop] = v;
+                visited[v] = 1;
+            }
+        }
+    }
+
+    return 0;
+}
+
+void find_cycle_and_max_edge(
+    MatGraph* g, 
+    int u, 
+    int v, 
+    int* uMax, 
+    int* vMax, 
+    int* weightMax
+) {
+    int origWeight = g->adjMat[u][v];
+    g->adjMat[u][v] = 0;
+    g->adjMat[v][u] = 0;
+
+    int parent[MAX_VERTICES];
+    int visited[MAX_VERTICES] = {0};
+
+    for (int i = 0; i < g->numVertices; i++) parent[i] = -1;
+
+    int queue[MAX_VERTICES];
+    int front = 0, rear = 0;
+
+    queue[rear++] = u;
+    visited[u] = 1;
+
+    while (front < rear) {
+        int curr = queue[front++];
+        if (curr == v) break;
+        for (int adj = 0; adj < g->numVertices; adj++) {
+            if (g->adjMat[curr][adj] > 0 && !visited[adj]) {
+                queue[rear++] = adj;
+                visited[adj] = 1;
+                parent[adj] = curr;
+            }
+        }
+    }
+
+    g->adjMat[u][v] = origWeight;
+    g->adjMat[v][u] = origWeight;
+
+    *weightMax = origWeight;
+    *uMax = u;
+    *vMax = v;
+
+    int curr = v;
+    while (curr != u) {
+        int prev = parent[curr];
+        if (g->adjMat[prev][curr] > *weightMax) {
+            *weightMax = g->adjMat[prev][curr];
+            *uMax = prev;
+            *vMax = curr;
+        }
+        curr = prev;
+    }
+}
+
+void maybe_mst_c(MatGraph* g, Edge* resultEdges, int* resultSize) {
+    /*
+        Return the MST.
+        Time complexity: O(E*V).
+    */
+    int n = g->numVertices;
+    *resultSize = 0;
+
+    MatGraph* T = mat_graph_create(n);
+
+    Edge edges[MAX_EDGES];
+    int edgeCnt = 0;
+
+    for (int u = 0; u < n; u++) {
+        for (int v = u + 1; v < n; v++) {
+            if (g->adjMat[u][v] > 0) {
+                edges[edgeCnt].u = u;
+                edges[edgeCnt].v = v;
+                edges[edgeCnt].weight = g->adjMat[u][v];
+                edgeCnt++;
+            }
+        }
+    }   
+    printf("Processing %d edges in arbitrary order\n", edgeCnt);
+    for (int i = 0; i < edgeCnt; i++) {
+        int u = edges[i].u;
+        int v = edges[i].v;
+        int w = edges[i].weight;
+        
+        printf("Considering edge (%d, %d) with weight %d\n", u, v, w);
+
+        int hasPath = check_path_exists(T, u, v);
+        if (!hasPath) {
+            mat_graph_add_undirected_edge(T, u, v, w);
+            printf("Added edge (%d, %d) with weight %d\n", u, v, w);
+        } else {
+            mat_graph_add_undirected_edge(T, u, v, w);
+            int uMax = -1, vMax = -1, weightMax = -1;
+            find_cycle_and_max_edge(T, u, v, &uMax, &vMax, &weightMax);
+            mat_graph_remove_undirected_edge(T, uMax, vMax);
+            if (uMax == u && vMax == v) 
+                printf("Skipped edge (%d, %d) with weight %d\n", u, v, w);
+            else {
+                printf("Added edge (%d, %d) with weight %d\n", u, v, w);
+                printf("Removed edge (%d, %d) with weight %d (max weight on cycle)\n", 
+                       uMax, vMax, weightMax);
+            }
+        }
+    }
+
+    for (int u = 0; u < n; u++) {
+        for (int v = u + 1; v < n; v++) {
+            if (T->adjMat[u][v] > 0) {
+                resultEdges[*resultSize].u = u;
+                resultEdges[*resultSize].v = v;
+                resultEdges[*resultSize].weight = T->adjMat[u][v];
+                (*resultSize)++;
+            }
+        }
+    }
+
+    mat_graph_free(T);
+}
+
+#pragma endregion 21-3 Alternative minimum-spanning-tree algorithms
 
 int main(void) {
     switch (TASK)
@@ -449,7 +732,52 @@ int main(void) {
             mat_graph_free(g);
             break;
         }
-        
+
+        case 3: {
+            // 21-3 
+            printf("Testing alternative MST algorithms:\n");
+            MatGraph* g = mat_graph_create(6);
+            
+            mat_graph_add_undirected_edge(g, 0, 1, 4);
+            mat_graph_add_undirected_edge(g, 0, 2, 3);
+            mat_graph_add_undirected_edge(g, 1, 2, 5);
+            mat_graph_add_undirected_edge(g, 1, 3, 2);
+            mat_graph_add_undirected_edge(g, 2, 3, 6);
+            mat_graph_add_undirected_edge(g, 2, 4, 2);
+            mat_graph_add_undirected_edge(g, 3, 4, 3);
+            mat_graph_add_undirected_edge(g, 3, 5, 4);
+            mat_graph_add_undirected_edge(g, 4, 5, 5);
+
+            printf("Original graph: \n");
+            mat_graph_print(g);
+
+            // Maybe MST a
+            printf("\nRunning MAYBE-MST-A algorithm:\n");
+            Edge resultEdgesA[MAX_EDGES];
+            int resultSizeA = 0;
+            maybe_mst_a(g, resultEdgesA, &resultSizeA);
+            printf("\nMST edges from MAYBE-MST-A:\n");
+            print_maybe_mst_edges(resultEdgesA, resultSizeA);
+
+            // Maybe MST b
+            printf("\nRunning MAYBE-MST-B algorithm:\n");
+            Edge resultEdgesB[MAX_EDGES];
+            int resultSizeB = 0;
+            maybe_mst_b(g, resultEdgesB, &resultSizeB);
+            printf("\nMST edges from MAYBE-MST-B:\n");
+            print_maybe_mst_edges(resultEdgesB, resultSizeB);
+
+            // Maybe MST c
+            printf("\nRunning MAYBE-MST-C algorithm:\n");
+            Edge resultEdgesC[MAX_EDGES];
+            int resultSizeC = 0;
+            maybe_mst_c(g, resultEdgesC, &resultSizeC);
+            print_maybe_mst_edges(resultEdgesC, resultSizeC);
+
+            mat_graph_free(g);
+            break;
+        }
+
         default:
             break;
     }
