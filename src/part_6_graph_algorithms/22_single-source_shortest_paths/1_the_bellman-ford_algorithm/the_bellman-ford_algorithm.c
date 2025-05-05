@@ -388,11 +388,6 @@ void print_modified_solution_prim(int dist[], int pred[], int numVertices) {
 
 #pragma region 22.1-7
 
-typedef struct {
-    int vertices[MAX_VERTICES];
-    int length;
-} Cycle;
-
 int find_negative_cycle_dfs(
     ListGraph* g,
     int source,
