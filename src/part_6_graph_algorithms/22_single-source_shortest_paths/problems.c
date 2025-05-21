@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#define TASK 1
+#define TASK 2
 
 #pragma region Graph utils
 
@@ -119,6 +120,97 @@ void yens_bellman_ford(MatGraph* g, int src, int dist[], int pred[]) {
 
 #pragma endregion 22-1 Yens improvement to Bellman-Ford
 
+#pragma region 22-2 Nesting boxes
+
+int compare_ints(const void* a, const void* b) {
+    return (*(int*)a - *(int*)b);
+}
+
+int nests_inside(int dims1[], int dims2[], int d) {
+    int sortedBox1[MAX_VERTICES];
+    int sortedBox2[MAX_VERTICES];
+
+    memcpy(sortedBox1, dims1, d * sizeof(int));
+    memcpy(sortedBox2, dims2, d * sizeof(int));
+    qsort(sortedBox1, d, sizeof(int), compare_ints);
+    qsort(sortedBox2, d, sizeof(int), compare_ints);
+
+    for (int i = 0; i < d; i++)
+        if (sortedBox1[i] >= sortedBox2[i]) return 0;
+    
+    return 1;
+}
+
+/*
+    Sorting dimensions: O(nd*lg(d))
+    Checking nesting for each pair: O(n^2)
+    Finding the longest path: O(n^2)
+
+    Overall: O(nd*max(lg(d), n))
+*/
+void find_longest_nesting_seq(int boxes[][MAX_VERTICES], int n, int d) {
+    int nestingGraph[MAX_VERTICES][MAX_VERTICES] = {0};
+    
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (i != j && nests_inside(boxes[i], boxes[j], d)) {
+                nestingGraph[i][j] = 1;
+                printf("Box %d nests inside Box %d\n", i, j);
+            }
+        } 
+    }
+
+    int dp[MAX_VERTICES];
+    int pred[MAX_VERTICES];
+
+    for (int i = 0; i < n; i++) {
+        dp[i] = 1;
+        pred[i] = -1;
+    }
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (nestingGraph[i][j] && dp[j] + 1 > dp[i]) {
+                dp[i] = dp[j] + 1;
+                pred[i] = j;
+            }
+        }
+    }
+
+    int maxIdx = 0;
+    for (int i = 1; i < n; i++)
+        if (dp[i] > dp[maxIdx]) maxIdx = i;
+
+    printf("Length of the longest nesting seq: %d\n", dp[maxIdx]);
+    
+    int seq[MAX_VERTICES];
+    int len = dp[maxIdx];
+    int curr = maxIdx;
+    for (int i = len - 1; i >= 0; i--) {
+        seq[i] = curr;
+        curr = pred[curr];
+    }
+
+    for (int i = 0; i < len; i++) {
+        printf("Box %d", seq[i]);
+        if (i < len - 1) printf(" -> ");
+    }
+    printf("\n\n");
+
+    printf("Box dimensions in the seq:\n");
+    for (int i = 0; i < len; i++) {
+        int boxIdx = seq[i];
+        printf("Box %d: (", boxIdx);
+        for (int j = 0; j < d; j++) {
+            printf("%d", boxes[boxIdx][j]);
+            if (j < d - 1) printf(", ");
+        }
+        printf(")\n");
+    }
+}
+
+#pragma endregion 22-2 Nesting boxes
+
 int main(void) {
     switch (TASK)
     {
@@ -143,6 +235,28 @@ int main(void) {
 
             print_solution(dist, pred, numVertices, src);
             mat_graph_free(g);
+            break;
+        }
+
+        case 2: {
+            // 22-2
+            int d = 3;
+            int box1[] = {3, 1, 5};
+            int box2[] = {6, 2, 7};
+
+            if (nests_inside(box1, box2, d)) printf("Box 1 nests inside Box 2\n");
+            else printf("Box 1 does not nest inside Box 2\n");
+
+            int n = 5;
+            int boxes[MAX_VERTICES][MAX_VERTICES] = {
+                {2, 6, 8}, 
+                {1, 3, 4}, 
+                {5, 7, 9},  
+                {3, 5, 8},   
+                {2, 4, 6} 
+            };
+
+            find_longest_nesting_seq(boxes, n, d);
             break;
         }
         
