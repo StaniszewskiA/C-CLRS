@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TASK 2
+#define TASK 3
 
 #pragma region Graph utils
 
@@ -149,12 +149,12 @@ int nests_inside(int dims1[], int dims2[], int d) {
     Overall: O(nd*max(lg(d), n))
 */
 void find_longest_nesting_seq(int boxes[][MAX_VERTICES], int n, int d) {
-    int nestingGraph[MAX_VERTICES][MAX_VERTICES] = {0};
+    MatGraph* nestingGraph = mat_graph_create(n);
     
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (i != j && nests_inside(boxes[i], boxes[j], d)) {
-                nestingGraph[i][j] = 1;
+                mat_graph_add_directed_edge(nestingGraph, i, j, 1);
                 printf("Box %d nests inside Box %d\n", i, j);
             }
         } 
@@ -170,7 +170,7 @@ void find_longest_nesting_seq(int boxes[][MAX_VERTICES], int n, int d) {
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            if (nestingGraph[i][j] && dp[j] + 1 > dp[i]) {
+            if (nestingGraph->adjMat[i][j] != 0 && dp[j] + 1 > dp[i]) {
                 dp[i] = dp[j] + 1;
                 pred[i] = j;
             }
@@ -210,6 +210,96 @@ void find_longest_nesting_seq(int boxes[][MAX_VERTICES], int n, int d) {
 }
 
 #pragma endregion 22-2 Nesting boxes
+
+#pragma region 22-3 Arbitrage
+
+#include <math.h>
+
+void build_exchange_rate_graph(MatGraph* g, double rates[][MAX_VERTICES]) {
+    int n = g->numVertices;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (i != j && rates[i][j] > 0) {
+                int weight = (int)(-log(rates[i][j]) * 1000);
+                g->adjMat[i][j] = weight;
+            }
+        }
+    }
+}
+
+int detect_currency_arbitrage(MatGraph* g, int src, int dist[], int pred[]) {
+    int numVertices = g->numVertices;
+    init_single_source(dist, pred, numVertices, src);
+
+    for (int i = 0; i < numVertices - 1; i++) {
+        for (int u = 0; u < numVertices; u++) {
+            for (int v = 0; v < numVertices; v++) {
+                if (g->adjMat[u][v] != 0)
+                    relax_edge(u, v, g->adjMat[u][v], dist, pred);
+            }
+        }
+    }
+
+    for (int u = 0; u < numVertices; u++) {
+        for (int v = 0; v < numVertices; v++) {
+            if (g->adjMat[u][v] != 0) {
+                if (dist[u] != INF && dist[u] + g->adjMat[u][v] < dist[v]) {
+                    pred[v] = u;
+                    return v;
+                }
+            }
+        }
+    }
+
+    return -1;
+}
+
+void print_arbitrage_cycle(int vertex, int pred[], double rates[][MAX_VERTICES]) {
+    int cycle[MAX_VERTICES];
+    int cycleLen = 0;
+    int visited[MAX_VERTICES] = {0};
+    int curr = vertex;
+
+    do {
+        cycle[cycleLen++] = curr;
+        curr = pred[curr];
+        if (visited[curr]) break;
+        visited[curr] = 1;
+    } while (1);
+
+    int startIdx = -1;
+    for (int i = 0; i < cycleLen; i++) {
+        if (cycle[i] == curr) {
+            startIdx = i;
+            break;
+        }
+    }
+
+    if (startIdx == -1) {
+        printf("Error extracting cycle\n");
+        return;
+    }
+
+    printf("Currency exchange sequence: ");
+    double profit = 1.0;
+
+    printf("%d", curr);
+    int prev = curr;
+
+    for (int i = startIdx - 1; i >= 0; i--) {
+        printf(" -> %d", cycle[i]);
+        profit *= rates[prev][cycle[i]];
+        prev = cycle[i];
+    }
+
+    printf(" -> %d\n", curr);
+    profit *= rates[prev][curr];
+
+    printf("Total profit factor: %.6f (%.2f%%)\n", profit, (profit-1)*100);
+}
+
+#pragma endregion 22-3 Arbitrage
 
 int main(void) {
     switch (TASK)
@@ -257,6 +347,47 @@ int main(void) {
             };
 
             find_longest_nesting_seq(boxes, n, d);
+            break;
+        }
+
+        case 3: {
+            // 22-3
+            int n = 4;
+            double rates[MAX_VERTICES][MAX_VERTICES] = {
+                {1.0, 0.82, 0.72, 110.0},   
+                {1.22, 1.0, 0.88, 134.0},   
+                {1.39, 1.14, 1.0, 153.0},   
+                {0.0091, 0.0075, 0.0065, 1.0}
+            };
+
+            printf("Currency Exchange Rates:\n");
+            printf("------------------------\n");
+            printf("     USD     EUR     GBP     JPY\n");
+            for (int i = 0; i < n; i++) {
+                if (i == 0) printf("USD ");
+                else if (i == 1) printf("EUR ");
+                else if (i == 2) printf("GBP ");
+                else printf("JPY ");
+
+                for (int j = 0; j < n; j++) {
+                    printf("%7.4f ", rates[i][j]);
+                }
+                printf("\n");
+            }
+            printf("\n");
+
+            MatGraph* g = mat_graph_create(n);
+            build_exchange_rate_graph(g, rates);
+
+            int dist[MAX_VERTICES];
+            int pred[MAX_VERTICES];
+
+            int vertex = detect_currency_arbitrage(g, 0, dist, pred);
+
+            if (vertex != -1) print_arbitrage_cycle(vertex, pred, rates);
+            else printf("No arbitrage opportunity. \n");
+
+            mat_graph_free(g);
             break;
         }
         
