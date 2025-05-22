@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TASK 3
+#define TASK 4
 
 #pragma region Graph utils
 
@@ -301,6 +301,145 @@ void print_arbitrage_cycle(int vertex, int pred[], double rates[][MAX_VERTICES])
 
 #pragma endregion 22-3 Arbitrage
 
+#pragma region 22-4 Gabows scaling algorithm for single-source shortest paths
+
+int calculate_bits(int W) {
+    int k = 0;
+
+    while (W > 0) {
+        W >>= 1;
+        k++;
+    }
+
+    return k == 0 ? 1 : k;
+}
+
+int scale_weight(int weight, int i, int k) {
+    return weight >> (k - i);
+}
+
+void bucket_dijkstra(MatGraph* g, int src, int dist[], int pred[], int maxW) {
+    int n = g->numVertices;
+    init_single_source(dist, pred, n, src);
+
+    int** buckets = (int**)malloc((maxW + 1) * sizeof(int*));
+    int* bucketSize = (int*)calloc(maxW + 1, sizeof(int));
+
+    for (int i = 0; i <= maxW; i++) buckets[i] = (int*)malloc(n * sizeof(int));
+
+    buckets[0][0] = src;
+    bucketSize[0] = 1; 
+
+    for (int d = 0; d <= maxW; d++) {
+        for (int i = 0; i < bucketSize[d]; i++) {
+            int u = buckets[d][i];
+            if (dist[u] < d) continue;;
+            for (int v = 0; v < n; v++) {
+                if (g->adjMat[u][v] >= 0) {
+                    int prevDist = dist[v];
+                    relax_edge(u, v, g->adjMat[u][v], dist, pred);
+                    if (dist[v] < prevDist && dist[v] <= maxW)
+                        buckets[dist[v]][bucketSize[dist[v]]++] = v;
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i <= maxW; i++) free(buckets[i]);
+    free(buckets);
+    free(bucketSize);
+}
+
+void reweight_edges(MatGraph* g, MatGraph* reweighted, int i, int k, int prevDist[]) {
+    int n = g->numVertices;
+
+    for (int u = 0; u < n; u++) {
+        for (int v = 0; v < n; v++) {
+            if (g->adjMat[u][v] != 0) {
+                int weight = g->adjMat[u][v];
+                int wi = scale_weight(weight, i, k);
+                if (prevDist[u] != INF) {
+                    int wHat = wi + 2 * prevDist[u];
+                    if (prevDist[v] != INF) wHat -= 2 * prevDist[v];
+                    reweighted->adjMat[u][v] = wHat;
+                }
+            }
+        }
+    }
+}
+
+void gabows_scaling(MatGraph* g, int src, int dist[], int pred[]) {
+    int n = g->numVertices;
+
+    int maxW = 0;
+    for (int u = 0; u < n; u++) {
+        for (int v = 0; v < n; v++) {
+            if (g->adjMat[u][v] > maxW) maxW = g->adjMat[u][v];
+        }
+    }
+
+    int k = calculate_bits(maxW);
+    printf("Max weight: %d, Number of bits (k): %d\n", maxW, k);
+
+    MatGraph* reweighted = mat_graph_create(n);
+    int* prevDist = (int*)malloc(n * sizeof(int));
+
+    // Most significant bits
+    printf("\nIteration i=1: Using only the most significant bit\n");
+    for (int u = 0; u < n; u++) {
+        for (int v = 0; v < n; v++) {
+            if (g->adjMat[u][v] != 0)
+                reweighted->adjMat[u][v] = scale_weight(g->adjMat[u][v], 1, k);
+        }
+    }
+
+    bucket_dijkstra(reweighted, src, dist, pred, 1);
+
+    printf("Distances after the first iteration:\n");
+    for (int v = 0; v < n; v++) printf("%d: %d, ", v, dist[v]);
+    printf("\n");
+
+    // Add more bits
+    for (int i = 2; i <= k; i++) {
+        printf("\nIteration i=%d: Using %d most significant bits\n", i, i);
+        for (int v = 0; v < n; v++) prevDist[v] = dist[v];
+        for (int u = 0; u < n; u++) {
+            for (int v = 0; v < n; v++) reweighted->adjMat[u][v] = 0;
+        }
+
+        reweight_edges(g, reweighted, i, k, prevDist);
+        bucket_dijkstra(reweighted, src, dist, pred, n - 1);
+
+        for (int v = 0; v < n; v++) {
+            if (dist[v] != INF && prevDist[v] != INF)
+                dist[v] += 2 * prevDist[v];
+        }
+
+        printf("Distances after i=%d: ", i);
+        for (int v = 0; v < n; v++) printf("%d: %d, ", v, dist[v]);
+        printf("\n");
+    }
+
+    printf("\nFinal shortest path distances from source %d:\n", src);
+    for (int v = 0; v < n; v++) {
+        if (v != src) {
+            printf("To vertex %d: ", v);
+            if (dist[v] == INF) {
+                printf("No path exists\n");
+            } else {
+                printf("Distance = %d, Path: ", dist[v]);
+                print_path(pred, v);
+                printf("\n");
+            }
+        }
+    }
+
+    free(prevDist);
+    mat_graph_free(reweighted);
+}
+
+#pragma endregion 22-4 Gabows scaling algorithm for single-source shortest paths
+
 int main(void) {
     switch (TASK)
     {
@@ -386,6 +525,52 @@ int main(void) {
 
             if (vertex != -1) print_arbitrage_cycle(vertex, pred, rates);
             else printf("No arbitrage opportunity. \n");
+
+            mat_graph_free(g);
+            break;
+        }
+
+        case 4: {
+            // 22-4
+            int numVertices = 5;
+            MatGraph* g = mat_graph_create(numVertices);
+
+            mat_graph_add_directed_edge(g, 0, 1, 4);  
+            mat_graph_add_directed_edge(g, 0, 2, 2);  
+            mat_graph_add_directed_edge(g, 1, 2, 5); 
+            mat_graph_add_directed_edge(g, 1, 3, 10); 
+            mat_graph_add_directed_edge(g, 2, 3, 3); 
+            mat_graph_add_directed_edge(g, 2, 4, 12); 
+            mat_graph_add_directed_edge(g, 3, 4, 2);  
+
+            printf("Orignal graph's weights:\n");
+            for (int u = 0; u < numVertices; u++) {
+                for (int v = 0; v < numVertices; v++) {
+                    if (g->adjMat[u][v] != 0) {
+                        printf("Edge (%d,%d): %d (binary: ", u, v, g->adjMat[u][v]);
+                        int weight = g->adjMat[u][v];
+                        int pos = 1 << 30;
+                        int printed = 0;
+
+                        while (pos > 0) {
+                            if (weight & pos) {
+                                printf("1");
+                                printed = 1;
+                            } else if (printed) printf("0");
+                            pos >>= 1;
+                        }
+                        if (!printed) printf("0");
+                        printf(")\n");
+                    }
+                }
+            }
+            printf("\n");
+
+            int dist[MAX_VERTICES];
+            int pred[MAX_VERTICES];
+            int src = 0;
+
+            gabows_scaling(g, src, dist, pred);
 
             mat_graph_free(g);
             break;
