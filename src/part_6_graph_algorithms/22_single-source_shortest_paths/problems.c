@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+#include <float.h>
 
-#define TASK 4
+#define TASK 5
 
 #pragma region Graph utils
 
@@ -440,6 +442,49 @@ void gabows_scaling(MatGraph* g, int src, int dist[], int pred[]) {
 
 #pragma endregion 22-4 Gabows scaling algorithm for single-source shortest paths
 
+#pragma region 22-5 Karps minimum mean-weight cycle algorithm
+
+
+double karps_minimum_mean_weight(MatGraph* g, int pred[]) {
+    int n = g->numVertices;
+    int dist[MAX_VERTICES][MAX_VERTICES];
+    double minMeanW = DBL_MAX;
+
+    for (int k = 0; k <= n; k++) {
+        for (int v = 0; v <= n; v++) {
+            dist[k][v] = (k == 0) ? 0 : INF;
+        }
+    }
+
+    // dp[k][v] = δ_k(s, v)
+    for (int k = 1; k <= n; k++) {
+        for (int u = 0; u < n; u++) {
+            for (int v = 0; v < n; v++) {
+                if (g->adjMat[u][v] != 0 && dist[k - 1][u] != INF) {
+                    int w = g->adjMat[u][v];
+                    if (dist[k - 1][u] + w < dist[k][v]) {
+                        dist[k][v] = dist[k - 1][u] + w;
+                        if (k == n) pred[v] = u; 
+                    }
+                }
+            }
+        }
+    }
+
+    for (int v = 0; v < n; v++) {
+        for (int k = 0; k < n; k++) {
+            if (dist[n][v] != INF && dist[k][v] != INF) {
+                double meanW = (double)(dist[n][v] - dist[k][v]) / (n - k);
+                if (meanW < minMeanW) minMeanW = meanW;
+            }
+        }
+    }
+
+    return minMeanW;
+}
+
+#pragma endregion 22-5 Karps minimum mean-weight cycle algorithm
+
 int main(void) {
     switch (TASK)
     {
@@ -576,6 +621,25 @@ int main(void) {
             break;
         }
         
+        case 5: {
+            // 22-5
+            int numVertices = 4;
+            MatGraph* g = mat_graph_create(numVertices);
+
+            mat_graph_add_directed_edge(g, 0, 1, 1);
+            mat_graph_add_directed_edge(g, 1, 2, 1);
+            mat_graph_add_directed_edge(g, 2, 3, -3);
+            mat_graph_add_directed_edge(g, 3, 0, 1);
+
+            int pred[MAX_VERTICES];
+
+            double minMeanW = karps_minimum_mean_weight(g, pred);
+            printf("Minimum mean-weight cycle: %.2f\n", minMeanW);
+
+            mat_graph_free(g);
+            break;
+        }
+
         default:
             break;
     }
