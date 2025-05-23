@@ -4,7 +4,7 @@
 #include <limits.h>
 #include <float.h>
 
-#define TASK 5
+#define TASK 6
 
 #pragma region Graph utils
 
@@ -485,6 +485,70 @@ double karps_minimum_mean_weight(MatGraph* g, int pred[]) {
 
 #pragma endregion 22-5 Karps minimum mean-weight cycle algorithm
 
+#pragma region 22-6 Bitonic shortest paths
+
+typedef struct Edge {
+    int u, v, w;
+} Edge;
+
+int extract_edges(MatGraph* g, Edge edges[]) {
+    int n = g->numVertices;
+    int edgeCnt = 0;
+
+    for (int u = 0; u < n; u++) {
+        for (int v = 0; v < n; v++) {
+            if (g->adjMat[u][v] != 0) {
+                edges[edgeCnt].u = u;
+                edges[edgeCnt].v = v;
+                edges[edgeCnt].w = g->adjMat[u][v];
+                edgeCnt++;
+            }
+        }
+    }
+
+    return edgeCnt;
+}
+
+int edge_cmp_inc(const void* a, const void* b) {
+    return ((Edge*)a)->w - ((Edge*)b)->w; 
+}
+
+int edge_cmp_dec(const void* a, const void* b) {
+    return ((Edge*)b)->w - ((Edge*)a)->w; 
+}
+
+/*
+    Sorting the edges: O(E*log(E))
+    Relaxing the edges: O(4*E) = O(E)
+    Overall: O(E*log(E)) + O(E) = O(E*log(E))
+*/
+void bitonic_shortest_paths(MatGraph* g, int src, int dist[], int pred[]) {
+    int n = g->numVertices;
+    Edge edges[MAX_EDGES];
+    int edgeCnt = extract_edges(g, edges);
+    
+    init_single_source(dist, pred, n, src);
+
+    // We need 4 passes, 2 for inc, 2 for dec
+    qsort(edges, edgeCnt, sizeof(Edge), edge_cmp_inc);
+    for (int i = 0; i < edgeCnt; i++) 
+        relax_edge(edges[i].u, edges[i].v, edges[i].w, dist, pred);
+
+    qsort(edges, edgeCnt, sizeof(Edge), edge_cmp_dec);
+    for (int i = 0; i < edgeCnt; i++) 
+        relax_edge(edges[i].u, edges[i].v, edges[i].w, dist, pred);
+
+    qsort(edges, edgeCnt, sizeof(Edge), edge_cmp_inc);
+    for (int i = 0; i < edgeCnt; i++) 
+        relax_edge(edges[i].u, edges[i].v, edges[i].w, dist, pred);
+
+    qsort(edges, edgeCnt, sizeof(Edge), edge_cmp_dec);
+    for (int i = 0; i < edgeCnt; i++) 
+        relax_edge(edges[i].u, edges[i].v, edges[i].w, dist, pred);
+}
+
+#pragma endregion 22-6 Bitonic shortest paths
+
 int main(void) {
     switch (TASK)
     {
@@ -635,6 +699,29 @@ int main(void) {
 
             double minMeanW = karps_minimum_mean_weight(g, pred);
             printf("Minimum mean-weight cycle: %.2f\n", minMeanW);
+
+            mat_graph_free(g);
+            break;
+        }
+
+        case 6: {
+            // 22-6
+            int numVertices = 6;
+            MatGraph* g = mat_graph_create(numVertices);
+
+            mat_graph_add_directed_edge(g, 0, 1, 2);
+            mat_graph_add_directed_edge(g, 1, 2, 4);
+            mat_graph_add_directed_edge(g, 2, 3, 6);
+            mat_graph_add_directed_edge(g, 3, 4, 5);
+            mat_graph_add_directed_edge(g, 4, 5, 1);
+            mat_graph_add_directed_edge(g, 1, 4, 3);
+
+            int dist[MAX_VERTICES];
+            int pred[MAX_VERTICES];
+            int src = 0;
+
+            bitonic_shortest_paths(g, src, dist, pred);
+            print_solution(dist, pred, numVertices, src);
 
             mat_graph_free(g);
             break;
