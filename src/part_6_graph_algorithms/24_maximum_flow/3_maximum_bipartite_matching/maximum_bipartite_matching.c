@@ -70,7 +70,6 @@ int edmonds_karp(MatGraph* g, int src, int sink) {
     int parent[MAX_VERTICES];
     int maxFlow = 0;
 
-    // Initialize flow to 0
     for (u = 0; u < g->numVertices; u++) {
         for (v = 0; v < g->numVertices; v++) {
             g->flow[u][v] = 0;
