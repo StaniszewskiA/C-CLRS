@@ -332,23 +332,14 @@ int main(void) {
     {
         case 1: {
             // Basic Ford-Fulkerson
-            int n = 6;
+            int n = 3;
             MatGraph* g = mat_graph_create(n);
-            mat_graph_add_directed_edge(g, 0, 1, 16);
-            mat_graph_add_directed_edge(g, 0, 2, 13);
-            mat_graph_add_directed_edge(g, 1, 2, 10);
-            mat_graph_add_directed_edge(g, 2, 1, 4);
-            mat_graph_add_directed_edge(g, 1, 3, 12);
-            mat_graph_add_directed_edge(g, 2, 4, 14);
-            mat_graph_add_directed_edge(g, 3, 2, 9);
-            mat_graph_add_directed_edge(g, 4, 3, 7);
-            mat_graph_add_directed_edge(g, 3, 5, 20);
-            mat_graph_add_directed_edge(g, 4, 5, 4);
+            mat_graph_add_directed_edge(g, 0, 1, 3);
+            mat_graph_add_directed_edge(g, 1, 2, 2);
+            mat_graph_add_directed_edge(g, 0, 2, 1);
 
-            int maxFlow = edmonds_karp(g, 0, 5);
+            int maxFlow = ford_fulkerson(g, 0, 2);
             printf("Maximum flow: %d\n", maxFlow);
-
-            decompose_flow(g, 0, 5);
 
             mat_graph_free(g);
             break;
