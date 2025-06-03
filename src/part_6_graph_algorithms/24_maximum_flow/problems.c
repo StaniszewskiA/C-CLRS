@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TASK 1
+#define TASK 2
 
 #pragma region Graph utils
 
@@ -91,6 +91,33 @@ int edmonds_karp(FlowGraph* g, int src, int sink) {
 
     return maxFlow;
 }
+
+int has_cycle(FlowGraph* g, int v, int visited[], int stack[]) {
+    if (visited[v]) return stack[v];
+
+    visited[v] = 1;
+    stack[v] = 1;
+
+    for (int i = 0; i < g->numVertices; ++i) {
+        if (!g->adjMat[v][i]) continue;
+        if (has_cycle(g, i, visited, stack)) return 1;
+    }
+
+    stack[v] = 0;
+    return 0;
+}
+
+int is_dag(FlowGraph* g) {
+    int visited[MAX_VERTICES] = {0};
+    int stack[MAX_VERTICES] = {0};
+
+    for (int i = 0; i < g->numVertices; ++i) {
+        if (has_cycle(g, i, visited, stack)) return 0;
+    }
+
+    return 1;
+}
+
 
 #pragma endregion Graph utils
 
@@ -181,6 +208,102 @@ int can_escape(int n, int startingPoints[][2], int m) {
 
 #pragma endregion Escape problem
 
+#pragma region Minimum path cover
+
+int find_minimum_path_cover(FlowGraph* g) {
+    /*
+        O(VE), only works for DAGS
+    */
+    if (!is_dag(g)) {
+        printf("Passed graph is not a DAG");
+        return -1;
+    }
+    int n = g->numVertices;
+    int totalVertices = 2 * (n + 1);
+    FlowGraph* flowGraph = flow_graph_create(totalVertices);
+
+    int src = 0;
+    int sink = n + 1;
+
+    // to src
+    for (int i = 1; i <= n; ++i) flow_graph_add_edge(flowGraph, src, i, 1);
+
+    // to sink
+    for (int i = 1; i <= n; ++i) {
+        int yi = n + 1 + i;
+        flow_graph_add_edge(flowGraph, yi, sink, 1);
+    }
+
+    // connect both parts
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (g->adjMat[i][j] <= 0) continue;
+            int xi = (i + 1);
+            int yj = n + 1 + (j + 1);
+            flow_graph_add_edge(flowGraph, xi, yj, 1);
+        }
+    }
+
+    int maxFlow = edmonds_karp(flowGraph, src, sink);
+
+    printf("Maximum flow found: %d\n", maxFlow);
+    printf("Number of vertices: %d\n", n);
+
+    int minPathCoverSize = n - maxFlow;
+    printf("Minimum path cover size: %d\n", minPathCoverSize);
+
+    printf("\nPath cover paths:\n");
+
+    int* inPath = calloc(n + 1, sizeof(int));
+    int pathCnt = 0;
+
+    for (int i = 1; i <= n; ++i) {
+        if (inPath[i]) continue;
+        
+        int hasIncoming = 0;
+        for (int j = 1; j <= n; ++j) {
+            int xj = j;
+            int yi = n + 1 + i;
+            if (flowGraph->flow[xj][yi] == 1) {
+                hasIncoming = 1;
+                break;
+            }
+        }
+
+        if (hasIncoming) continue;
+        printf("Path %d: ", ++pathCnt);
+        int curr = i;
+
+        while (curr != -1) {
+            printf("%d ", curr);
+            inPath[curr] = 1;
+            int next = -1;
+
+            for (int j = 1; j <= n; ++j) {
+                int xi = curr;
+                int yj = n + 1 + j;
+                if (flowGraph->flow[xi][yj] == 1) {
+                    next = j;
+                    break;
+                }
+            }
+            curr = next;
+        }
+        printf("\n");
+    }
+
+    // isolated vertices
+    for (int i = 1; i <= n; i++) {
+        if (inPath[i]) continue;
+        printf("Path %d: %d\n", ++pathCnt, i);
+    }
+
+    flow_graph_free(flowGraph);
+    return minPathCoverSize;
+}
+
+#pragma endregion Minimum path cover
+
 int main(void) {
     switch (TASK)
     {
@@ -231,6 +354,23 @@ int main(void) {
             if (result2) printf("Escape is possible\n");
             else printf("Escape is impossible.\n");
 
+            break;
+        }
+
+        case 2: {
+            // Minimum path cover
+            int n = 5;
+            FlowGraph* g = flow_graph_create(n);
+
+            flow_graph_add_edge(g, 0, 1, 1); 
+            flow_graph_add_edge(g, 0, 2, 1);  
+            flow_graph_add_edge(g, 1, 3, 1);
+            flow_graph_add_edge(g, 2, 3, 1);  
+            flow_graph_add_edge(g, 3, 4, 1);  
+
+            find_minimum_path_cover(g);
+
+            flow_graph_free(g);
             break;
         }
         
