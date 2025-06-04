@@ -1,9 +1,10 @@
+#include <assert.h>
 #include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TASK 3
+#define TASK 4
 #define INF INT_MAX
 
 #pragma region Graph utils
@@ -422,6 +423,21 @@ void solve_consulting_problem(
 
 #pragma endregion Algorithmic consulting
 
+#pragma region Updating maximum flow
+
+int update_capacity(FlowGraph* g, int u, int v, int src, int sink, int delta) {
+    int originalFlow = 0;
+    for (int i = 0; i < g->numVertices; i++) originalFlow += g->flow[src][i];
+
+    g->adjMat[u][v] += delta;
+
+    int newFlow = edmonds_karp(g, src, sink);
+    
+    return newFlow - originalFlow;
+}
+
+#pragma endregion Updating maximum flow
+
 int main(void) {
     switch (TASK)
     {
@@ -507,6 +523,34 @@ int main(void) {
             int expertCosts[4] = {80, 70, 60, 90};
 
             solve_consulting_problem(jobs, m, expertCosts, n);
+            break;
+        }
+
+        case 4 : {
+            // 24-4
+            int n = 6;
+            FlowGraph* g = flow_graph_create(n);
+            int edges[][3] = {{0,1,10}, {0,2,8}, {1,3,5}, {2,3,3}, {1,4,8}, {3,5,10}, {4,5,10}};
+            for (int i = 0; i < 7; i++) {
+                flow_graph_add_edge(g, edges[i][0], edges[i][1], edges[i][2]);
+            }
+
+            int src = 0;
+            int sink = 5;
+            int initialFlow = edmonds_karp(g, src, sink);
+            printf("Initial maximum flow: %d\n", initialFlow);
+
+            // increase 
+            printf("Testing capacity increase on edge (0,1)\n");
+            int flowIncrease = update_capacity(g, 0, 1, src, sink, 1);
+            printf("Flow increased by: %d\n", flowIncrease);
+
+            // decrease
+            printf("Testing capacity decrease on edge (0,1)\n");
+            int flowDecrease = update_capacity(g, 0, 1, src, sink, -1);
+            printf("Flow decreased by: %d\n", -flowDecrease);
+
+            flow_graph_free(g);
             break;
         }
         
