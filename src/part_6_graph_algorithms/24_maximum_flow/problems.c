@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TASK 2
+#define TASK 3
+#define INF INT_MAX
 
 #pragma region Graph utils
 
@@ -304,6 +305,123 @@ int find_minimum_path_cover(FlowGraph* g) {
 
 #pragma endregion Minimum path cover
 
+#pragma region Algorithmic consulting
+
+typedef struct {
+    int profit;
+    int numExperts;
+    int experts[MAX_VERTICES];
+} Job;
+
+FlowGraph* create_consulting_flow_network(
+    Job jobs[], 
+    int numJobs, 
+    int expertCosts[], 
+    int numExperts
+) {
+    // src, edges, sink
+    int totalVertices = 1 + numJobs + numExperts + 1;
+    int src = 0;
+    int sink = totalVertices - 1;
+
+    FlowGraph* g = flow_graph_create(totalVertices);
+
+    // src to experts
+    for (int i = 0; i < numExperts; i++) {
+        int expertVertex = i + 1;
+        flow_graph_add_edge(g, src, expertVertex, expertCosts[i]);
+        printf("Edge: source -> expert %d (capacity %d)\n", i + 1, expertCosts[i]);
+    }
+
+    // jobs to sink
+    for (int i = 0; i < numJobs; i++) {
+        int jobVertex = i + numExperts + 1;
+        flow_graph_add_edge(g, jobVertex, sink, jobs[i].profit);
+        printf("Edge: job %d -> sink (capacity %d)\n", i + 1, jobs[i].profit);
+    }
+
+    // experts to jobs
+    for (int i = 0; i < numJobs; i++) {
+        int jobVertex = i + numExperts + 1;
+        for (int j = 0; j < jobs[i].numExperts; j++) {
+            int expertVertex = jobs[i].experts[j];
+            flow_graph_add_edge(g, expertVertex, jobVertex, INF);
+            printf("Edge: expert %d -> job %d (capacity infinity)\n", expertVertex, i + 1);
+        }
+    }
+
+    return g;
+}
+
+void solve_consulting_problem(
+    Job jobs[],
+    int numJobs,
+    int expertCosts[],
+    int numExperts
+) {
+    /*
+        O(VE^2) with assumptions
+    */
+    FlowGraph* g = create_consulting_flow_network(
+        jobs, numJobs, expertCosts, numExperts);
+
+    int src = 0;
+    int sink = g->numVertices - 1;
+
+    int maxFlow = edmonds_karp(g, src, sink);
+    printf("\nMaximum flow in consulting network: %d\n", maxFlow);
+
+    int totalPossibleProfit = 0;
+    for (int i = 0; i < numJobs; i++) totalPossibleProfit += jobs[i].profit;
+    printf("Total possible profit: %d\n", totalPossibleProfit);
+
+    int maxNetRevenue = totalPossibleProfit - maxFlow;
+    printf("Max netto revenue: %d\n", maxNetRevenue);
+
+    // reconstruct
+    int visited[MAX_VERTICES] = {0};
+    int queue[MAX_VERTICES];
+    int front = 0;
+    int rear = 0;
+
+    queue[rear++] = src;
+    visited[src] = 1;
+
+    while (front != rear) {
+        int u = queue[front++];
+        for (int v = 0; v < g->numVertices; v++) {
+            if (visited[v] || (g->adjMat[u][v] - g->flow[u][v]) <= 0) continue;
+            visited[v] = 1;
+            queue[rear++] = v; 
+        }
+    }
+
+    printf("Accepted jobs: ");
+    int acceptedJobsCnt = 0;
+    for (int i = 0; i < numJobs; i++) {
+        int jobVertex = 1 + numExperts + i;
+        if (visited[jobVertex]) continue;
+        printf("%d ", i + 1);
+        acceptedJobsCnt++;
+    }
+    if (acceptedJobsCnt == 0) printf("none");
+    printf("\n");
+
+    printf("Experts to hire: ");
+    int hiredExpertsCnt = 0;
+    for (int i = 0; i < numExperts; i++) {
+        int expertVertex = 1 + i;
+        if (visited[expertVertex]) continue;
+        printf("%d ", i + 1);
+        hiredExpertsCnt++;
+    }
+    if (hiredExpertsCnt == 0) printf("none");
+
+    flow_graph_free(g);
+}
+
+#pragma endregion Algorithmic consulting
+
 int main(void) {
     switch (TASK)
     {
@@ -371,6 +489,24 @@ int main(void) {
             find_minimum_path_cover(g);
 
             flow_graph_free(g);
+            break;
+        }
+
+        case 3: {
+            // Algorithmic consulting
+            int m = 3;
+            int n = 4;
+
+            // profit, number of experts, experts' ids
+            Job jobs[3] = {
+                {100, 2, {1, 2}},
+                {200, 2, {2, 3}},
+                {150, 3, {1, 3, 4}}
+            };
+
+            int expertCosts[4] = {80, 70, 60, 90};
+
+            solve_consulting_problem(jobs, m, expertCosts, n);
             break;
         }
         
