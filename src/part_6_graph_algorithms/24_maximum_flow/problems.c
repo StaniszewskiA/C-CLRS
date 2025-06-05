@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TASK 5
+#define TASK 6
 #define INF INT_MAX
 
 #pragma region Graph utils
@@ -29,8 +29,8 @@ FlowGraph* flow_graph_create(int numVertices) {
     return g;
 }
 
-void flow_graph_add_edge(FlowGraph* g, int src, int v, int capacity) {
-    g->adjMat[src][v] = capacity;
+void flow_graph_add_edge(FlowGraph* g, int u, int v, int capacity) {
+    g->adjMat[u][v] = capacity;
 }
 
 void flow_graph_free(FlowGraph* g) {
@@ -70,21 +70,21 @@ int edmonds_karp(FlowGraph* g, int src, int sink) {
     int parent[MAX_VERTICES];
     int maxFlow = 0;
 
-    for (src = 0; src < g->numVertices; src++)
+    for (u = 0; u < g->numVertices; u++)
         for (v = 0; v < g->numVertices; v++)
-            g->flow[src][v] = 0;
+            g->flow[u][v] = 0;
 
     while (bfs(g, src, sink, parent)) {
         int pathFlow = INT_MAX;
         for (v = sink; v != src; v = parent[v]) {
-            src = parent[v];
-            pathFlow = fmin(pathFlow, g->adjMat[src][v] - g->flow[src][v]);
+            u = parent[v];
+            pathFlow = fmin(pathFlow, g->adjMat[u][v] - g->flow[u][v]);
         }
 
         for (v = sink; v != src; v = parent[v]) {
-            src = parent[v];
-            g->flow[src][v] += pathFlow;
-            g->flow[v][src] -= pathFlow;
+            u = parent[v];
+            g->flow[u][v] += pathFlow;
+            g->flow[v][u] -= pathFlow;
         }
 
         maxFlow += pathFlow;
@@ -527,6 +527,99 @@ int max_flow_by_scaling(FlowGraph* g, int src, int sink) {
 
 #pragma endregion Maximum flow by scaling
 
+#pragma region The widest augmenting path
+
+int dijkstra_widest_path(FlowGraph* g, int src, int sink, int parent[]) {
+    int maxCapacity[MAX_VERTICES];
+    int visited[MAX_VERTICES] = {0};
+
+    // init
+    for (int i = 0; i < g->numVertices; i++) {
+        maxCapacity[i] = 0;
+        parent[i] = -1;
+    }
+    maxCapacity[src] = INT_MAX;
+
+    for (int cnt = 0; cnt < g->numVertices - 1; cnt++) {
+        int maxCap = 0;
+        int u = -1;
+
+        for (int i = 0; i < g->numVertices; i++) {
+            if (visited[i] || maxCapacity[i] < maxCap) continue;
+            maxCap = maxCapacity[i];
+            u = i;
+        }
+
+        if (u == -1 || maxCap == 0) break;
+        visited[u] = 1;
+
+        if (u == sink) return maxCapacity[sink];
+
+        for (int v = 0; v < g->numVertices; v++) {
+            if (visited[v]) continue;
+
+            int residualCap = g->adjMat[u][v] - g->flow[u][v];
+            if (residualCap <= 0) continue;
+
+            int newCap = fmin(maxCapacity[u], residualCap);
+            if (newCap > maxCapacity[v]) {
+                maxCapacity[v] = newCap;
+                parent[v] = u;
+            }
+        }
+    }
+
+    return maxCapacity[sink];
+} 
+
+int widest_augmenting_path(FlowGraph* g, int src, int sink) {
+    /*
+        O(EV^2 log(|f*|))
+    */
+    
+    // init flows
+    for (int u = 0; u < g->numVertices; u++)
+        for (int v = 0; v < g->numVertices; v++)
+            g->flow[u][v] = 0;
+
+    int totalFlow = 0;
+    int parent[MAX_VERTICES];
+    int iteration = 0;
+
+    while (1) {
+        int pathCapacity = dijkstra_widest_path(g, src, sink, parent);
+        if (pathCapacity == 0) break;
+        iteration++;
+        printf("Iteration %d: Found path with capacity: %d\n",
+            iteration, pathCapacity);
+
+        // augment
+        for (int v = sink; v != src; v = parent[v]) {
+            int u = parent[v];
+            g->flow[u][v] += pathCapacity;
+            g->flow[v][u] -= pathCapacity;
+        }
+
+        totalFlow += pathCapacity;
+
+        // reconstruct the path
+        printf("Path: ");
+        int path[MAX_VERTICES];
+        int pathLen = 0;
+        for (int v = sink; v != src; v = parent[v]) path[pathLen++] = v;
+        for (int i = pathLen - 1; i >= 0; i--) {
+            printf("%d", path[i]);
+            if (i > 0) printf(" -> ");
+        }
+        printf(" (flow: %d)\n", pathCapacity);
+    }
+
+    printf("Total iterations: %d\n", iteration);
+    return totalFlow;
+}
+
+#pragma endregion The widest augmenting path
+
 int main(void) {
     switch (TASK)
     {
@@ -584,12 +677,16 @@ int main(void) {
             // Minimum path cover
             int n = 5;
             FlowGraph* g = flow_graph_create(n);
+            int edges[][3] = {
+                {0, 1, 1},
+                {0, 2, 1},
+                {1, 3, 1},
+                {2, 3, 1},
+                {2, 3, 1}
+            };
 
-            flow_graph_add_edge(g, 0, 1, 1); 
-            flow_graph_add_edge(g, 0, 2, 1);  
-            flow_graph_add_edge(g, 1, 3, 1);
-            flow_graph_add_edge(g, 2, 3, 1);  
-            flow_graph_add_edge(g, 3, 4, 1);  
+            for (int i = 0; i < 5; i++) 
+                flow_graph_add_edge(g, edges[i][0], edges[i][1], edges[i][2]);
 
             find_minimum_path_cover(g);
 
@@ -676,6 +773,45 @@ int main(void) {
 
             int maxFlow = max_flow_by_scaling(g, src, sink);
             printf("Max flow: %d\n", maxFlow);
+
+            flow_graph_free(g);
+            break;
+        }
+
+        case 6: {
+            // The widest augmenting path
+            int n = 6;
+            FlowGraph* g = flow_graph_create(n);
+            int edges[][3] = {
+                {0,1,16}, 
+                {0,2,13}, 
+                {1,2,10}, 
+                {1,3,12}, 
+                {2,1,4}, 
+                {2,4,14}, 
+                {3,2,9}, 
+                {3,5,20}, 
+                {4,3,7}, 
+                {4,5,4}
+            };
+
+            for (int i = 0; i < 10; i++)
+                flow_graph_add_edge(g, edges[i][0], edges[i][1], edges[i][2]);
+
+            int src = 0;
+            int sink = 5;
+
+            int widestFlow = widest_augmenting_path(g, src, sink);
+            printf("Widest augmenting path result: %d\n", widestFlow);
+
+            for (int u = 0; u < g->numVertices; u++)
+                for (int v = 0; v < g->numVertices; v++)
+                    g->flow[u][v] = 0;
+
+            int edmondsFlow = edmonds_karp(g, src, sink);
+            printf("Edmonds-Karp result: %d\n", edmondsFlow);
+
+            printf("Do results match? %d\n", widestFlow == edmondsFlow);
 
             flow_graph_free(g);
             break;
