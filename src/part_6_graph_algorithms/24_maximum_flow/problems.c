@@ -1,10 +1,9 @@
-#include <assert.h>
 #include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TASK 4
+#define TASK 5
 #define INF INT_MAX
 
 #pragma region Graph utils
@@ -30,8 +29,8 @@ FlowGraph* flow_graph_create(int numVertices) {
     return g;
 }
 
-void flow_graph_add_edge(FlowGraph* g, int u, int v, int capacity) {
-    g->adjMat[u][v] = capacity;
+void flow_graph_add_edge(FlowGraph* g, int src, int v, int capacity) {
+    g->adjMat[src][v] = capacity;
 }
 
 void flow_graph_free(FlowGraph* g) {
@@ -49,17 +48,17 @@ int bfs(FlowGraph* g, int src, int sink, int parent[]) {
     parent[src] = -1;
 
     while (front != rear) {
-        int u = queue[front++];
+        int src = queue[front++];
 
         for (int v = 0; v < g->numVertices; v++) {
-            if (visited[v] || (g->adjMat[u][v] - g->flow[u][v]) <= 0) continue;
+            if (visited[v] || (g->adjMat[src][v] - g->flow[src][v]) <= 0) continue;
             if (v == sink) {
-                parent[v] = u;
+                parent[v] = src;
                 return 1;
             }
             queue[rear++] = v;
             visited[v] = 1;
-            parent[v] = u;
+            parent[v] = src;
         }
     }
 
@@ -71,21 +70,21 @@ int edmonds_karp(FlowGraph* g, int src, int sink) {
     int parent[MAX_VERTICES];
     int maxFlow = 0;
 
-    for (u = 0; u < g->numVertices; u++)
+    for (src = 0; src < g->numVertices; src++)
         for (v = 0; v < g->numVertices; v++)
-            g->flow[u][v] = 0;
+            g->flow[src][v] = 0;
 
     while (bfs(g, src, sink, parent)) {
         int pathFlow = INT_MAX;
         for (v = sink; v != src; v = parent[v]) {
-            u = parent[v];
-            pathFlow = fmin(pathFlow, g->adjMat[u][v] - g->flow[u][v]);
+            src = parent[v];
+            pathFlow = fmin(pathFlow, g->adjMat[src][v] - g->flow[src][v]);
         }
 
         for (v = sink; v != src; v = parent[v]) {
-            u = parent[v];
-            g->flow[u][v] += pathFlow;
-            g->flow[v][u] -= pathFlow;
+            src = parent[v];
+            g->flow[src][v] += pathFlow;
+            g->flow[v][src] -= pathFlow;
         }
 
         maxFlow += pathFlow;
@@ -389,9 +388,9 @@ void solve_consulting_problem(
     visited[src] = 1;
 
     while (front != rear) {
-        int u = queue[front++];
+        int src = queue[front++];
         for (int v = 0; v < g->numVertices; v++) {
-            if (visited[v] || (g->adjMat[u][v] - g->flow[u][v]) <= 0) continue;
+            if (visited[v] || (g->adjMat[src][v] - g->flow[src][v]) <= 0) continue;
             visited[v] = 1;
             queue[rear++] = v; 
         }
@@ -425,11 +424,11 @@ void solve_consulting_problem(
 
 #pragma region Updating maximum flow
 
-int update_capacity(FlowGraph* g, int u, int v, int src, int sink, int delta) {
+int update_capacity(FlowGraph* g, int src, int v, int u, int sink, int delta) {
     int originalFlow = 0;
     for (int i = 0; i < g->numVertices; i++) originalFlow += g->flow[src][i];
 
-    g->adjMat[u][v] += delta;
+    g->adjMat[src][v] += delta;
 
     int newFlow = edmonds_karp(g, src, sink);
     
@@ -437,6 +436,96 @@ int update_capacity(FlowGraph* g, int u, int v, int src, int sink, int delta) {
 }
 
 #pragma endregion Updating maximum flow
+
+#pragma region Maximum flow by scaling
+
+int dfs_with_scale(
+    FlowGraph* g,
+    int src,
+    int sink,
+    int parent[],
+    int visited[],
+    int scale
+) {
+    if (src == sink) return 1;
+    visited[src] = 1;
+    
+    for (int v = 0; v < g->numVertices; v++) {
+        if (visited[v]) continue;
+        
+        int residualCapacity = g->adjMat[src][v] - g->flow[src][v];
+        if (residualCapacity < scale) continue;
+
+        parent[v] = src;
+        if (dfs_with_scale(g, v, sink, parent, visited, scale)) return 1;
+    }
+
+    return 0;
+}
+
+int dfs_augmenting_path(
+    FlowGraph* g,
+    int src,
+    int sink,
+    int parent[],
+    int scale
+) {
+    int visited[MAX_VERTICES] = {0};
+    parent[src] = -1;
+    return dfs_with_scale(g, src, sink, parent, visited, scale);
+}
+
+int max_flow_by_scaling(FlowGraph* g, int src, int sink) {
+    // init flow
+    for (int u = 0; u < g->numVertices; u++)
+        for (int v = 0; v < g->numVertices; v++)
+            g->flow[u][v] = 0;
+
+    // max capacity
+    int maxCapacity = 0;
+    for (int u = 0; u < g->numVertices; u++)
+        for (int v = 0; v < g->numVertices; v++)
+            maxCapacity = fmax(g->adjMat[u][v], maxCapacity);
+    
+    if (maxCapacity == 0) return 0;
+
+    // scale = 2^⌊log₂(maxCapacity)⌋
+    int scale = (int)pow(2, floor(log2(maxCapacity)));
+    printf("Initial scale: %d\n", scale);
+
+    int totalFlow = 0;
+
+    while (scale >= 1) {
+        printf("Scale = %d\n", scale);
+        int pathFound = 0;
+        int parent[MAX_VERTICES];
+
+        while (dfs_augmenting_path(g, src, sink, parent, scale)) {
+            int pathFlow = INT_MAX;
+            for (int v = sink; v != src; v = parent[v]) {
+                int u = parent[v];
+                int residual = g->adjMat[u][v] - g->flow[u][v];
+                pathFlow = fmin(pathFlow, residual);
+            }
+
+            for (int v = sink; v != src; v = parent[v]) {
+                int u = parent[v];
+                g->flow[u][v] += pathFlow;
+                g->flow[v][u] -= pathFlow;
+            }
+
+            totalFlow += pathFlow;
+            pathFound++;
+            printf("Found augmenting path with flow %d\n", pathFlow);
+        }
+        printf("Found %d paths using scale of %d\n", pathFound, scale);
+        scale >>= 1;
+    }
+
+    return totalFlow;
+}
+
+#pragma endregion Maximum flow by scaling
 
 int main(void) {
     switch (TASK)
@@ -527,10 +616,18 @@ int main(void) {
         }
 
         case 4 : {
-            // 24-4
+            // Updating maximum flow
             int n = 6;
             FlowGraph* g = flow_graph_create(n);
-            int edges[][3] = {{0,1,10}, {0,2,8}, {1,3,5}, {2,3,3}, {1,4,8}, {3,5,10}, {4,5,10}};
+            int edges[][3] = {
+                {0,1,10}, 
+                {0,2,8}, 
+                {1,3,5}, 
+                {2,3,3}, 
+                {1,4,8}, 
+                {3,5,10}, 
+                {4,5,10}
+            };
             for (int i = 0; i < 7; i++) {
                 flow_graph_add_edge(g, edges[i][0], edges[i][1], edges[i][2]);
             }
@@ -549,6 +646,36 @@ int main(void) {
             printf("Testing capacity decrease on edge (0,1)\n");
             int flowDecrease = update_capacity(g, 0, 1, src, sink, -1);
             printf("Flow decreased by: %d\n", -flowDecrease);
+
+            flow_graph_free(g);
+            break;
+        }
+
+        case 5: {
+            // Maximum flow by scaling
+            int n = 6;
+            FlowGraph* g = flow_graph_create(n);
+            int edges[][3] = {
+                {0,1,16}, 
+                {0,2,13}, 
+                {1,2,10}, 
+                {1,3,12}, 
+                {2,1,4}, 
+                {2,4,14}, 
+                {3,2,9}, 
+                {3,5,20}, 
+                {4,3,7}, 
+                {4,5,4}
+            };
+
+            for (int i = 0; i < 10; i++)
+                flow_graph_add_edge(g, edges[i][0], edges[i][1], edges[i][2]);
+
+            int src = 0;
+            int sink = 5;
+
+            int maxFlow = max_flow_by_scaling(g, src, sink);
+            printf("Max flow: %d\n", maxFlow);
 
             flow_graph_free(g);
             break;
