@@ -2,8 +2,9 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
-#define TASK 6
+#define TASK 7
 #define INF INT_MAX
 
 #pragma region Graph utils
@@ -119,8 +120,167 @@ int is_dag(FlowGraph* g) {
     return 1;
 }
 
+FlowGraph* flow_graph_copy(FlowGraph* original) {
+    int n = original->numVertices;
+    FlowGraph* copy = flow_graph_create(n);
+
+    for (int u = 0; u < n; u++) {
+        for (int v = 0; v < n; v++) {
+            copy->adjMat[u][v] = original->adjMat[u][v];
+            copy->flow[u][v] = original->flow[u][v];
+        }
+    }
+
+    return copy;
+}
+
+void flow_graph_reset_flow(FlowGraph* g) {
+    int n = g->numVertices;
+
+    for (int u = 0; u < n; u++)
+        for (int v = 0; v < n; v++) g->flow[u][v] = 0;
+}
+
+void flow_graph_find_reachable_vertices(FlowGraph* g, int src, int reachable[]) {
+    int queue[MAX_VERTICES];
+    int front = 0;
+    int rear = 0;
+    int n = g->numVertices;
+
+    for (int i = 0; i < n; i++) reachable[i] = 0;
+
+    queue[rear++] = src;
+    reachable[src] = 1;
+
+    while (front != rear) {
+        int curr = queue[front++];
+        
+        for (int v = 0; v < n; v++) {
+            if (reachable[v] 
+                || (g->adjMat[curr][v] - g->flow[curr][v]) <= 0) continue;
+            queue[rear++] = v;
+            reachable[v] = 1;
+        }
+    }
+}
+
+int flow_graph_get_random_edge(FlowGraph* g, int activeEdges[], int* u, int* v) {
+    int n = g->numVertices;
+    int totalEdges = 0;
+    for (int i = 0; i < n; i++) {
+        if (!activeEdges[i]) continue;
+        for (int j = i + 1; j < n; j++) {
+            if (!activeEdges[j]) continue;
+            totalEdges += g->adjMat[i][j];
+        }
+    }
+
+    if (totalEdges == 0) return 0;
+
+    int randomEdgeIndex = rand() % totalEdges;
+
+    for (int i = 0; i < n; i++) {
+        if (!activeEdges[i]) continue;
+        for (int j = i + 1; j < n; j++) {
+            if (!activeEdges[j]) continue;
+            int cnt = g->adjMat[i][j];
+            if (randomEdgeIndex < cnt) {
+                *u = i;
+                *v = j;
+                return 1;
+            }
+            randomEdgeIndex -= cnt;
+        }
+    }
+
+    return 0;
+} 
+
+void flow_graph_contract_edge(FlowGraph* g, int u, int v, int activeEdges[]) {
+    int n = g->numVertices;
+    for (int i = 0; i < n; i++) {
+        if (i == u || i == v || !activeEdges[i]) continue;
+
+        g->adjMat[u][i] += g->adjMat[v][i];
+        g->adjMat[i][u] += g->adjMat[i][v];
+
+        g->adjMat[v][i] = 0;
+        g->adjMat[i][v] = 0;
+    }
+
+    g->adjMat[u][v] = 0;
+    g->adjMat[v][u] = 0;
+}
 
 #pragma endregion Graph utils
+
+#pragma region Gomory-Hu utils
+
+typedef struct {
+    int tree[MAX_VERTICES][MAX_VERTICES];
+    int capacity[MAX_VERTICES][MAX_VERTICES];
+    int n;
+} GomoryHuTree;
+
+GomoryHuTree* gomory_hu_tree_create(int n) {
+    GomoryHuTree* ghTree = malloc(sizeof(GomoryHuTree));
+    ghTree->n = n;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            ghTree->tree[i][j] = 0;
+            ghTree->capacity[i][j] = 0;
+        }
+    }
+
+    return ghTree;
+}
+
+void gomory_hu_tree_free(GomoryHuTree* ghTree) {
+    free(ghTree);
+}
+
+GomoryHuTree* gomory_hu_tree_build(FlowGraph* g) {
+    int n = g->numVertices;
+    GomoryHuTree* ghTree = gomory_hu_tree_create(n);
+
+    int components[MAX_VERTICES];
+    for (int i = 0; i < n; i++) components[i] = 0;
+
+    // |V| - 1
+    for (int v = 1; v < n; v++) {
+        int u = components[v];
+        printf("Computing max flow on path %d -> %d", u, v);
+
+        FlowGraph* tempG = flow_graph_copy(g);
+        flow_graph_reset_flow(g);
+
+        int maxFlow = edmonds_karp(tempG, u, v);
+        printf("  Max flow value: %d\n", maxFlow);
+
+        int reachable[MAX_VERTICES];
+        flow_graph_find_reachable_vertices(tempG, u, reachable);
+
+        ghTree->tree[u][v] = ghTree->tree[v][u] = 1;
+        ghTree->capacity[u][v] = ghTree->capacity[v][u] = maxFlow;
+        printf("Added tree edge {%d,%d} with capacity %d\n", u, v, maxFlow);
+
+        printf("Component update: ");
+        for (int i = 0; i < n; i++) {
+            if (components[i] != components[v] || reachable[i]) continue;
+            components[i] = v;
+            printf("%d->comp_%d ", i, v);
+        }
+
+        printf("\n");
+        flow_graph_free(tempG);
+    }
+
+    printf("Gomory-Hu tree construction complete\n");
+    return ghTree;
+}
+
+#pragma endregion Gomory-Hu utils
 
 #pragma region Escape problem
 
@@ -620,6 +780,225 @@ int widest_augmenting_path(FlowGraph* g, int src, int sink) {
 
 #pragma endregion The widest augmenting path
 
+#pragma region Minimum global cut
+
+int find_min_global_cut_all_pairs(FlowGraph* g) {
+    /*
+        Check every pair of vertices as
+        source and sink.
+
+        Edmonds-Karp: O(VE^2)
+        V over 2 = O(V^2)
+
+        Overall O(V^3*E^2) I believe.
+    */
+    int n = g->numVertices;
+    int minGlobalCut = INT_MAX;
+    int bestSrc = -1;
+    int bestSink = -1;
+    int pairCnt = 0;
+
+    FlowGraph* tmepG = flow_graph_create(n);
+
+    // all pairs
+    for (int s = 0; s < n; s++) {
+        for (int t = 0; t < n; t++) {
+            if (s == t) continue;
+            pairCnt++;
+
+            FlowGraph* tempG = flow_graph_copy(g);
+            flow_graph_reset_flow(tempG);
+
+            int maxFlow = edmonds_karp(tempG, s, t);
+            printf("Pair (%d, %d): max flow = %d\n",
+                s, t, maxFlow);
+
+            if (maxFlow >= minGlobalCut) continue;
+
+            minGlobalCut = maxFlow;
+            bestSrc = s;
+            bestSink = t;
+            printf("New minimum found\n");
+
+            flow_graph_free(tempG);
+        }
+    }
+
+    printf("Results: \n");
+    printf("Tested %d pairs\n", pairCnt);
+    printf("Minimum global cut value mi(G) = %d\n", minGlobalCut);
+    printf("Best pair: (%d,%d)\n", bestSrc, bestSink);
+
+    return minGlobalCut;
+}
+
+int find_min_global_cut_fixed_src(FlowGraph* g) {
+    /*
+        Check every possible source against
+        a fixed sink.
+
+        Edmonds-Karp: O(VE^2)
+        V possible pairs = |V| - 1 comparisons = O(V)
+
+        Overall O(V^2*E^2) I believe.
+    */
+    int n = g->numVertices;
+    int minGlobalCut = INT_MAX;
+    int src = 0;
+    int bestSink = -1;
+    int pairCnt = 0;
+
+    for (int t = 1; t < n; t++) {
+        pairCnt++;
+
+        FlowGraph* tempG = flow_graph_copy(g);
+        flow_graph_reset_flow(tempG);
+
+        int maxFlow = edmonds_karp(tempG, src, t);
+        printf("Pair (%d, %d): max flow = %d\n",
+            src, t, maxFlow);
+
+        if (maxFlow >= minGlobalCut) continue;
+
+        minGlobalCut = maxFlow;
+        bestSink = t;
+        printf("New minimum found\n");
+
+        flow_graph_free(tempG);
+
+    }
+
+    printf("Results: \n");
+    printf("Tested %d pairs\n", pairCnt);
+    printf("Minimum global cut value mi(G) = %d\n", minGlobalCut);
+    printf("Best pair: (%d,%d)\n", src, bestSink);
+
+    return minGlobalCut;
+}
+
+int find_min_global_cut_gomory_hu(FlowGraph* g) {
+    /*
+        |V| - 1 iterations of O(VE^2)
+        Overall: O(V^2*E^2)
+    */
+    GomoryHuTree* ghTree = gomory_hu_tree_build(g);
+    int minGlobalCut = INT_MAX; 
+
+    for (int u = 0; u < ghTree->n; u++) {
+        for (int v = u + 1; v < ghTree->n; v++) {
+            if (!ghTree->tree[u][v] 
+                || ghTree->capacity[u][v] >= minGlobalCut) continue;
+            minGlobalCut = ghTree->capacity[u][v];
+            printf("New minimum: edge {%d,%d} capacity %d\n", u, v, ghTree->capacity[u][v]);
+        }
+    }
+
+    printf("Results: \n");
+    printf("Minimum global cut value mi(G) = %d\n", minGlobalCut);
+
+    return minGlobalCut;
+}
+
+int karger_single_run(FlowGraph* g) {
+    /*
+        Contract random edges until
+        only 2 remain.
+    */
+    int n = g->numVertices;
+    int activeEdges[MAX_VERTICES];
+    int vertexCnt = n;
+
+    for (int i = 0; i < n; i++) activeEdges[i] = 1;
+
+    while (vertexCnt > 2) {
+        int u, v;
+        if (!flow_graph_get_random_edge(g, activeEdges, &u, &v)) 
+            return INT_MAX;
+        flow_graph_contract_edge(g, u, v, activeEdges);
+        activeEdges[v] = 0;
+        vertexCnt--;
+    }
+
+    int remaining[2];
+    int cnt = 0;
+
+    for (int i = 0; i < n && cnt < 2; i++) {
+        if (activeEdges[i]) remaining[cnt++] = i;
+    }
+
+    if (cnt != 2) return INT_MAX;
+
+    int minGlobalCut = g->adjMat[remaining[0]][remaining[1]];
+    return minGlobalCut;
+}
+
+int karger_unique(FlowGraph* g) {
+    /*
+        Assuming there's only one
+        global minimum cut.
+
+        O(V^2)
+    */
+    srand(time(NULL));
+
+    int n = g->numVertices;
+    if (n < 2) return 0;
+
+    int iterations = n * n;
+    printf("Running %d iterations\n", iterations);
+
+    int minGlobalCut = INT_MAX;
+    
+    for (int iter = 0; iter < iterations; iter++) {
+        FlowGraph* tempG = flow_graph_copy(g);
+        int cutValue = karger_single_run(tempG);
+
+        if (cutValue < minGlobalCut) {
+            minGlobalCut = cutValue;
+            printf("Iteration %d: New minimum cut found = %d\n", iter + 1, cutValue);
+        }
+
+        flow_graph_free(tempG);
+    }
+
+    return minGlobalCut;
+}
+
+int karger(FlowGraph* g) {
+    /*
+        O(V^2*log(V)) iterations of
+        Karger's algorithm.
+
+        Overall: O(V^4*log(V))
+    */
+
+    srand(time(NULL));
+
+    int n = g->numVertices;
+    if (n < 2) return 0;
+
+    int iterations = n * n * (int)log(n) * 2;
+    printf("Running %d iterations\n", iterations);
+
+    int minGlobalCut = INT_MAX;
+
+    for (int iter = 0; iter < iterations; iter++) {
+        FlowGraph* tempG = flow_graph_copy(g);
+        int cutValue = karger_single_run(tempG);
+
+        if (cutValue < minGlobalCut) {
+            minGlobalCut = cutValue;
+            printf("Iteration %d: New minimum cut found = %d\n", iter + 1, cutValue);
+        } 
+
+        flow_graph_free(tempG);
+    }
+
+    return minGlobalCut;
+}
+
+#pragma endregion Minimum global cut
+
 int main(void) {
     switch (TASK)
     {
@@ -812,6 +1191,100 @@ int main(void) {
             printf("Edmonds-Karp result: %d\n", edmondsFlow);
 
             printf("Do results match? %d\n", widestFlow == edmondsFlow);
+
+            flow_graph_free(g);
+            break;
+        }
+
+        case 7: {
+            // Minimum global cut
+            int n = 5;
+            FlowGraph* g = flow_graph_create(n); 
+
+            int edges[][3] = {
+                {0, 1, 2}, 
+                {1, 0, 2},
+                {1, 2, 3},  
+                {2, 1, 3},
+                {2, 3, 1},  
+                {3, 2, 1},
+                {3, 4, 4},  
+                {4, 3, 4},
+                {0, 4, 1}, 
+                {4, 0, 1}
+            };
+
+            int numEdges = sizeof(edges) / sizeof(edges[0]);
+            
+            for (int i = 0; i < numEdges; i += 2) {
+                flow_graph_add_edge(g, edges[i][0], edges[i][1], edges[i][2]);
+                flow_graph_add_edge(g, edges[i + 1][0], edges[i + 1][1], edges[i + 1][2]);
+                printf("  {%d,%d} capacity %d\n", edges[i][0], edges[i][1], edges[i][2]);
+            }
+            printf("\n");
+
+            printf("ALGORITHMS COMPARISON\n");
+
+            struct {
+                int (*func)(FlowGraph*);
+                const char* name;
+                const char* complexity;
+            } algos[] = {
+                {
+                    find_min_global_cut_all_pairs, 
+                    "All pairs algorithm", 
+                    "O(V^3*E^2)"
+                },
+                {
+                    find_min_global_cut_fixed_src, 
+                    "Fixed source algorithm", 
+                    "O(V^2*E^2)"
+                },
+                {
+                    find_min_global_cut_gomory_hu,
+                    "Gomory-Hu tree algorithm", 
+                    "O(V^2*E^2)"
+                },
+                {
+                    karger_unique,
+                    "Karger's algorithm for unique minimum global cuts", 
+                    "O(V^2)"
+                },
+                {
+                    karger,
+                    "Karger's algorithm", 
+                    "O(V^4*log(V))"
+                }
+            };
+
+            int algoCnt = sizeof(algos) / sizeof(algos[0]);
+            int results[algoCnt];
+            
+            for (int i = 0; i < algoCnt; i++) {
+                printf("%d. %s (%s):\n", 
+                    i + 1, algos[i].name, algos[i].complexity);
+                FlowGraph* tempG = flow_graph_copy(g);
+                results[i] = algos[i].func(tempG);
+                flow_graph_free(tempG);
+                printf("\n");
+            }
+
+            printf("VERIFICATION\n");
+            for (int i = 0; i < algoCnt; i++) 
+                printf("  %s: %d\n", algos[i].name, results[i]);
+
+            int allMatch = 1;
+            int refRes = results[0];
+
+            for (int i = 1; i < algoCnt; i++) {
+                if (results[i] == refRes) continue;
+                allMatch = 0;
+                printf("Result mismatch between %s (%d) and %s (%d)\n",
+                    algos[0].name, results[0], algos[i].name, results[i]);
+            }
+
+            if (allMatch) 
+                printf("All algorithms produce the same result: %d\n", refRes);
 
             flow_graph_free(g);
             break;
