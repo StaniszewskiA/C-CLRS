@@ -110,3 +110,14 @@ int random_int(int min, int max) {
     int range = max - min + 1;
     return min + (rand() % range);
 }
+
+void print_arr(int arr[], int N) {
+    for (int i = 0; i < N; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
+void copy_arr(const int source[], int dest[], int size) {
+    for (int i = 0; i < size; i++) dest[i] = source[i];
+}

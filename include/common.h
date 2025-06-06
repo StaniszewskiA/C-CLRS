@@ -2,6 +2,7 @@
 #define COMMON_H
 
 // Libs
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,6 +54,9 @@ void print_separator(const char* title);
 void print_error(const char* msg);
 double get_time_ms(void);
 int random_int(int min, int max);
+void print_arr(int arr[], int size);
+void print_arr_slice(int arr[], int left, int right);
+void copy_arr(const int source[], int dest[], int size);
 
 // Debug
 #ifdef DEBUG

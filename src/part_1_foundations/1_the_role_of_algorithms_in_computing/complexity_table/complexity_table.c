@@ -1,4 +1,4 @@
-#include "../../../../include/part_1_foundations/1_the_role_of_algorithms_in_computing/complexity_table.h"
+#include "part_1_foundations/1_the_role_of_algorithms_in_computing/complexity_table.h"
 
 double log_base(double x, double base) {
     return log(x) / log(base);
