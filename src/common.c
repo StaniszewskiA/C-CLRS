@@ -118,6 +118,129 @@ void print_arr(int arr[], int N) {
     printf("\n");
 }
 
-void copy_arr(const int source[], int dest[], int size) {
-    for (int i = 0; i < size; i++) dest[i] = source[i];
+void print_arr_slice(int arr[], int left, int right)
+{
+    printf("Array slice: ");
+    for (int i = left; i <= right; i++)
+        printf("%d ", arr[i]);
+    printf("\n");
+}
+
+void print_matrix(int matrix[MAX_MATRIX_SIZE][MAX_MATRIX_SIZE], int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void print_arr_double(double arr[], int size) {
+    for (int i = 0; i < size; i++) {
+        printf("%.2f ", arr[i]);
+    }
+    printf("\n");
+}
+
+void print_arr_float(float A[]) {
+    for (int i = 0; i < NARRAY; ++i) {
+        printf("%.2f ", A[i]);
+    }
+    printf("\n");
+}
+
+double** allocate_matrix(int size) {
+    double** matrix = (double**)malloc(size * sizeof(double*));
+    for (int i = 0; i < size; i++) {
+        matrix[i] = (double*)malloc(size * sizeof(double));
+    }
+    return matrix;
+}
+
+void input_matrix(double** matrix, int size, const char* name) {
+    printf("Enter elements of matrix %s:\n", name);
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            scanf("%lf", &matrix[i][j]);
+        }
+    }
+}
+
+void free_matrix(double** matrix, int size) {
+    for (int i = 0; i < size; i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
+}
+
+void add_matrices(
+    double** A, 
+    double** B, 
+    double** C, 
+    int size, 
+    int multiplier
+) {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            C[i][j] = A[i][j] + multiplier* B[i][j];
+        }
+    }
+}
+
+void interval_swap(Interval *a,Interval *b ) {
+    Interval temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void print_intervals(Interval A[], int size) {
+    for (int i = 0; i < size; i++) {
+        printf("(%d, %d) ", A[i].low, A[i].high);
+    }
+    printf("\n");
+}
+
+void convert_to_base_n(
+    int A[],
+    int n,
+    int base,
+    int converted[][MAX_BASE_DIGITS]
+) {
+    for (int i = 0; i < n; i++) {
+        int num = A[i];
+        for (int j = MAX_BASE_DIGITS - 1; j >= 0; j--) {
+            converted[i][j] = num % base;
+            num /= base;
+        }
+    }
+}
+
+void convert_back_from_base_n(
+    int converted[][MAX_BASE_DIGITS], 
+    int n, 
+    int base, 
+    int A[]
+) {
+    for (int i = 0; i < n; i++) {
+        int num = 0;
+        for (int j = 0; j < MAX_BASE_DIGITS; j++) {
+            num = num * base + converted[i][j];
+        }
+        A[i] = num;
+    }
+}
+
+int find_max(int A[], int n) {
+    int max = A[0];
+    for (int i = 1; i < n; i++) {
+        if (A[i] > max) {
+            max = A[i];
+        }
+    }
+    return max;
+}
+
+int count_digits(int num) {
+    if (num == 0) return 1;
+    return (int)log10(abs(num)) + 1;
 }

@@ -1,6 +1,6 @@
 #include "part_1_foundations/2_getting_started/getting_started.h"
 
-int main() {
+int main(void) {
     printf("1. Polynomial Complexity Analysis:\n");
     const char *polynomial = "3x^7 + 2x^3 - 7x + 10";
     printf("   Polynomial: %s\n", polynomial);

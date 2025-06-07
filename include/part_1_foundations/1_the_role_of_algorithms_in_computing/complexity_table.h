@@ -2,6 +2,7 @@
 #define COMPLEXITY_TABLE_H
 
 #include "../../common.h"
+#include "../part_1_commons.h"
 
 // Time in microseconds
 #define ONE_SECOND 1000000LL

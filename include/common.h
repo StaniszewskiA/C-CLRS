@@ -50,13 +50,64 @@ void* safe_realloc(void* ptr, size_t size);
 void safe_free(void* ptr);
 
 // Other
+
+#define NARRAY 10
+
 void print_separator(const char* title);
 void print_error(const char* msg);
 double get_time_ms(void);
 int random_int(int min, int max);
 void print_arr(int arr[], int size);
 void print_arr_slice(int arr[], int left, int right);
-void copy_arr(const int source[], int dest[], int size);
+void print_arr_double(double arr[], int size);
+void print_arr_float(float A[]);
+
+// Matrix utils
+
+#define MAX_MATRIX_SIZE 100
+
+void print_matrix(int matrix[MAX_MATRIX_SIZE][MAX_MATRIX_SIZE], int n);
+double** allocate_matrix(int size);
+void input_matrix(double** matrix, int size, const char* name);
+void free_matrix(double** matrix, int size);
+void add_matrices(
+    double** A, 
+    double** B, 
+    double** C, 
+    int size, 
+    int multiplier
+);
+
+// Intervals
+typedef struct {
+    int low;
+    int high;
+} Interval;
+
+void interval_swap(Interval *a, Interval *b );
+void print_intervals(Interval A[], int size);
+
+// System conversions
+#define MAX_BASE_DIGITS 3
+
+void convert_to_base_n(
+    int A[],
+    int n,
+    int base,
+    int converted[][MAX_BASE_DIGITS]
+);
+void convert_back_from_base_n(
+    int converted[][MAX_BASE_DIGITS], 
+    int n, 
+    int base, 
+    int A[]
+);
+
+// Array utils
+int find_max(int A[], int n);
+
+// Counting
+int count_digits(int num);
 
 // Debug
 #ifdef DEBUG
