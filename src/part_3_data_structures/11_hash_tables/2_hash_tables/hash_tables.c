@@ -1,47 +1,28 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
-#define TASK 3
-
-//----------Hash Table with Singly Linked List----------
-#define TABLE_SIZE 100
-
-typedef struct Node {
-    // Deletions can be sped up by using Doubly Linked Lists
-    char* key;
-    int value;
-    struct Node* next;
-} Node;
-
-typedef struct HashTable {
-    Node* buckets[TABLE_SIZE];
-} HashTable;
+#include "part_3_data_structures/11_hash_tables/hash_tables.h"
 
 unsigned int hash(const char* key) {
     unsigned long int hash_val = 0;
     while (*key)
         hash_val = (hash_val << 5) + *(key++);
-    return hash_val % TABLE_SIZE;
+    return hash_val % HASH_TABLE_SIZE;
 }
 
-HashTable* init_ht() {
+HashTable* ht_init() {
     HashTable* ht = (HashTable*)malloc(sizeof(HashTable));
     if (!ht) {
         printf("Malloc failed\n");
         return NULL;
     }
 
-    for (int i = 0; i < TABLE_SIZE; i++)
+    for (int i = 0; i < HASH_TABLE_SIZE; i++)
         ht->buckets[i] = NULL;
 
     return ht;
 }
 
-void insert_ht(HashTable* ht, const char* key, int val) {
+void ht_insert(HashTable* ht, const char* key, int val) {
     unsigned int idx = hash(key);
-    Node* newNode = (Node*)malloc(sizeof(Node));
+    CharNode* newNode = (CharNode*)malloc(sizeof(CharNode));
     if (!newNode) {
         printf("Malloc failed\n");
         return;
@@ -59,12 +40,12 @@ void insert_ht(HashTable* ht, const char* key, int val) {
     ht->buckets[idx] = newNode;
 }
 
-int search_ht(HashTable* ht, const char* key, int *out_val) {
+int ht_search(HashTable* ht, const char* key, int* outVal) {
     unsigned int idx = hash(key);
-    Node* node = ht->buckets[idx];
+    CharNode* node = ht->buckets[idx];
     while (node) {
         if (strcmp(node->key, key) == 0) {
-            *out_val = node->value;
+            *outVal = node->value;
             return 1;
         }
         node = node->next;
@@ -73,10 +54,10 @@ int search_ht(HashTable* ht, const char* key, int *out_val) {
     return 0;
 }
 
-void delete_ht(HashTable* ht, const char* key) {
+void ht_delete(HashTable* ht, const char* key) {
     unsigned int idx = hash(key);
-    Node* node = ht->buckets[idx];
-    Node* prev = NULL;
+    CharNode* node = ht->buckets[idx];
+    CharNode* prev = NULL;
     while (node) {
         if (strcmp(node->key, key) == 0) {
             if (prev) prev->next = node->next;
@@ -90,11 +71,11 @@ void delete_ht(HashTable* ht, const char* key) {
     node = node->next;
 }
 
-void free_ht(HashTable* ht) {
-    for (int i = 0; i < TABLE_SIZE; i++) {
-        Node *node = ht->buckets[i];
+void ht_free(HashTable* ht) {
+    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
+        CharNode *node = ht->buckets[i];
         while (node) {
-            Node* temp = node;
+            CharNode* temp = node;
             node = node->next;
             free(temp->key);
             free(temp);
@@ -103,19 +84,7 @@ void free_ht(HashTable* ht) {
     free(ht);
 }
 
-//----------Hash Table with Free Slots----------
-typedef struct FreeSlot {
-    int idx;
-    struct FreeSlot *prev, *next;
-} FreeSlot;
-
-typedef struct FreeSlotsHashTable {
-    Node* buckets[TABLE_SIZE];
-    int flags[TABLE_SIZE]; // 1 - occupied, 0 - free
-    FreeSlot* free_list_head;
-} FreeSlotsHashTable;
-
-FreeSlotsHashTable* init_fsht() {
+FreeSlotsHashTable* fsht_init() {
     FreeSlotsHashTable* fsht = (FreeSlotsHashTable*)malloc(
         sizeof(FreeSlotsHashTable)
     );
@@ -124,13 +93,13 @@ FreeSlotsHashTable* init_fsht() {
         return NULL;
     }
 
-    for (int i = 0; i < TABLE_SIZE; i++) {
+    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
         fsht->buckets[i] = NULL;
         fsht->flags[i] = 0;
     }
 
     FreeSlot *prev = NULL;
-    for (int i = 0; i < TABLE_SIZE; i++) {
+    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
         FreeSlot *slot = (FreeSlot *)malloc(sizeof(FreeSlot));
         slot->idx = i;
         slot->prev = prev;
@@ -143,7 +112,7 @@ FreeSlotsHashTable* init_fsht() {
     return fsht;
 }
 
-void insert_fsht(FreeSlotsHashTable* fsht, const char* key, int val) {
+void fsht_insert(FreeSlotsHashTable* fsht, const char* key, int val) {
     unsigned int idx = hash(key);
 
     if (fsht->flags[idx] == 0) {
@@ -157,16 +126,16 @@ void insert_fsht(FreeSlotsHashTable* fsht, const char* key, int val) {
         fsht->flags[idx] = 1;
     }
 
-    Node* newNode = (Node*)malloc(sizeof(Node));
+    CharNode* newNode = (CharNode*)malloc(sizeof(CharNode));
     newNode->key = strdup(key);
     newNode->value = val;
     newNode->next = fsht->buckets[idx];
     fsht->buckets[idx] = newNode;
 }
 
-void delete_fsht(FreeSlotsHashTable* fsht, const char* key) {
+void fsht_delete(FreeSlotsHashTable* fsht, const char* key) {
     unsigned int idx = hash(key);
-    Node* node = fsht->buckets[idx], *prev = NULL;
+    CharNode* node = fsht->buckets[idx], *prev = NULL;
 
     while (node) {
         if (strcmp(node->key, key) == 0) {
@@ -196,11 +165,11 @@ void delete_fsht(FreeSlotsHashTable* fsht, const char* key) {
     }
 }
 
-void free_fsht(FreeSlotsHashTable* fsht) {
-    for (int i = 0; i < TABLE_SIZE; i++) {
-        Node* node = fsht->buckets[i];
+void fsht_free(FreeSlotsHashTable* fsht) {
+    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
+        CharNode* node = fsht->buckets[i];
         while (node) {
-            Node *temp = node;
+            CharNode *temp = node;
             node = node->next;
             free(temp->key);
             free(temp);
@@ -217,93 +186,30 @@ void free_fsht(FreeSlotsHashTable* fsht) {
     free(fsht);
 }
 
-//----------Fetching random key from Hash Table----------
-char* get_random_key(HashTable* ht) {
-    int non_empty_buckets[TABLE_SIZE];
+char* ht_get_random_key(HashTable* ht) {
+    int non_empty_buckets[HASH_TABLE_SIZE];
     int count = 0;
     
-    for (int i = 0; i < TABLE_SIZE; i++) {
-        if (ht->buckets[i]) non_empty_buckets[count++] = i;
+    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
+        if (ht->buckets[i]) {
+            non_empty_buckets[count++] = i;
+        }
     }
 
     if (count == 0) return NULL;    
 
-    int rand_idx = non_empty_buckets[rand() % count];
-    Node* node = ht->buckets[rand_idx];
+    int rand_bucket_idx = non_empty_buckets[rand() % count];
+    CharNode* node = ht->buckets[rand_bucket_idx];
+    
     int length = 0;
-
-    for (Node* temp = node; temp; temp = temp->next) {
+    for (CharNode* temp = node; temp; temp = temp->next) {
         length++;
     }
 
     int chosen = rand() % length;
-
     for (int i = 0; i < chosen; i++) {
         node = node->next;
     }
 
     return node->key;
-}
-
-int main(void) {
-    switch (TASK)
-    {
-        case 1: {
-            HashTable* ht = init_ht();
-            insert_ht(ht, "key1", 42);
-            insert_ht(ht, "key2", 99);
-
-            int val = 42;
-            if (search_ht(ht, "key1", &val)) {
-                printf("Found key1: %d\n", val);
-            } else {
-                printf("Key1 not found\n");
-            }
-
-            delete_ht(ht, "key1");
-            if (search_ht(ht, "key1", &val)) {
-                printf("Found key1: %d\n", val);
-            } else {
-                printf("Key1 not found\n");
-            }
-
-            free_ht(ht);
-
-            break;
-        }    
-        case 2: {
-            FreeSlotsHashTable* fsht = init_fsht();
-
-            insert_fsht(fsht, "key1", 42);
-            insert_fsht(fsht, "key1", 99);
-
-            delete_fsht(fsht, "key1");
-
-            free_fsht(fsht);
-
-            break;
-        }
-        case 3: {
-            srand(time(NULL));
-            HashTable* ht = init_ht();
-
-            insert_ht(ht, "key1", 10);
-            insert_ht(ht, "key2", 20);
-            insert_ht(ht, "key3", 30);
-
-            char* random_key = get_random_key(ht);
-
-            if (random_key) {
-                printf("Random key: %s\n", random_key);
-            } else {
-                printf("HashTable is empty\n");
-            }
-            free_ht(ht);
-
-            break;
-        }
-        default:
-            break;
-    }
-    return 0;
-}
+} 

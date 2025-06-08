@@ -1,73 +1,54 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "part_3_data_structures/13_red-black_trees/red-black_trees.h"
 
 #define TASK 3
 
-//-----Persistent Trees-----
-typedef struct Node {
-    int key;
-    struct Node *left, *right;
-} Node;
-
-typedef struct PersistentTree {
-    Node *root;
-} PersistentTree;
-
-Node* new_node(int key) {
-    Node* node = (Node*)malloc(sizeof(Node));
+Node2* node2_create(int key) {
+    Node2* node = (Node2*)malloc(sizeof(Node2));
     node->key = key;
     node->left = NULL;
     node->right = NULL;
     return node;
 }
 
-Node* copy_node(Node* target) {
+Node2* node2_copy(Node2* target) {
     if (target == NULL) return NULL;
-    Node* copy = (Node*)malloc(sizeof(Node));
+    Node2* copy = (Node2*)malloc(sizeof(Node2));
     *copy = *target;
     return copy;
 }
 
 void persistent_tree_insert(PersistentTree *tree, int k) {
     if (tree->root == NULL) {
-        tree->root = new_node(k);
+        tree->root = node2_create(k);
         return;
     }
 
-    Node *x = tree->root, *y = NULL;
+    Node2 *x = tree->root, *y = NULL;
     while (x != NULL) {
         y = x;
         if (k < x->key) {
             x = x->left;
-            y->left = copy_node(x);
+            y->left = node2_copy(x);
         } else {
             x = x->right;
-            y->right = copy_node(x);
+            y->right = node2_copy(x);
         }
     }
 
-    Node *z = new_node(k);
+    Node2 *z = node2_create(k);
     if (k < y->key) y->left = z;
     else y->right = z; 
 }
 
-//-----AVL Trees-----
-typedef struct AVLNode {
-    int key;
-    struct AVLNode *left; 
-    struct AVLNode *right;
-    int height; 
-} AVLNode;
-
-int get_height(AVLNode *node) {
+int avl_node_get_height(AVLNode *node) {
     return (node == NULL) ? 0 : node->height; 
 }
 
-int get_balance_factor(AVLNode *node) {
-    return (node == NULL) ? 0 : get_height(node->left) - get_height(node->right);
+int avl_node_get_balance_factor(AVLNode *node) {
+    return (node == NULL) ? 0 : avl_node_get_height(node->left) - avl_node_get_height(node->right);
 }
 
-AVLNode *create_node(int key) {
+AVLNode* avl_node_create_node(int key) {
     AVLNode *node = (AVLNode*)malloc(sizeof(AVLNode));
     node->key = key;
     node->left = NULL;
@@ -75,7 +56,7 @@ AVLNode *create_node(int key) {
     return node;
 }
 
-AVLNode *right_rotate(AVLNode *y) {
+AVLNode* avl_tree_right_rotate(AVLNode *y) {
     AVLNode *x = y->left;
     AVLNode *T2 = x->right;
 
@@ -83,21 +64,21 @@ AVLNode *right_rotate(AVLNode *y) {
     y->left = T2;
 
     y->height = 1 + (
-        (get_height(y->left) > get_height(y->right)) 
-        ? get_height(y->left) 
-        : get_height(y->right)
+        (avl_node_get_height(y->left) > avl_node_get_height(y->right)) 
+        ? avl_node_get_height(y->left) 
+        : avl_node_get_height(y->right)
     );
 
     x->height = 1 + (
-        (get_height(x->left) > get_height(x->right)) 
-        ? get_height(x->left) 
-        : get_height(x->right)
+        (avl_node_get_height(x->left) > avl_node_get_height(x->right)) 
+        ? avl_node_get_height(x->left) 
+        : avl_node_get_height(x->right)
     );
 
     return x;
 }
 
-AVLNode *left_rotate(AVLNode *x) {
+AVLNode* avl_tree_left_rotate(AVLNode *x) {
     AVLNode *y = x->right;
     AVLNode *T2 = y->left;
 
@@ -105,80 +86,80 @@ AVLNode *left_rotate(AVLNode *x) {
     x->right = T2;
 
     x->height = 1 + (
-        (get_height(x->left) > get_height(x->right)) 
-        ? get_height(x->left) 
-        : get_height(x->right)
+        (avl_node_get_height(x->left) > avl_node_get_height(x->right)) 
+        ? avl_node_get_height(x->left) 
+        : avl_node_get_height(x->right)
     );
 
     y->height = 1 + (
-        (get_height(y->left) > get_height(y->right)) 
-        ? get_height(y->left) 
-        : get_height(y->right)
+        (avl_node_get_height(y->left) > avl_node_get_height(y->right)) 
+        ? avl_node_get_height(y->left) 
+        : avl_node_get_height(y->right)
     );
 
     return y;
 }
 
-AVLNode *avl_insert(AVLNode *node, int key) {
-    if (node == NULL) return create_node(key);
+AVLNode* avl_tree_insert(AVLNode *node, int key) {
+    if (node == NULL) return avl_node_create_node(key);
 
-    if (key < node->key) node->left = avl_insert(node->left, key);
-    else if (key > node->key) node->right = avl_insert(node->right, key);
+    if (key < node->key) node->left = avl_tree_insert(node->left, key);
+    else if (key > node->key) node->right = avl_tree_insert(node->right, key);
     else return node;
 
     node->height = 1 + (
-        (get_height(node->left) > get_height(node->right)) 
-        ? get_height(node->left) 
-        : get_height(node->right)
+        (avl_node_get_height(node->left) > avl_node_get_height(node->right)) 
+        ? avl_node_get_height(node->left) 
+        : avl_node_get_height(node->right)
     );
 
-    int balance = get_balance_factor(node);
+    int avl_tree_balance = avl_node_get_balance_factor(node);
 
-    if (balance > 1 && key < node->left->key) return right_rotate(node);
-    if (balance < -1 && key > node->right->key) return left_rotate(node);
-    if (balance > 1 && key > node->left->key) {
-        node->left = left_rotate(node->left);
-        return right_rotate(node);
+    if (avl_tree_balance > 1 && key < node->left->key) return avl_tree_right_rotate(node);
+    if (avl_tree_balance < -1 && key > node->right->key) return avl_tree_left_rotate(node);
+    if (avl_tree_balance > 1 && key > node->left->key) {
+        node->left = avl_tree_left_rotate(node->left);
+        return avl_tree_right_rotate(node);
     }
-    if (balance < -1 && key < node->right->key) {
-        node->right = right_rotate(node->right);
-        return left_rotate(node);
+    if (avl_tree_balance < -1 && key < node->right->key) {
+        node->right = avl_tree_right_rotate(node->right);
+        return avl_tree_left_rotate(node);
     }
 
     return node;
 }
 
-AVLNode *search(AVLNode *root, int key) {
+AVLNode* avl_tree_search(AVLNode *root, int key) {
     if (root == NULL || root->key == key) return root;
     
-    if (key < root->key) return search(root->left, key);
-    else return search(root->right, key);
+    if (key < root->key) return avl_tree_search(root->left, key);
+    else return avl_tree_search(root->right, key);
 }
 
-void inorder(AVLNode *root) {
+void avl_tree_inorder_traversal(AVLNode *root) {
     if (root != NULL) {
-        inorder(root->left);
+        avl_tree_inorder_traversal(root->left);
         printf("%d ", root->key);
-        inorder(root->right);
+        avl_tree_inorder_traversal(root->right);
     }
 }
 
-void balance(AVLNode **root) {
+void avl_tree_balance(AVLNode **root) {
     AVLNode *node = *root;
     while (node != NULL) {
-        int balance = get_balance_factor(node);
+        int avl_tree_balance = avl_node_get_balance_factor(node);
 
-        if (balance > 1) {
-            if (get_balance_factor(node->left) >= 0) node = right_rotate(node);
+        if (avl_tree_balance > 1) {
+            if (avl_node_get_balance_factor(node->left) >= 0) node = avl_tree_right_rotate(node);
             else {
-                node->left = left_rotate(node->left);
-                node = right_rotate(node);
+                node->left = avl_tree_left_rotate(node->left);
+                node = avl_tree_right_rotate(node);
             }
-        } else if (balance < -1) {
-            if (get_balance_factor(node->right) <= 0) node = left_rotate(node);
+        } else if (avl_tree_balance < -1) {
+            if (avl_node_get_balance_factor(node->right) <= 0) node = avl_tree_left_rotate(node);
             else {
-                node->right = right_rotate(node->right);
-                node = left_rotate(node);
+                node->right = avl_tree_right_rotate(node->right);
+                node = avl_tree_left_rotate(node);
             }
         }
 
@@ -206,19 +187,19 @@ int main(void) {
     case 3: {
         AVLNode *root = NULL;
 
-        root = avl_insert(root, 10);
-        root = avl_insert(root, 20);
-        root = avl_insert(root, 30);
-        root = avl_insert(root, 40);
-        root = avl_insert(root, 50);
-        root = avl_insert(root, 25);
+        root = avl_tree_insert(root, 10);
+        root = avl_tree_insert(root, 20);
+        root = avl_tree_insert(root, 30);
+        root = avl_tree_insert(root, 40);
+        root = avl_tree_insert(root, 50);
+        root = avl_tree_insert(root, 25);
 
         printf("Inorder traversal of the AVL tree: ");
-        inorder(root);
+        avl_tree_inorder_traversal(root);
         printf("\n");
 
         int key = 25;
-        if (search(root, key))
+        if (avl_tree_search(root, key))
             printf("%d found in AVL tree\n", key);
         else
             printf("%d not found in AVL tree\n", key);

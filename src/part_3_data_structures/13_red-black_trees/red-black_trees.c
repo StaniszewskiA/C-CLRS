@@ -1,34 +1,20 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "part_3_data_structures/13_red-black_trees/red-black_trees.h"
 
-typedef enum { RED, BLACK } NodeColor;
-
-typedef struct Node {
-    int data;
-    NodeColor color;
-    struct Node *left, *right, *parent;
-} Node;
-
-typedef struct RedBlackTree {
-    Node *root;
-    Node *NIL; // sentinel
-} RedBlackTree;
-
-Node* create_node(RedBlackTree *tree, int data) {
-    Node* node = (Node*)malloc(sizeof(Node));
+RedBlackNode* rb_node_create(RedBlackTree *tree, int data) {
+    RedBlackNode* node = (RedBlackNode*)malloc(sizeof(RedBlackNode));
     node->data = data;
     node->color = RED;
-    node->left = tree->NIL;
-    node->right = tree->NIL;
+    node->left = tree->nil;
+    node->right = tree->nil;
     node->parent = NULL;
     return node;
 }
 
-void left_rotate(RedBlackTree *tree, Node *x) {
-    Node *y = x->right;
+void rb_tree_left_rotate(RedBlackTree *tree, RedBlackNode *x) {
+    RedBlackNode *y = x->right;
     x->right = y->left;
 
-    if (y->left != tree->NIL) y->left->parent = x;
+    if (y->left != tree->nil) y->left->parent = x;
 
     y->parent = x->parent;
 
@@ -36,15 +22,15 @@ void left_rotate(RedBlackTree *tree, Node *x) {
     else if (x == x->parent->left) x->parent->left = y;
     else x->parent->right = y;
 
-    x->left = x;
+    y->left = x;
     x->parent = y;
 }
 
-void right_rotate(RedBlackTree *tree, Node *y) {
-    Node *x = y->right;
+void rb_tree_right_rotate(RedBlackTree *tree, RedBlackNode *y) {
+    RedBlackNode *x = y->left;
     y->left = x->right;
 
-    if (x->right != tree->NIL) y->right->parent = y;
+    if (x->right != tree->nil) x->right->parent = y;
 
     x->parent = y->parent;
 
@@ -56,10 +42,10 @@ void right_rotate(RedBlackTree *tree, Node *y) {
     y->parent = x;
 }
 
-void rb_insert_fixup(RedBlackTree *tree, Node *z) {
-    while (z->parent != NULL & z->parent->color == RED) {
+void rb_tree_insert_fixup(RedBlackTree *tree, RedBlackNode *z) {
+    while (z->parent != NULL && z->parent->color == RED) {
         if (z->parent == z->parent->parent->left) {
-            Node *y = z->parent->parent->right;
+            RedBlackNode *y = z->parent->parent->right;
             if (y->color == RED) {
                 z->parent->color = BLACK;
                 y->color = BLACK;
@@ -68,14 +54,14 @@ void rb_insert_fixup(RedBlackTree *tree, Node *z) {
             } else {
                 if (z == z->parent->right) {
                     z = z->parent;
-                    left_rotate(tree, z);
+                    rb_tree_left_rotate(tree, z);
                 }
                 z->parent->color = BLACK;
                 z->parent->parent->color = RED;
-                right_rotate(tree, z->parent->parent);
+                rb_tree_right_rotate(tree, z->parent->parent);
             }
         } else {
-            Node *y = z->parent->parent->left;
+            RedBlackNode *y = z->parent->parent->left;
             if (y->color == RED) {
                 z->parent->color = BLACK;
                 y->color = BLACK;
@@ -84,23 +70,23 @@ void rb_insert_fixup(RedBlackTree *tree, Node *z) {
             } else {
                 if (z == z->parent->left) {
                     z = z->parent;
-                    right_rotate(tree, z);
+                    rb_tree_right_rotate(tree, z);
                 }
                 z->parent->color = BLACK;
                 z->parent->parent->color = RED;
-                left_rotate(tree, z->parent->parent);
+                rb_tree_left_rotate(tree, z->parent->parent);
             }
         }
     }
     tree->root->color = BLACK;
 }
 
-void insert(RedBlackTree *tree, int data) {
-    Node *z = create_node(tree, data);
-    Node *x = tree->root;
-    Node *y = NULL;
+void rb_tree_insert(RedBlackTree *tree, int data) {
+    RedBlackNode *z = rb_node_create(tree, data);
+    RedBlackNode *x = tree->root;
+    RedBlackNode *y = NULL;
 
-    while (x != tree->NIL) {
+    while (x != tree->nil) {
         y = x;
         if (z->data < x->data) {
             x = x->left;
@@ -118,14 +104,14 @@ void insert(RedBlackTree *tree, int data) {
         y->right = z;
     }
 
-    z->left = tree->NIL;
-    z->right = tree->NIL;
+    z->left = tree->nil;
+    z->right = tree->nil;
     z->color = RED;
 
-    rb_insert_fixup(tree, z);
+    rb_tree_insert_fixup(tree, z);
 }
 
-void rb_transplant(RedBlackTree *tree, Node *u, Node *v) {
+void rb_tree_transplant(RedBlackTree *tree, RedBlackNode *u, RedBlackNode *v) {
     if (u->parent == NULL) tree->root = v;
     else if (u == u->parent->left) u->parent->left = v;
     else u->parent->right = v;
@@ -133,14 +119,14 @@ void rb_transplant(RedBlackTree *tree, Node *u, Node *v) {
     v->parent = u->parent;
 }
 
-void rb_delete_fixup(RedBlackTree *tree, Node *x) {
-    while (x != tree->root && x->color == BLACK){
+void rb_tree_delete_fixup(RedBlackTree *tree, RedBlackNode *x) {
+    while (x != tree->root && x->color == BLACK) {
         if (x == x->parent->left) {
-            Node *w = x->parent->right;
+            RedBlackNode *w = x->parent->right;
             if (w->color == RED) {
                 w->color = BLACK;
                 x->parent->color = RED;
-                left_rotate(tree, x->parent);
+                rb_tree_left_rotate(tree, x->parent);
                 w = x->parent->right;
             }
             if (w->left->color == BLACK && w->right->color == BLACK) {
@@ -150,33 +136,37 @@ void rb_delete_fixup(RedBlackTree *tree, Node *x) {
                 if (w->right->color == BLACK) {
                     w->left->color = BLACK;
                     w->color = RED;
-                    right_rotate(tree, w);
+                    rb_tree_right_rotate(tree, w);
                     w = x->parent->right;
                 }
                 w->color = x->parent->color;
                 x->parent->color = BLACK;
                 w->right->color = BLACK;
-                left_rotate(tree, x->parent);
+                rb_tree_left_rotate(tree, x->parent);
                 x = tree->root;
             }
         } else {
-            Node *w = x->parent->left;
+            RedBlackNode *w = x->parent->left;
             if (w->color == RED) {
                 w->color = BLACK;
                 x->parent->color = RED;
-                right_rotate(tree, x->parent);
+                rb_tree_right_rotate(tree, x->parent);
                 w = x->parent->left;
+            }
+            if (w->right->color == BLACK && w->left->color == BLACK) {  
+                w->color = RED;
+                x = x->parent;
             } else {
                 if (w->left->color == BLACK) {
                     w->right->color = BLACK;
                     w->color = RED;
-                    left_rotate(tree, w);
+                    rb_tree_left_rotate(tree, w);
                     w = x->parent->left;
                 }
                 w->color = x->parent->color;
                 x->parent->color = BLACK;
                 w->left->color = BLACK;
-                right_rotate(tree, x->parent);
+                rb_tree_right_rotate(tree, x->parent);
                 x = tree->root;
             }
         }
@@ -184,34 +174,33 @@ void rb_delete_fixup(RedBlackTree *tree, Node *x) {
     x->color = BLACK;
 }
 
-Node* rb_minimum(RedBlackTree *tree, Node *node) {
-    while (node->left != tree->NIL) node = node->left;
+RedBlackNode* rb_tree_get_min(RedBlackTree *tree, RedBlackNode *node) {
+    while (node->left != tree->nil) node = node->left;
     return node;
 }
 
-void rb_delete(RedBlackTree *tree, Node *z) {
-    Node *y = z;
-    Node *x;
+void rb_tree_delete(RedBlackTree *tree, RedBlackNode *z) {
+    RedBlackNode *y = z;
+    RedBlackNode *x;
     NodeColor y_original_color = y->color;
 
-    if (z->left == tree->NIL) {
+    if (z->left == tree->nil) {
         x = z->right;
-        rb_transplant(tree, z, z->right);
-    } else if (z->right == tree->NIL) {
+        rb_tree_transplant(tree, z, z->right);
+    } else if (z->right == tree->nil) {
         x = z->left;
-        rb_transplant(tree, z, z->left);
+        rb_tree_transplant(tree, z, z->left);
     } else {
-        y = rb_minimum(tree, z->right);
+        y = rb_tree_get_min(tree, z->right);
         y_original_color = y->color;
         x = y->right;
         if (y->parent == z) x->parent = y;
         else {
-            rb_transplant(tree, y, y->right);
+            rb_tree_transplant(tree, y, y->right);
             y->right = z->right;
             y->right->parent = y;
         }
-        rb_transplant(tree, z, y);
-        y->left = z->left;
+        rb_tree_transplant(tree, z, y);
         y->left = z->left;
         y->left->parent = y;
         y->color = z->color;
@@ -219,53 +208,50 @@ void rb_delete(RedBlackTree *tree, Node *z) {
 
     free(z);
 
-    if (y_original_color == BLACK) rb_delete_fixup(tree, x);
+    if (y_original_color == BLACK) rb_tree_delete_fixup(tree, x);
 }
 
-void rb_enumerate(RedBlackTree *tree, Node *r, int a, int b) {
-    if (r == tree->NIL) return;
+void rb_tree_enumerate(RedBlackTree *tree, RedBlackNode *r, int a, int b) {
+    if (r == tree->nil) return;
     
-    if (a <= r->data) rb_enumerate(tree, r->left, a, b);
+    if (a <= r->data) rb_tree_enumerate(tree, r->left, a, b);
     if (a <= r->data && r->data <= b) printf("%d ", r->data);
-    if (r->data <= b) rb_enumerate(tree, r->right, a, b);
+    if (r->data <= b) rb_tree_enumerate(tree, r->right, a, b);
 }
 
-Node* rb_join(RedBlackTree *tree, Node *T1, Node *x, Node *T2) {
-    rb_transplant(tree, T1, x);
+RedBlackNode* rb_tree_join(
+    RedBlackTree *tree, 
+    RedBlackNode *T1, 
+    RedBlackNode *x, 
+    RedBlackNode *T2
+) {
+    rb_tree_transplant(tree, T1, x);
 
     x->left = T1;
     x->right = T2;
 
-    if (T1 != tree->NIL) T1->parent = x;
-    if (T2 != tree->NIL) T2->parent = x;
+    if (T1 != tree->nil) T1->parent = x;
+    if (T2 != tree->nil) T2->parent = x;
 
     return x;
 }
 
-int main(void) {
-    RedBlackTree *tree = malloc(sizeof(RedBlackTree));
-    tree->NIL = malloc(sizeof(Node));
-    tree->NIL->color = BLACK;
-    tree->root = tree->NIL;
+RedBlackNode* rb_tree_search(RedBlackTree *tree, int data) {
+    RedBlackNode *current = tree->root;
+    while (current != tree->nil && current->data != data) {
+        if (data < current->data) {
+            current = current->left;
+        } else {
+            current = current->right;
+        }
+    }
+    return current == tree->nil ? NULL : current;
+}
 
-    insert(tree, 10);
-    insert(tree, 20);
-    insert(tree, 30);
-    insert(tree, 15);
-    insert(tree, 25);
-    insert(tree, 5);
-    insert(tree, 35);
-
-    printf("Nodes in range [10, 25]: ");
-    rb_enumerate(tree, tree->root, 10, 25);
-    printf("\n");
-
-    Node *target = tree->root->right;
-    rb_delete(tree, target);
-
-    printf("Nodes in range [10, 25] after deletion: ");
-    rb_enumerate(tree, tree->root, 10, 25);
-    printf("\n");
-
-    return 0;
+void rb_tree_inorder_traversal(RedBlackTree *tree, RedBlackNode *node) {
+    if (node != tree->nil) {
+        rb_tree_inorder_traversal(tree, node->left);
+        printf("%d(%s) ", node->data, node->color == RED ? "R" : "B");
+        rb_tree_inorder_traversal(tree, node->right);
+    }
 }

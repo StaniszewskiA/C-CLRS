@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <math.h>
 #include <time.h>
 #include <limits.h>
@@ -17,6 +18,7 @@
 #define MIX_VALUE -10000
 #define INF INT_MAX
 #define NEG_INF INT_MIN
+#define NIL -1
 
 // Macros
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -26,8 +28,8 @@
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr)[0])
 
 // Color flags
-#define RED 0
-#define BLACK 1
+// #define RED 0
+// #define BLACK 1
 
 // Error codes
 typedef enum {

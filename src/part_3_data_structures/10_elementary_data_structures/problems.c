@@ -1,23 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
+#include "part_3_data_structures/10_elementary_data_structures/elementary_data_structures.h"
 
-#define TASK 3
+#define TASK 1
 
-//----------Binomial Heap----------
-typedef struct BinomialNode {
-    int key;
-    int degree;
-    struct BinomialNode* parent;
-    struct BinomialNode* child;
-    struct BinomialNode* sibling;
-} BinomialNode;
-
-typedef struct BinomialHeap {
-    BinomialNode* head;
-} BinomialHeap;
-
-BinomialNode* createNode(int key) {
+BinomialNode* binomial_node_create(int key) {
     BinomialNode* newNode = (BinomialNode*)malloc(sizeof(BinomialNode));
     newNode->key = key;
     newNode->degree = 0;
@@ -25,7 +10,7 @@ BinomialNode* createNode(int key) {
     return newNode;
 }
 
-BinomialNode* mergeTrees(BinomialNode* b1, BinomialNode* b2) {
+BinomialNode* binomial_node_merge_trees(BinomialNode* b1, BinomialNode* b2) {
     if (b1->key > b2->key) {
         BinomialNode* temp = b1;
         b1 = b2;
@@ -39,7 +24,7 @@ BinomialNode* mergeTrees(BinomialNode* b1, BinomialNode* b2) {
     return b1;
 }
 
-BinomialNode* mergeHeaps(BinomialNode* h1, BinomialNode* h2) {
+BinomialNode* binomial_node_merge_heaps(BinomialNode* h1, BinomialNode* h2) {
     if (!h1) return h2;
     if (!h2) return h1;
 
@@ -60,9 +45,9 @@ BinomialNode* mergeHeaps(BinomialNode* h1, BinomialNode* h2) {
     return newHead;
 }
 
-BinomialHeap* unionHeaps(BinomialHeap* h1, BinomialHeap* h2) {
+BinomialHeap* binomial_node_union_heaps(BinomialHeap* h1, BinomialHeap* h2) {
     BinomialHeap* newHeap = (BinomialHeap*)malloc(sizeof(BinomialHeap));
-    newHeap->head = mergeHeaps(h1->head, h2->head);
+    newHeap->head = binomial_node_merge_heaps(h1->head, h2->head);
     if (!newHeap->head) return newHeap;
 
     BinomialNode *prev = NULL, *curr = newHeap->head, *next = curr->sibling;
@@ -73,11 +58,11 @@ BinomialHeap* unionHeaps(BinomialHeap* h1, BinomialHeap* h2) {
         } else {
             if (curr->key <= next->key) {
                 curr->sibling = next->sibling;
-                mergeTrees(curr, next);
+                binomial_node_merge_trees(curr, next);
             } else {
                 if (!prev) newHeap->head = next;
                 else prev->sibling = next;
-                mergeTrees(next, curr);
+                binomial_node_merge_trees(next, curr);
                 curr = next;
             }
         }
@@ -86,19 +71,18 @@ BinomialHeap* unionHeaps(BinomialHeap* h1, BinomialHeap* h2) {
     return newHeap;
 }
 
-void insert(BinomialHeap* heap, int key) {
+void binomial_heap_insert(BinomialHeap* heap, int key) {
     BinomialHeap* tempHeap = (BinomialHeap*)malloc(sizeof(BinomialHeap));
-    tempHeap->head = createNode(key);
-    *heap = *unionHeaps(heap, tempHeap);
+    tempHeap->head = binomial_node_create(key);
+    *heap = *binomial_node_union_heaps(heap, tempHeap);
 }
 
-int extractMin(BinomialHeap* heap) {
+int binomial_heap_extract_min(BinomialHeap* heap) {
     if (!heap->head) return INT_MAX;
     
     BinomialNode* minNode = heap->head;
     BinomialNode* prevMin = NULL;
     BinomialNode* curr = heap->head;
-    BinomialNode* prev = NULL;
 
     while (curr->sibling) {
         if (curr->sibling->key < minNode->key) {
@@ -123,7 +107,7 @@ int extractMin(BinomialHeap* heap) {
     }
 
     BinomialHeap tempHeap = {prevChild};
-    *heap = *unionHeaps(heap, &tempHeap);
+    *heap = *binomial_node_union_heaps(heap, &tempHeap);
 
     int minKey = minNode->key;
     free(minNode);
@@ -131,7 +115,7 @@ int extractMin(BinomialHeap* heap) {
     return minKey;
 }
 
-void printHeap(BinomialNode* node) {
+void print_binomial_heap(BinomialNode* node) {
     while (node) {
         printf("B%d: %d \n", node->degree, node->key);
         node = node->sibling;
@@ -139,24 +123,10 @@ void printHeap(BinomialNode* node) {
     printf("\n");
 }
 
-//----------Compact List Search----------
-#include <time.h>
-
-#define NIL -1
-
-typedef struct Node {
-    int key;
-    int next;
-} Node;
-
-int random_idx(int n) {
-    return (rand() % n);
-}
-
-int compact_list_search(Node L[], int head, int n, int k) {
+int compact_list_search(SimpleNode L[], int head, int n, int k) {
     int i = head;
     while (i != NIL && L[i].key < k) {
-        int j = random_idx(n);
+        int j = random_int(0, n);
         if (L[i].key < L[j].key && L[j].key <= k) {
             i = j;
             if (L[i].key == k) {
@@ -168,11 +138,10 @@ int compact_list_search(Node L[], int head, int n, int k) {
     return (i == NIL || L[i].key > k) ? NIL : i;
 }
 
-//----------Compact List Search Prim----------
-int compact_list_search_prim(Node L[], int head, int n, int k, int t) {
+int compact_list_search_prim(SimpleNode L[], int head, int n, int k, int t) {
     int i = head;
     for (int q = 1; q <= t; q++) {
-        int j = random_idx(n);
+        int j = random_int(0, n);
         if (L[i].key < L[j].key && L[j].key <= k) {
             i = j;
             if (L[i].key == k) {
@@ -191,26 +160,26 @@ int main(void) {
     {
     case 1: {
         BinomialHeap heap = {NULL};
-        insert(&heap, 10);
-        insert(&heap, 20);
-        insert(&heap, 30);
-        insert(&heap, 40);
-        insert(&heap, 50);
-        insert(&heap, 60);
+        binomial_heap_insert(&heap, 10);
+        binomial_heap_insert(&heap, 20);
+        binomial_heap_insert(&heap, 30);
+        binomial_heap_insert(&heap, 40);
+        binomial_heap_insert(&heap, 50);
+        binomial_heap_insert(&heap, 60);
 
         printf("Heap before extract-min:\n");
-        printHeap(heap.head);
+        print_binomial_heap(heap.head);
 
-        printf("Extracted min: %d\n", extractMin(&heap));
+        printf("Extracted min: %d\n", binomial_heap_extract_min(&heap));
 
         printf("Heap after extract-min:\n");
-        printHeap(heap.head);
+        print_binomial_heap(heap.head);
         break;
     }
     case 2: {
         srand(time(NULL));
 
-        Node L[] = {
+        SimpleNode L[] = {
             {3, 1},
             {7, 2},
             {10, 3},
@@ -234,7 +203,7 @@ int main(void) {
     case 3: {
         srand(time(NULL));
 
-        Node L[] = {
+        SimpleNode L[] = {
             {3, 1},
             {7, 2},
             {10, 3},
