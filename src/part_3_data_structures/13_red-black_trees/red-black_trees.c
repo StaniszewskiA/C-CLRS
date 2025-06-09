@@ -2,12 +2,24 @@
 
 RedBlackNode* rb_node_create(RedBlackTree *tree, int data) {
     RedBlackNode* node = (RedBlackNode*)malloc(sizeof(RedBlackNode));
+    node->key = data;  
     node->data = data;
     node->color = RED;
+    node->size = 1;
     node->left = tree->nil;
     node->right = tree->nil;
     node->parent = NULL;
     return node;
+}
+
+RedBlackTree* rb_tree_create() {
+    RedBlackTree* T = (RedBlackTree*)malloc(sizeof(RedBlackTree));
+    T->nil = (RedBlackNode*)malloc(sizeof(RedBlackNode));
+    T->nil->color = BLACK;
+    T->nil->size = 0;
+    T->root = T->nil;
+    printf("Successfuly created the RedBlackTree\n");
+    return T;
 }
 
 void rb_tree_left_rotate(RedBlackTree *tree, RedBlackNode *x) {

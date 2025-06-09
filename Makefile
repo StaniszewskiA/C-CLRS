@@ -14,6 +14,7 @@ PART_1_COMMONS_SRC = $(SRCDIR)/part_1_foundations/part_1_commons.c
 PART_2_COMMONS_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/part_2_commons.c
 PART_3_COMMONS_SRC = $(SRCDIR)/part_3_data_structures/part_3_commons.c
 PART_4_COMMONS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/part_4_commons.c
+PART_5_COMMONS_SRC = $(SRCDIR)/part_5_advanced_data_structures/part_5_commons.c
 
 # ============================================================================
 # PART 1: FOUNDATIONS
@@ -182,6 +183,36 @@ AMORTIZED_ANALYSIS_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniqu
 
 CHAPTER_16_PROBLEMS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/16_amortized_analysis/problems.c
 
+# Chapter 17
+DYNAMIC_ORDER_STATISTICS_SRC = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/1_dynamic_order_statistics/dynamic_order_statistics.c
+DYNAMIC_ORDER_STATISTICS_MAIN = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/1_dynamic_order_statistics/main.c
+
+HOW_TO_ENRICH_DATA_STRUCTURE_SRC = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/2_how_to_enrich_a_data_structure/how_to_enrich_a_data_structure.c
+HOW_TO_ENRICH_DATA_STRUCTURE_MAIN = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/2_how_to_enrich_a_data_structure/main.c
+
+INTERVAL_TREES_SRC = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/3_interval_trees/interval_trees.c
+INTERVAL_TREES_MAIN = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/3_interval_trees/main.c
+
+CHAPTER_17_PROBLEMS_SRC = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/problems.c
+
+# Chapter 18
+B_TREES_SRC = $(SRCDIR)/part_5_advanced_data_structures/18_b-trees/b-trees.c
+B_TREES_MAIN = $(SRCDIR)/part_5_advanced_data_structures/18_b-trees/main.c
+
+CHAPTER_18_PROBLEMS_SRC = $(SRCDIR)/part_5_advanced_data_structures/18_b-trees/problems.c
+
+# Chapter 19
+DISJOINT_SET_OPERATIONS_SRC = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/1_disjoint_set_operations/disjoint_set_operations.c
+DISJOINT_SET_OPERATIONS_MAIN = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/1_disjoint_set_operations/main.c
+
+LINKED_LIST_REPRESENTATION_SRC = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/2_linked-list_representation_of_disjoint_sets/linked-list_representation_of_disjoint_sets.c
+LINKED_LIST_REPRESENTATION_MAIN = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/2_linked-list_representation_of_disjoint_sets/main.c
+
+DISJOINT_SET_FORESTS_SRC = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/3_disjoint_set_forests/disjoint_set_forests.c
+DISJOINT_SET_FORESTS_MAIN = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/3_disjoint_set_forests/main.c
+
+CHAPTER_19_PROBLEMS_SRC = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/problems.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -237,7 +268,18 @@ CHAPTER_16_PROBLEMS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniqu
 		offline-caching run-offline-caching \
 		chapter-15-problems run-chapter-15-problems \
 		amortized-analysis run-amortized-analysis \
-		chapter-16-problems run-chapter-16-problems
+		chapter-16-problems run-chapter-16-problems \
+		dynamic-order-statistics run-dynamic-order-statistics \
+		how-to-enrich-data-structure run-how-to-enrich-data-structure \
+		interval-trees run-interval-trees \
+		chapter-17-problems run-chapter-17-problems \
+		chapter-17-problems run-chapter-17-problems \
+        b-trees run-b-trees \
+		chapter-18-problems run-chapter-18-problems \
+		disjoint-set-operations run-disjoint-set-operations \
+		linked-list-representation run-linked-list-representation \
+		disjoint-set-forests run-disjoint-set-forests \
+		chapter-19-problems run-chapter-19-problems \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -589,6 +631,69 @@ chapter-16-problems: $(BINDIR)
 
 run-chapter-16-problems: chapter-16-problems
 	$(BINDIR)/chapter_16_problems
+
+# Chapter 17
+dynamic-order-statistics: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(RED_BLACK_TREES_SRC) $(DYNAMIC_ORDER_STATISTICS_SRC) $(DYNAMIC_ORDER_STATISTICS_MAIN) -o $(BINDIR)/dynamic_order_statistics
+
+run-dynamic-order-statistics: dynamic-order-statistics
+	$(BINDIR)/dynamic_order_statistics
+
+how-to-enrich-data-structure: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(RED_BLACK_TREES_SRC) $(HOW_TO_ENRICH_DATA_STRUCTURE_SRC) $(HOW_TO_ENRICH_DATA_STRUCTURE_MAIN) -o $(BINDIR)/how_to_enrich_data_structure
+
+run-how-to-enrich-data-structure: how-to-enrich-data-structure
+	$(BINDIR)/how_to_enrich_data_structure
+
+interval-trees: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(RED_BLACK_TREES_SRC) $(INTERVAL_TREES_SRC) $(INTERVAL_TREES_MAIN) -o $(BINDIR)/interval_trees
+
+run-interval-trees: interval-trees
+	$(BINDIR)/interval_trees
+
+chapter-17-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(PART_5_COMMONS_SRC) $(RED_BLACK_TREES_SRC) $(CHAPTER_17_PROBLEMS_SRC) -o $(BINDIR)/chapter_17_problems
+
+run-chapter-17-problems: chapter-17-problems
+	$(BINDIR)/chapter_17_problems
+
+# Chapter 18
+b-trees: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(B_TREES_SRC) $(B_TREES_MAIN) -o $(BINDIR)/b_trees
+
+run-b-trees: b-trees
+	$(BINDIR)/b_trees
+
+chapter-18-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(B_TREES_SRC) $(CHAPTER_18_PROBLEMS_SRC) -o $(BINDIR)/chapter_18_problems
+
+run-chapter-18-problems: chapter-18-problems
+	$(BINDIR)/chapter_18_problems
+
+# Chapter 19
+disjoint-set-operations: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(DISJOINT_SET_OPERATIONS_SRC) $(DISJOINT_SET_OPERATIONS_MAIN) -o $(BINDIR)/disjoint_set_operations
+
+run-disjoint-set-operations: disjoint-set-operations
+	$(BINDIR)/disjoint_set_operations
+
+linked-list-representation: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(LINKED_LIST_REPRESENTATION_SRC) $(LINKED_LIST_REPRESENTATION_MAIN) -o $(BINDIR)/linked_list_representation
+
+run-linked-list-representation: linked-list-representation
+	$(BINDIR)/linked_list_representation
+
+disjoint-set-forests: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(DISJOINT_SET_FORESTS_SRC) $(DISJOINT_SET_FORESTS_MAIN) -o $(BINDIR)/disjoint_set_forests
+
+run-disjoint-set-forests: disjoint-set-forests
+	$(BINDIR)/disjoint_set_forests
+
+chapter-19-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(CHAPTER_19_PROBLEMS_SRC) -o $(BINDIR)/chapter_19_problems
+
+run-chapter-19-problems: chapter-19-problems
+	$(BINDIR)/chapter_19_problems
 
 # ============================================================================
 # UTILITY TARGETS

@@ -14,7 +14,9 @@ typedef enum {
 } NodeColor;
 
 typedef struct RedBlackNode {
+    int key;
     int data;
+    int size;
     NodeColor color;
     struct RedBlackNode *left, *right, *parent;
 } RedBlackNode;
@@ -25,6 +27,7 @@ typedef struct RedBlackTree {
 } RedBlackTree;
 
 RedBlackNode* rb_node_create(RedBlackTree *tree, int data);
+RedBlackTree* rb_tree_create();
 void rb_tree_left_rotate(RedBlackTree *tree, RedBlackNode *x);
 void rb_tree_right_rotate(RedBlackTree *tree, RedBlackNode *y);
 void rb_tree_insert_fixup(RedBlackTree *tree, RedBlackNode *z);

@@ -22,6 +22,8 @@
 
 // Macros
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MAX3(a, b, c) (((a) > (b)) ? (((a) > (c)) ? (a) : (c)) : (((b) > (c)) ? (b) : (c)))
+
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define ABS(x) ((x) < 0 ? -(x) : x)
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr)[0])
