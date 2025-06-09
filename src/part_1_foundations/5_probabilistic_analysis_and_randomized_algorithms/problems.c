@@ -31,17 +31,11 @@ int random_search(int A[], int n, int x) {
     return -1;
 }
 
-void swap(int *a, int *b) {
-    int temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
 void scramble(int A[], int n) {
     srand(time(NULL));
     for (int i = n - 1; i > 0; i--) {
         int j = rand() % (i + 1);
-        swap(&A[i], &A[j]);
+        SWAP_INT(A[i], A[j]);
     }
 }
 

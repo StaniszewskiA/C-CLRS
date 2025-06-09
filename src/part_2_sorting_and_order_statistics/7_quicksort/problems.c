@@ -17,10 +17,10 @@ void fuzzy_partition(
     while (j <= k) {
         if (A[j].high < x.low) {
             i++;
-            interval_swap(&A[i], &A[j]);
+            SWAP_INTERVAL(A[i], A[j]);
             j++;
         } else if (A[j].low > x.high) {
-            interval_swap(&A[j], &A[k]);
+            SWAP_INTERVAL(A[j], A[k]);
             k--;
         } else {
             j++;
@@ -58,7 +58,7 @@ int hoare_partition(int A[], int p, int r) {
             return j;
         }
 
-        swap4(&A[i], &A[j]);
+        SWAP_INT(A[i], A[j]);
     }
 }
 
@@ -71,16 +71,16 @@ PartitionIndices partition_prim(int A[], int p, int r) {
     while (j < k) {
         if (A[j] < x) {
             i++;
-            swap4(&A[i], &A[j]);
+            SWAP_INT(A[i], A[j]);
             j++;
         } else if (A[j] > x) {
             k--;
-            swap4(&A[j], &A[k]);
+            SWAP_INT(A[j], A[k]);
         } else {
             j++;
         }
     }
-    swap4(&A[k], &A[r]);
+    SWAP_INT(A[k], A[r]);
 
     return (PartitionIndices){i + 1, k};
 }
@@ -91,7 +91,7 @@ PartitionIndices randomized_partition(
     int r
 ) {
     int i = p + rand() % (r - p + 1);
-    swap4(&A[r], &A[i]);
+    SWAP_INT(A[r], A[i]);
     return partition_prim(A, p, r);
 }
 
@@ -114,9 +114,9 @@ void quicksort_prim(int A[], int p, int r) {
         }
 
         if (i <= q) {
-            swap4(&A[i], &A[q]);
+            SWAP_INT(A[i], A[q]);
         } else {
-            swap4(&A[i], &A[q + 1]);
+            SWAP_INT(A[i], A[q+ 1]);
             q = q + 1;
         }
 
@@ -127,7 +127,7 @@ void quicksort_prim(int A[], int p, int r) {
 
 void stooge_sort(int A[], int p, int r) {
     if (A[p] > A[r]) {
-        swap4(&A[p], &A[r]);
+        SWAP_INT(A[p], A[r]);
     }
 
     if (p + 1 < r) {

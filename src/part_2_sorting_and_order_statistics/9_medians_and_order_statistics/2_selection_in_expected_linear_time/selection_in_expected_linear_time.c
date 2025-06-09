@@ -1,11 +1,5 @@
 #include "part_2_sorting_and_order_statistics/9_medians_and_order_statistics/medians_and_order_statistics.h"
 
-void swap5(int *a, int *b) {
-    int temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
 int partition(int A[], int p, int r) {
     int pivot = A[r];
     int i = p - 1;
@@ -13,16 +7,16 @@ int partition(int A[], int p, int r) {
     for (int j = p; j < r; j++) {
         if (A[j] < pivot) {
             i++;
-            swap5(&A[i], &A[j]);
+            SWAP_INT(A[i], A[j]);;
         }
     }
-    swap5(&A[i + 1], &A[r]);
+    SWAP_INT(A[i + 1], A[r]);;
     return i + 1;
 }
 
 int randomized_partition(int A[], int p, int r) {
-    int random_index = p + rand() % (r - p + 1);
-    swap5(&A[random_index], &A[r]);  
+    int randomIdx = p + rand() % (r - p + 1);
+    SWAP_INT(A[randomIdx], A[r]) 
     return partition(A, p, r);
 }
 

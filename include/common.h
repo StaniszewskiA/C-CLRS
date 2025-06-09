@@ -24,12 +24,24 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define ABS(x) ((x) < 0 ? -(x) : x)
-#define SWAP(a, b, temp) do { temp = a; a = b; b = temp; } while(0)
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr)[0])
+
+#define SWAPS(a, b, type) do { \
+    type temp = (a); \
+    (a) = (b); \
+    (b) = temp; \
+} while(0);
+
+#define SWAP_INT(a, b) SWAPS(a, b, int);
+#define SWAP_DOUBLE(a, b) SWAPS(a, b, double);
+#define SWAP_INTERVAL(a, b) SWAPS(a, b, Interval);
 
 // Color flags
 // #define RED 0
 // #define BLACK 1
+
+// Types
+typedef unsigned int uint;
 
 // Error codes
 typedef enum {
@@ -44,6 +56,8 @@ typedef enum {
 
 // Comparisons
 typedef int (*compare_func_t)(const void* a, const void* b);
+int compare(const void *a, const void *b);
+int min_of_three(int a, int b, int c);
 
 // Memory allocation
 void* safe_malloc(size_t size);
@@ -110,6 +124,9 @@ int find_max(int A[], int n);
 
 // Counting
 int count_digits(int num);
+
+// Random
+void generate_random_binary_string(char *str, size_t length);
 
 // Debug
 #ifdef DEBUG

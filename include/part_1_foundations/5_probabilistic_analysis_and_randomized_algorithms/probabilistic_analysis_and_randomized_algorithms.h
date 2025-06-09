@@ -16,7 +16,6 @@ int hire_assistant(int* candidates, int size);
 
 int linear_search2(int A[], int n, int x);
 int random_search(int A[], int n, int x);
-void swap(int *a, int *b);
 void scramble(int A[], int n);
 int scrambleSearch(int A[], int n, int x);
 

@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <limits.h>
-#include <stdlib.h>
+#include "part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/greedy_algorithms.h"
 
 #define TASK 3
 
@@ -68,17 +66,12 @@ void make_change_optimal(int denoms[], int k, int n) {
 
     O(n*log(n))
 */
-typedef struct {
-    int id;
-    int pTime; // Abb. for processing time
-} Task;
-
-int compare(const void* a, const void* b) {
+int compare_tasks(const void* a, const void* b) {
     return ((Task*)a)->pTime - ((Task*)b)->pTime;
 }
 
 void schedule_tasks(Task tasks[], int n) {
-    qsort(tasks, n, sizeof(Task), compare);
+    qsort(tasks, n, sizeof(Task), compare_tasks);
     
     unsigned totalCompletionTime = 0;
     int i;
@@ -94,25 +87,19 @@ void schedule_tasks(Task tasks[], int n) {
 
     O(n^2) (?)
 */
-typedef struct {
-    int id;
-    int pTime;
-    int rTime; // Abb. for release time
-} OnlineTask;
-
-int compare_online_p_times(const void* a, const void* b) {
+int compare_tasks_online_p_times(const void* a, const void* b) {
     return ((OnlineTask*)a)->pTime - ((OnlineTask*)b)->pTime;
 }
 
-int compare_online_r_times(const void* a, const void* b) {
+int compare_tasks_online_r_times(const void* a, const void* b) {
     return ((OnlineTask*)a)->rTime - ((OnlineTask*)b)->rTime;
 }
 
 void schedule_online_tasks(OnlineTask tasks[], int n) {
-    qsort(tasks, n, sizeof(OnlineTask), compare_online_r_times);
+    qsort(tasks, n, sizeof(OnlineTask), compare_tasks_online_r_times);
 
     unsigned totalCompletionTime = 0;
-    unsigned completedTasks = 0;
+    int completedTasks = 0;  
     unsigned currTime = 0;
 
     OnlineTask* q = malloc(n * sizeof(OnlineTask));
@@ -120,24 +107,21 @@ void schedule_online_tasks(OnlineTask tasks[], int n) {
     int i;
 
     while (completedTasks < n) {
-        while (completedTasks < n && tasks[completedTasks].rTime <= currTime) {
+        while (completedTasks < n && (unsigned)tasks[completedTasks].rTime <= currTime) { 
             q[qSize++] = tasks[completedTasks];
             completedTasks++;
         }
 
         if (qSize > 0) {
-            qsort(q, qSize, sizeof(OnlineTask), compare_online_p_times);
+            qsort(q, qSize, sizeof(OnlineTask), compare_tasks_online_p_times);
             OnlineTask currTask = q[0];
 
-            // Execute
             currTime += currTask.pTime;
             totalCompletionTime += currTime;
 
-            // Deque task
             for (i = 1; i < qSize; i++) q[i - 1] = q[i];
             qSize--;
         } else {
-            // No executable tasks.
             currTime++;
         }
     }

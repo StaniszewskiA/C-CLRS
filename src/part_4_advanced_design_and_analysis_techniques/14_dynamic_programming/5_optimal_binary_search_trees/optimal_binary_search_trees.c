@@ -1,35 +1,5 @@
-#include <stdio.h>
-#include <limits.h>
-#include <float.h>
-#include <stdlib.h>
+#include "part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/dynamic_programming.h"
 
-#define TASK 5
-#define N 3
-
-//----------BST utils----------
-typedef struct Node {
-    int key;
-    struct Node* left;     
-    struct Node* right;  
-} Node;
-
-Node* new_node(int key) {
-    Node* node = (Node*)malloc(sizeof(Node));
-    node->key = key;
-    node->left = node->right = NULL;
-    return node;
-}
-
-void print_bst(Node* root) {
-    // Inorder traversal
-    if (root != NULL) {
-        print_bst(root->left);
-        printf("%d ", root->key);
-        print_bst(root->right);
-    }
-}
-
-//----------Optimal BST----------
 void optimal_bst(float p[], float q[], int n, int root[][n + 1]) {
     float costs[n + 1][n + 1]; 
     float weights[n + 1][n + 1];
@@ -69,26 +39,20 @@ void optimal_bst(float p[], float q[], int n, int root[][n + 1]) {
     printf("Minimum cost of Optimal BST: %f\n", costs[0][n]);
 }
 
-//----------14.5-1----------
-Node* construct_optimal_bst(int root[][N+1], int i, int j) {
+BSTNode* construct_optimal_bst(int root[][100], int keys[], int i, int j) {
     if (i > j) return NULL;
 
-    int root_key = i + 1;
+    int k = root[i][j];
+    BSTNode* node = bst_node_init(keys[k - 1]);  
 
-    if (i == j) {
-        Node* node = new_node(root_key);
-        return node;
-    } 
-
-    Node* node = new_node(root_key);
-
-    node->left = construct_optimal_bst(root, i, root[i][j] - 1);
-    node->right = construct_optimal_bst(root, root[i][j] + 1, j);
+    if (i < j) {  
+        node->left = construct_optimal_bst(root, keys, i, k - 1);
+        node->right = construct_optimal_bst(root, keys, k, j);
+    }
 
     return node;
 }
 
-//----------14.5-4----------
 void knuthian_optimal_bst(float p[], float q[], int n, int root[][n + 1]) {
     float costs[n + 1][n + 1]; 
     float weights[n + 1][n + 1];
@@ -129,7 +93,6 @@ void knuthian_optimal_bst(float p[], float q[], int n, int root[][n + 1]) {
     printf("Minimum cost of Optimal BST: %f\n", costs[0][n]);
 }
 
-//----------Print Root Table (debug)----------
 void print_root_table(int root[][N+1], int n) {
     printf("\nRoot Table:\n");
     for (int i = 0; i <= n; i++) {
@@ -138,52 +101,4 @@ void print_root_table(int root[][N+1], int n) {
         }
         printf("\n");
     }
-}
-
-int main(void) {
-    float p[] = {0.0, 0.1, 0.25, 0.30, 0.05};  // Probabilities of keys (starting with p[0] for the dummy key)
-    float q[] = {0.05, 0.10, 0.05, 0.05, 0.05};  // Probabilities of dummy keys
-    int root[N + 1][N + 1] = {0};  // Root table for reconstructing the result
-
-    switch (TASK)
-    {
-        case 1: {
-            optimal_bst(p, q, N, root);
-            break;
-        }
-        case 2: {
-            // 14.5-1
-            optimal_bst(p, q, N, root);
-            printf("Optimal BST structure:\n");
-            print_root_table(root, N);
-            Node* bst_root = construct_optimal_bst(root, 0, N);
-            printf("In-order traversal of the optimal BST: ");
-            print_bst(bst_root);
-            printf("\n");
-            break;
-        }
-        case 4: {
-            // 14.5-2 
-            float p[] = {0.0, 0.04, 0.06, 0.08, 0.02, 0.1, 0.12, 0.14}; 
-            float q[] = {0.06, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.05, 0.05}; 
-            int root[N + 1][N + 1] = {0};
-            optimal_bst(p, q, N, root);
-            break;
-        }
-        case 5:{
-            // 14.5-4
-            knuthian_optimal_bst(p, q, N, root);
-            break;
-        }
-        case -1: {
-            // Debug
-            optimal_bst(p, q, N, root);
-            print_root_table(root, N);
-            break;
-        }
-        default:
-            break;
-    }
-
-    return 0;
 }

@@ -45,7 +45,6 @@ typedef struct {
 int find_highest_degree(const char *polynomial);
 void determine_big_o(int maxExponent);
 
-void swap(int *x, int *y);
 void selection_sort(int arr[], int n);
 
 // ============================================================================
@@ -68,7 +67,6 @@ int sum_search(int arr[], int size, int target);
 // PROBLEMS
 // ============================================================================
 
-void swap(int* xp, int* yp);
 void bubble_sort(int arr[], int n);
 
 int merge_and_count(int A[], int left, int mid, int right);

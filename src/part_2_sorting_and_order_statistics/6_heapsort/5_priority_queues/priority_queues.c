@@ -163,7 +163,7 @@ void max_heap_increase_key(int A[], int i, int key) {
 
     A[i] = key;
     while (i > 0 && A[(i - 1) / 2] < A[i]) {
-        swap3(A, i, (i - 1) / 2);
+        SWAP_INT(A[i], A[(i - 1) / 2]);
         i = (i - 1) / 2;
     }
 }

@@ -1,10 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include "part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/greedy_algorithms.h"
 
-#define TASK 5
-
-void recursive_activity_selector(int s[], int f[], int k, int n)  {
+void recursive_activity_selector(int s[], int f[], int k, int n) {
     int m = k + 1;
 
     while (m <= n && s[m] < f[k]) m++;
@@ -34,8 +30,6 @@ void greedy_activity_selector(int s[], int f[], int n) {
 
     Ο(n^3)
 */
-#define MAX_N 100
-
 int dp1[MAX_N + 2][MAX_N + 2];
 int act[MAX_N + 2][MAX_N + 2];
 
@@ -86,10 +80,6 @@ void dynamic_activity_selector(int s[], int f[], int n) {
 /*
     15.1-4
 */
-typedef struct Activity {
-    int start, end;
-} Activity; 
-
 int compare_activities(const void *a, const void *b) {
     return ((Activity*)a)->start - ((Activity*)b)->start;
 }
@@ -147,15 +137,11 @@ void max_halls(Activity activities[], int n) {
 
     O(n*log(n)), dominated by sorting time.
 */
-typedef struct ValuedActivity {
-    int start, end, value;
-} ValuedActivity;
-
 int compare_activities_end(const void* a, const void* b) {
     return ((ValuedActivity*)a)->end - ((Activity*)b)->end;
 }
 
-int bin_search(ValuedActivity activities[], int idx) {
+int activities_binary_search(ValuedActivity activities[], int idx) {
     int low = 0, high = idx - 1, mid;
 
     while (low <= high) {
@@ -185,7 +171,7 @@ int max_activity_value(ValuedActivity activities[], int n) {
 
     for (i = 1; i < n; i++) {
         int includeValue = activities[i].value;
-        int latestActivity = bin_search(activities, i);
+        int latestActivity = activities_binary_search(activities, i);
         
         if (latestActivity != -1) includeValue += dp5[latestActivity];
         
@@ -197,56 +183,4 @@ int max_activity_value(ValuedActivity activities[], int n) {
     int result = dp5[n - 1];
     free(dp5);
     return result;
-}
-
-int main(void) {
-    int s[] = {0, 1, 3, 5, 8, 5};  
-    int f[] = {0, 2, 4, 7, 9, 9};  
-    int n = sizeof(s) / sizeof(s[0]) - 1;
-
-    switch (TASK)
-    {
-        case 1: {
-            recursive_activity_selector(s, f, 0, n);
-            break;
-        }
-
-        case 2: {
-            greedy_activity_selector(s, f, n);
-            break;
-        }
-
-        case 3: {
-            // 15.1-1
-            dynamic_activity_selector(s, f, n);
-            break;
-        }
-
-        case 4: {
-            // 15.1-4
-            Activity activities[] = {
-                {30, 75}, {0, 50}, {60, 150}, {10, 20}, {80, 120}
-            };
-            int n4 = sizeof(activities) / sizeof(activities[0]);
-            max_halls(activities, n);
-
-            break;
-        }
-
-        case 5: {
-            // 15.1-5
-            ValuedActivity activity[] = {
-                {1, 3, 50}, {2, 5, 20}, {6, 9, 100}, {3, 8, 200}, {9, 10, 150}
-            };
-            int n = sizeof(activity) / sizeof(activity[0]);
-
-            printf("Max total value: %d\n",
-                max_activity_value(activity, n));
-
-            break;
-        }
-        
-        default:
-            break;
-    }
 }

@@ -1,8 +1,4 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#define TASK 3
+#include "part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/greedy_algorithms.h"
 
 /*
     15.2-2
@@ -12,12 +8,7 @@
     n - number of items
     W - maximum weight
 */
-typedef struct Item {
-    int value;
-    int weight;
-} Item;
-
-int discrete_knapsack(int W, Item items[], int n) {
+int discrete_knapsack(int W, KnapsackItem items[], int n) {
     int dp[n + 1][W + 1];
     int i, j;
 
@@ -53,14 +44,14 @@ int discrete_knapsack(int W, Item items[], int n) {
 
     n - number of points in the input set.
 */
-int compare(const void* a, const void* b) {
+int compare2(const void* a, const void* b) {
     return (*(double*)a > *(double*)b) - (*(double*)a < *(double*)b);
 }
 
 int min_intervals(double points[], int n) {
     if (n == 0) return 0;
 
-    qsort(points, n, sizeof(double), compare);
+    qsort(points, n, sizeof(double), compare2);
 
     int count = 0, i = 0;
 
@@ -84,14 +75,6 @@ int min_intervals(double points[], int n) {
     Time complexity: O(n)
     Space complexity: O(n)?
 */
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-
-typedef struct FracItem {
-    // Item with fractional values
-    double value;
-    double weight;
-} FracItem;
-
 double vw_ratio(FracItem item) {
     // printf("%.2f\n", item.value);
     // printf("%.2f\n", item.weight);
@@ -110,26 +93,7 @@ int compare_wv(const void* a, const void* b) {
     return 0;
 }
 
-int partition(FracItem arr[], int low, int high, int pivot) {
-    int i = low, j = high;
-
-    while (i <= j) {
-        while (vw_ratio(arr[i]) < pivot) i++;
-        while (vw_ratio(arr[j]) > pivot) j--;
-
-        if (i <= j) {
-            FracItem temp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = temp;
-            i++;
-            j--;
-        }
-    }
-
-    return i;
-} 
-
-FracItem select_median(FracItem arr[], int low, int high) {
+FracItem select_median_frac(FracItem arr[], int low, int high) {
     if (high - low <= 5) {
         qsort(&arr[low], high - low + 1, sizeof(FracItem), compare_wv);
         return arr[(low + high) /  2];
@@ -143,13 +107,13 @@ FracItem select_median(FracItem arr[], int low, int high) {
         arr[(low + high) / 2] = arr[(i + subHigh) / 2];
     }
 
-    return select_median(arr, low, high);
+    return select_median_frac(arr, low, high);
 }
 
 double fractional_knapsack(FracItem items[], int n, int W) {
     if (n == 0 || W == 0) return 0;
 
-    FracItem medianItem = select_median(items, 0, n - 1);
+    FracItem medianItem = select_median_frac(items, 0, n - 1);
     double medianVW = vw_ratio(medianItem);
 
     printf("Median item's VW ratio: %.2f\n", medianVW);
@@ -201,56 +165,4 @@ double fractional_knapsack(FracItem items[], int n, int W) {
     free(highRatioItems);
     free(lowRatioItems);
     return res;
-}
-
-int main(void) {
-    int W1 = 50;
-    Item items[] = {{10, 60}, {20, 10}, {30, 120}};
-    int n1 = sizeof(items) / sizeof(items[0]);
-
-    switch (TASK)
-    {
-        case 1: {
-            // 15.2-2
-
-            printf("Maximum value in Knapsack = %d\n", 
-                discrete_knapsack(W1, items, n1));
-            
-            break;
-        }
-
-        case 2: {
-            // 15.2-5
-            double points[] = {0.1, 1.2, 1.0, 0.75};
-            int n2 = sizeof(points) / sizeof(points[0]);
-            
-            printf("Minimum num of intervals: %d",
-                min_intervals(points, n2));
-
-            break;
-        }
-
-        case 3: {
-            // 15.2-6
-            double W3 = 50.0;
-            FracItem items[] = {{10.0, 60.0}, {20.0, 10.0}, {30.0, 120.0}};
-            int n1 = sizeof(items) / sizeof(items[0]);
-
-            // FracItem item1;
-            // item1.value = 1;
-            // item1.weight = 2; 
-
-            // printf("Test ratio: %.2f\n", vw_ratio(item1));
-
-            printf("Maximum value in the knapsack: %.2f\n", 
-                fractional_knapsack(items, n1, W1));
-
-            break;
-        }
-        
-        default:
-            break;
-    }
-
-    return 0;
 }

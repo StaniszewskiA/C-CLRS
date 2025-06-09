@@ -7,9 +7,6 @@
 // ============================================================================
 // CHAPTER 6.2: MAINTAING THE HEAP PROPERTY
 // ============================================================================
-
-void swap3(int A[], int i, int j);
-
 void max_heapify_iterative(int A[], int n, int i);
 void build_max_heap(int A[], int n); 
 

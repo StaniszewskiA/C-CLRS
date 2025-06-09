@@ -1,34 +1,23 @@
-#include <stdio.h> 
-#include <stdlib.h>
-#include <limits.h>
-#include <math.h>
-#include <string.h>
-#include <float.h>
+#include "part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/dynamic_programming.h"
 
-#define TASK 12
+#define TASK 1
+
+AdjList graph[MAX_VERTICES];
+int in_degrees[MAX_VERTICES];
+int topo_order[MAX_VERTICES];
+int dp[MAX_VERTICES];
+int idxMap[MAX_EMPLOYEES];
+Employee *employees[MAX_EMPLOYEES];
+int dp9[MAX_M9][MAX_M9];
+int breakSeq[MAX_M9][MAX_M9];
+int breaks[MAX_M9];
 
 /*
 14-1: Longest simple path in a DAG (Kahn's algorithm + DP)
 
 Time: O(|V| + |E|)
 */
-#define MAX_VERTICES 10
-
-typedef struct Edge {
-    int dest, weight;
-} Edge;
-
-typedef struct AdjList {
-    Edge edges[MAX_VERTICES];
-    int size;
-} AdjList;
-
-AdjList graph[MAX_VERTICES];
-int in_degrees[MAX_VERTICES];
-int topo_order[MAX_VERTICES];
-int dp[MAX_VERTICES];
-
-void add_edge(int u, int v, int w) {
+void graph_add_edge(int u, int v, int w) {
     graph[u].edges[graph[u].size].dest = v;
     graph[u].edges[graph[u].size].weight = w;
     graph[u].size++;
@@ -66,7 +55,7 @@ int topological_sort(int n) {
     return idx == n;
 }
 
-int longest_path_dag(int n, int s, int t) {
+int longest_path_in_dag(int n, int s, int t) {
     // Check if the graph is in fact acyclic.
     if (!topological_sort(n)) return INT_MIN;
 
@@ -158,9 +147,6 @@ void longest_palindrome_subseq(char *s) {
 Sort the points based on their x coordinate, store
 backtrack paths.
 */
-typedef struct Point {
-    double x, y;
-} Point;
 
 // Euclidean distance between two points.
 double euc_dist(Point a, Point b) {
@@ -168,7 +154,7 @@ double euc_dist(Point a, Point b) {
 }
 
 // Sort based on euclidean distance
-int compare(const void *a, const void *b) {
+int compare_points(const void *a, const void *b) {
     Point *p1 = (Point *)a;
     Point *p2 = (Point *)b;
     // Return 1, 0 or -1
@@ -177,7 +163,7 @@ int compare(const void *a, const void *b) {
 
 void bitonic_tsp(Point points[], int n) {
     // O(n*log(n))
-    qsort(points, n, sizeof(Point), compare);
+    qsort(points, n, sizeof(Point), compare_points);
 
     // DP for minimum costs.
     double dp[n][n];
@@ -247,7 +233,6 @@ void bitonic_tsp(Point points[], int n) {
 Just DP.
 O(n^3).
 */
-#define MAX_LINE_WIDTH 10
 
 void print_neatly(int *lengths, int n) {
     int C[n + 1], P[n + 1];
@@ -305,25 +290,6 @@ Space: O(m*n), same as time.
 
 We need only the previous row.
 */
-#define INF (INT_MAX / 2)
-
-#define COST_COPY -1
-#define COST_REPLACE 1
-#define COST_DELETE 2
-#define COST_INSERT 2
-#define COST_TWIDDLE INF
-#define COST_KILL INF
-
-typedef enum { 
-    COPY, 
-    REPLACE, 
-    DELETE, 
-    INSERT, 
-    TWIDDLE, 
-    KILL,
-    NONE
-} Operation;
-
 void edit_distance(char *x, char *y) {
     int m = strlen(x);
     int n = strlen(y);
@@ -414,33 +380,16 @@ void edit_distance(char *x, char *y) {
 
 O(n)
 */
-#define MAX_EMPLOYEES 10
-
-
-typedef struct Employee {
-    char name[50];
-    double conviviality;
-    struct Employee *leftChild;
-    struct Employee *rightSibling;
-} Employee;
-
-typedef struct {
-    double C[MAX_EMPLOYEES];
-    int included[MAX_EMPLOYEES];
-} DPResult;
-
-int idx_map[MAX_EMPLOYEES];
-Employee *employees[MAX_EMPLOYEES];
 int employee_count = 0;
 
-Employee* create_employee(const char* name, double conviviality) {
+Employee* employee_create(const char* name, double conviviality) {
     Employee* emp = (Employee*)malloc(sizeof(Employee));
     strcpy(emp->name, name);
     emp->conviviality = conviviality;
     emp->leftChild = NULL;
     emp->rightSibling = NULL;
     employees[employee_count] = emp;
-    idx_map[employee_count] = employee_count;
+    idxMap[employee_count] = employee_count;
     return emp;
 }
 
@@ -490,28 +439,7 @@ void print_guest_list(Employee* root, DPResult* dp, int idx) {
 /*
 14-7: Viterbi algorithm
 */
-#define NO_SUCH_PATH NULL
-#define MAX_SEQ_LEN 100 
-
-typedef struct ViterbiEdge {
-    int dest;
-    int sigma;
-    double proba; // Transition probability
-} ViterbiEdge;
-
-typedef struct ViterbiVertex {
-    int id;
-    int edgeCount;
-    ViterbiEdge* edges;
-} ViterbiVertex;
-
-typedef struct ViterbiSolution {
-    int* seq; // Sequence of states
-    int seqLen; 
-    double proba; // Probability of sequence
-} ViterbiSolution;
-
-ViterbiVertex* create_viterbi_vertex(int id, int edgeCount) {
+ViterbiVertex* viterbi_vertex_create(int id, int edgeCount) {
     ViterbiVertex* vertex = (ViterbiVertex*)malloc(sizeof(ViterbiVertex));
     vertex->id = id;
     vertex->edgeCount = edgeCount;
@@ -520,7 +448,7 @@ ViterbiVertex* create_viterbi_vertex(int id, int edgeCount) {
     return vertex;
 }
 
-void add_viterbi_edge(
+void viterbi_edge_add(
     ViterbiVertex* from, 
     int dest, 
     int sigma, 
@@ -591,21 +519,7 @@ ViterbiSolution viterbi(
 /*
 14-8: Image compression by seam carving
 */
-#define MAX_M 100
-#define MAX_N 100
-
-typedef struct Pixel{
-    int row;
-    int col;
-} Pixel;
-
-typedef struct Seam {
-    Pixel* pixels;
-    int size;
-    int capacity;
-} Seam;
-
-void init_seam(Seam* seam, int capacity) {
+void seam_init(Seam* seam, int capacity) {
     seam->pixels = (Pixel*)malloc(sizeof(Pixel) * capacity);
     seam->size = 0;
     seam->capacity = capacity;
@@ -621,14 +535,8 @@ void add_to_seam(Seam* seam, int row, int col) {
     seam->size++;
 }
 
-void free_seam(Seam* seam) {
+void seam_free(Seam* seam) {
     free(seam->pixels);
-}
-
-int min_of_three(int a, int b, int c) {
-    if (a <= b && a <= c) return a;
-    else if (b <= a && b <= c) return b;
-    else return c;
 }
 
 void seam_carving(int **d, int m, int n) {
@@ -640,7 +548,7 @@ void seam_carving(int **d, int m, int n) {
     // Init first rows.
     for (int i = 0; i < n; i++) {
         D[0][i] = d[0][i];
-        init_seam(&S[0][i], seamCap);
+        seam_init(&S[0][i], seamCap);
         add_to_seam(&S[0][i], 0, i);
     }
 
@@ -701,19 +609,12 @@ void seam_carving(int **d, int m, int n) {
         printf("(%d, %d)\n", S[i][q].pixels[i].row, S[i][q].pixels[i].col);
 
     printf("Freeing up the seam...\n");
-    for (int i = 0; i < m; i++) free_seam(&S[i][q]);
+    for (int i = 0; i < m; i++) seam_free(&S[i][q]);
 }
 
 /*
 14-9: Breaking a string
 */
-#define MAX_M9 100
-#define INF9 1000
-
-int dp9[MAX_M9][MAX_M9];
-int breakSeq[MAX_M9][MAX_M9];
-int breaks[MAX_M9];
-
 int break_string(int L[], int i, int j, int l, int r) {
     if (i >= j) return 0;
     if (dp9[i][j] != -1) return dp9[i][j];
@@ -757,8 +658,6 @@ void reconstruct_break_seq(int i, int j) {
 /*
 14-10: Planning an investment strategy
 */
-#define YEARS 10
-
 void invest(
     int r[YEARS + 1][YEARS + 1], 
     int dr[YEARS + 1][YEARS + 1], 
@@ -767,7 +666,7 @@ void invest(
     int I[YEARS + 1], 
     int R[YEARS + 1]
 ) {
-    int k, i, q;
+    int k, i;
 
     for (k = 1; k <= YEARS; k++) {
         I[k] = 0;
@@ -804,8 +703,6 @@ void invest(
 
 O(nD^2)
 */
-#define INF11 INT_MAX
-
 void inventory_planning(int n, int m, int c, int* demand, int* inventoryCost) {
     int D = 0;
     for (int i = 0; i < n; i++) D += demand[i];
@@ -814,7 +711,7 @@ void inventory_planning(int n, int m, int c, int* demand, int* inventoryCost) {
     int i, j, k;
 
     for (i = 0; i <= n; i++) {
-        for (j = 0; j <= D; j++) dp[i][j] = INF11;
+        for (j = 0; j <= D; j++) dp[i][j] = INF;
     }
 
     // Base case
@@ -822,7 +719,7 @@ void inventory_planning(int n, int m, int c, int* demand, int* inventoryCost) {
 
     for (i = 1; i <= n; i++) {
         for (j = 0; j <= D; j++) {
-            if (dp[i - 1][j] != INF11) { // Process if previous state is valid.
+            if (dp[i - 1][j] != INF) { // Process if previous state is valid.
                 for (k = 0; k <= D; k++) {
                     if (k < demand[i - 1]) continue;
                     int newInv = j + k - demand[i - 1];
@@ -839,7 +736,7 @@ void inventory_planning(int n, int m, int c, int* demand, int* inventoryCost) {
         }
     }
 
-    int result = INF11;
+    int result = INF;
     for (j = 0; j <= D; j++) {
         if (dp[n][j] < result) result = dp[n][j];
     }
@@ -850,28 +747,22 @@ void inventory_planning(int n, int m, int c, int* demand, int* inventoryCost) {
 /*
 14-12: Signing free-agent baseball players
 
-N - number of players
+n - number of players
 B - budget
 P - players per position
 
 O(NBP)
 */
-typedef struct Player {
-    int cost;
-    int war;
-    int pos;
-} Player;
-
-void sign_players(int N, int B, int P, Player players[N][P]) {    
-    int dp[N + 1][B + 1];
+void sign_players(int n, int B, int P, Player players[n][P]) {    
+    int dp[n + 1][B + 1];
     int i, j, k;
 
-    for (i = 0; i <= N; i++) {
+    for (i = 0; i <= n; i++) {
         for (j = 0; j <= B; j++) dp[i][j] = 0;
     } 
     printf("DP table initialized");
 
-    for (i = 1; i <= N; i++) {
+    for (i = 1; i <= n; i++) {
         for (j = 1; j <= B; j++) {
             dp[i][j] = dp[i - 1][j]; // Sign last player just in case.
 
@@ -887,7 +778,7 @@ void sign_players(int N, int B, int P, Player players[N][P]) {
         }
     }
 
-    printf("The total WAR is %d\n", dp[N][B]);
+    printf("The total WAR is %d\n", dp[n][B]);
 
     // Reconstruct chosen players
     int totalCost = 0;
@@ -895,7 +786,7 @@ void sign_players(int N, int B, int P, Player players[N][P]) {
     j = B;
     printf("The players selected are:\n");
 
-    for (i = N; i > 0; i--) {
+    for (i = n; i > 0; i--) {
         for (k = 0; k < P; k++) {
             if (j >= players[i - 1][k].cost 
                 && dp[i][j] == dp[i - 1][j - players[i - 1][k].cost] 
@@ -914,7 +805,6 @@ void sign_players(int N, int B, int P, Player players[N][P]) {
     printf("The total cost is %d\n", totalCost);
 }
 
-// Driver code
 int main(void) {
     switch (TASK)
     {
@@ -923,18 +813,18 @@ int main(void) {
             int n = 6;
             for (int i = 0; i < n; i++) graph[i].size = 0, in_degrees[i] = 0;
 
-            add_edge(0, 1, 5);
-            add_edge(0, 2, 3);
-            add_edge(1, 3, 6);
-            add_edge(1, 2, 2);
-            add_edge(2, 4, 4);
-            add_edge(2, 5, 2);
-            add_edge(2, 3, 7);
-            add_edge(3, 5, 1);
-            add_edge(4, 5, 3);
+            graph_add_edge(0, 1, 5);
+            graph_add_edge(0, 2, 3);
+            graph_add_edge(1, 3, 6);
+            graph_add_edge(1, 2, 2);
+            graph_add_edge(2, 4, 4);
+            graph_add_edge(2, 5, 2);
+            graph_add_edge(2, 3, 7);
+            graph_add_edge(3, 5, 1);
+            graph_add_edge(4, 5, 3);
 
             int s = 0, t = 5;
-            int result = longest_path_dag(n, s, t);
+            int result = longest_path_in_dag(n, s, t);
 
             if (result == -1) printf("No path from %d to %d\n", s, t);
             else printf("Longest path weight from %d to %d: %d\n", s, t, result);
@@ -977,12 +867,12 @@ int main(void) {
 
         case 6:
             // 14-6
-            Employee* president = create_employee("President", 10);
-            Employee* manager1 = create_employee("Manager1", 5);
-            Employee* manager2 = create_employee("Manager2", 6);
-            Employee* worker1 = create_employee("Worker1", 4);
-            Employee* worker2 = create_employee("Worker2", 7);
-            Employee* worker3 = create_employee("Worker3", 3);
+            Employee* president = employee_create("President", 10);
+            Employee* manager1 = employee_create("Manager1", 5);
+            Employee* manager2 = employee_create("Manager2", 6);
+            Employee* worker1 = employee_create("Worker1", 4);
+            Employee* worker2 = employee_create("Worker2", 7);
+            Employee* worker3 = employee_create("Worker3", 3);
             
             president->leftChild = manager1;
             manager1->rightSibling = manager2;
@@ -1004,13 +894,13 @@ int main(void) {
             // 14-7
             ViterbiVertex* graph[3]; 
 
-            graph[0] = create_viterbi_vertex(0, 2);
-            graph[1] = create_viterbi_vertex(1, 1);  
-            graph[2] = create_viterbi_vertex(2, 0);
+            graph[0] = viterbi_vertex_create(0, 2);
+            graph[1] = viterbi_vertex_create(1, 1);  
+            graph[2] = viterbi_vertex_create(2, 0);
 
-            add_viterbi_edge(graph[0], 1, 1, 0.9, 0);  
-            add_viterbi_edge(graph[0], 2, 2, 0.8, 1);  
-            add_viterbi_edge(graph[1], 2, 1, 0.7, 0);  
+            viterbi_edge_add(graph[0], 1, 1, 0.9, 0);  
+            viterbi_edge_add(graph[0], 2, 2, 0.8, 1);  
+            viterbi_edge_add(graph[1], 2, 1, 0.7, 0);  
 
             int sigma[] = {1, 1}; 
 

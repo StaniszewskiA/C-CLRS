@@ -16,7 +16,6 @@ void min_max(int A[], int size, int *min, int *max);
 // SELECTION IN EXPECTED LINEAR TIME
 // ============================================================================
 
-void swap5(int *a, int *b);
 int partition(int A[], int p, int r);
 int randomized_partition(int A[], int p, int r);
 int randomized_select(int A[], int p, int r, int i);

@@ -1,28 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
+#include "part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/dynamic_programming.h"
 
-#define SEQ_LEN 41
-#define TASK 7
-
-//----------Helpers----------
-void generate_random_binary_string(char *str, size_t length) {
-    for (size_t i = 0; i < length; i++) str[i] = (rand() % 2)  ? '1' : '0';
-    str[length] = '\0';
-}
-
-//----------Brute-Force LCS----------
-int bf_lcs(char *X, char *Y, int m, int n) {
+int lcs_brute_force(char *X, char *Y, int m, int n) {
     if (m == 0 || n == 0) return 0;
 
-    if (X[m - 1] == Y[n - 1]) return 1 + bf_lcs(X, Y, m - 1, n - 1);
-    else return fmin(bf_lcs(X, Y, m, n - 1), bf_lcs(X, Y, m - 1, n));
+    if (X[m - 1] == Y[n - 1]) return 1 + lcs_brute_force(X, Y, m - 1, n - 1);
+    else return fmin(lcs_brute_force(X, Y, m, n - 1), lcs_brute_force(X, Y, m - 1, n));
 }
 
-//----------Dynamic Programming LCS----------
-int dp_lcs(char *X, char *Y, int m, int n, int b[m+1][n+1], int c[m+1][n+1]) {
+int lcs_dp(char *X, char *Y, int m, int n, int b[m+1][n+1], int c[m+1][n+1]) {
     for (int i = 0; i <= m; i++) c[i][0] = 0;
     for (int j = 0; j <= n; j++) c[0][j] = 0;
 
@@ -59,7 +44,6 @@ void print_lcs(int b[SEQ_LEN + 1][SEQ_LEN + 1], char *X, int i, int j) {
         print_lcs(b, X, i, j - 1);
 }
 
-//----------14.4-2----------
 void print_lcs_no_b(
     int c[SEQ_LEN + 1][SEQ_LEN + 1], 
     char *X, 
@@ -77,7 +61,6 @@ void print_lcs_no_b(
     else print_lcs_no_b(c, X, Y, i, j - 1);
 }
 
-//----------14.4-3----------
 int memoized_lcs_len(
     int c[SEQ_LEN + 1][SEQ_LEN + 1], 
     char *X, 
@@ -100,11 +83,6 @@ int memoized_lcs_len(
 
     return c[i][j];
 }
-
-//----------14.4-5----------
-#define UP 1
-#define LEFT 2
-#define DIAG 3
 
 void print_lcs_prim(
     int c[SEQ_LEN][SEQ_LEN], 
@@ -173,19 +151,6 @@ void memo_lcs_length(
     memo_lcs_length_aux(X, Y, c, b, m, n);
 }
 
-int compare(const void *a, const void *b) {
-    return (*(char*)a - *(char*)b);
-}
-
-//----------14.4-6----------
-typedef struct Node {
-    int key;
-    struct Node* next;
-} Node;
-
-typedef struct List {
-    Node *head;
-} List;
 
 void print_list(List* list) {
     Node* temp = list->head;
@@ -196,7 +161,7 @@ void print_list(List* list) {
     printf("\n");
 }
 
-void insert(List* list, int key) {
+void list_insert(List* list, int key) {
     Node* new_node = (Node*)malloc(sizeof(Node));
     new_node->key = key;
     new_node->next = NULL;  
@@ -224,7 +189,7 @@ void long_monotonic(int* A, int n) {
         if (A[i] < B[i]) {
             B[1] = A[i];
             C[1].head = NULL;
-            insert(&C[1], A[i]);
+            list_insert(&C[1], A[i]);
         } else {
             int j = 0;
             for (int k = 1; k <= L; k++) {
@@ -234,7 +199,7 @@ void long_monotonic(int* A, int n) {
             }
             B[j + 1] = A[i];
             C[j + 1] = C[j];
-            insert(&C[j + 1], A[i]);
+            list_insert(&C[j + 1], A[i]);
             if (j + i > L) L = j + 1;
         }
     }
@@ -243,130 +208,4 @@ void long_monotonic(int* A, int n) {
 
     free(B);
     free(C);
-}
-
-//----------Driver----------
-int main(void) {
-    srand((unsigned int)time(NULL));
-
-    char X[SEQ_LEN + 1]; 
-    char Y[SEQ_LEN + 1];
-
-    generate_random_binary_string(X, SEQ_LEN);
-    generate_random_binary_string(Y, SEQ_LEN);
-
-    int m = strlen(X);
-    int n = strlen(Y);
-
-    int b[m + 1][n + 1];  
-    int c[m + 1][n + 1];
-
-    switch (TASK)
-    {
-        case 1: {
-            // Brute-Force LCS
-            clock_t start = clock();
-            int result = bf_lcs(X, Y, m, n);
-            clock_t end = clock();
-
-            double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC; 
-            printf("LCS: %d\n", result);
-            printf("Execution Time: %.6f seconds\n", time_taken);
-            break;
-        }
-        case 2: {
-            // Dynamic Programming LCS
-            clock_t start = clock();
-            int result = dp_lcs(X, Y, m, n, b, c);
-            clock_t end = clock();
-
-            double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC; 
-            printf("LCS Length: %d\n", result);
-            printf("Execution Time: %.6f seconds\n", time_taken);
-
-            printf("LCS: ");
-            print_lcs(b, X, m, n);  
-            printf("\n");
-            break;
-        }
-        case 3: {
-            // 14.4-1
-            char seq_a[] = "10010101";
-            char seq_b[] = "010110110";
-
-            int len_a = strlen(seq_a);
-            int len_b = strlen(seq_b);
-
-            int result = dp_lcs(seq_a, seq_b, len_a, len_b, b, c);
-
-            printf("LCS Length: %d\n", result);
-            printf("LCS Sequence: ");
-            print_lcs(b, seq_a, len_a, len_b);  
-            printf("\n");
-
-            break;
-        }
-        case 4: {
-            // 14.4-2
-            char seq_a[] = "10010101";
-            char seq_b[] = "010110110";
-
-            int len_a = strlen(seq_a);
-            int len_b = strlen(seq_b);
-
-            int result = dp_lcs(seq_a, seq_b, len_a, len_b, b, c);
-
-            printf("LCS Length: %d\n", result);
-            printf("LCS Sequence: ");
-            print_lcs_no_b(c, seq_a, seq_b, len_b, len_b);  
-            printf("\n");
-
-            break;
-        }
-        case 5: {
-            // 14.4-3
-            char seq_a[] = "10010101";
-            char seq_b[] = "010110110";
-
-            int len_a = strlen(seq_a);
-            int len_b = strlen(seq_b);
-
-            int result = memoized_lcs_len(c, seq_a, seq_b, len_a, len_b);
-
-            printf("LCS Length: %d\n", result);
-
-            break;
-        }
-        case 6: {
-            // 14.4-5
-            char X[SEQ_LEN] = "231432"; 
-            char Y[SEQ_LEN];
-
-            int c[SEQ_LEN][SEQ_LEN] = {0};  
-            int b[SEQ_LEN][SEQ_LEN] = {0};
-
-            strcpy(Y, X);
-            int m = strlen(X); 
-            int n = m;
-
-            qsort(Y, m, sizeof(char), compare);
-
-            memo_lcs_length(X, Y, c, b, m, n);
-            printf("Length of LCS: %d\n", c[m][n]);
-
-            break;
-        }
-        case 7: {
-            // 14.4-6
-            int A[] = {3, 10, 2, 1, 20};
-            int n = sizeof(A) / sizeof(A[0]);
-            long_monotonic(A, n);
-
-            break;
-        }
-        default:
-            break;
-    }
-
-    return 0;
 }

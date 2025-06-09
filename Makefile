@@ -10,9 +10,10 @@ COMMON_SRC = $(SRCDIR)/common.c
 MAIN_SRC = $(SRCDIR)/main.c
 
 # Part commons
-PART1_COMMONS_SRC = $(SRCDIR)/part_1_foundations/part_1_commons.c
-PART2_COMMONS_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/part_2_commons.c
-PART3_COMMONS_SRC = $(SRCDIR)/part_3_data_structures/part_3_commons.c
+PART_1_COMMONS_SRC = $(SRCDIR)/part_1_foundations/part_1_commons.c
+PART_2_COMMONS_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/part_2_commons.c
+PART_3_COMMONS_SRC = $(SRCDIR)/part_3_data_structures/part_3_commons.c
+PART_4_COMMONS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/part_4_commons.c
 
 # ============================================================================
 # PART 1: FOUNDATIONS
@@ -142,6 +143,45 @@ RED_BLACK_TREES_MAIN = $(SRCDIR)/part_3_data_structures/13_red-black_trees/main.
 RED_BLACK_TREES_PROBLEMS_SRC = $(SRCDIR)/part_3_data_structures/13_red-black_trees/problems.c
 RED_BLACK_TREES_PROBLEMS_MAIN = $(SRCDIR)/part_3_data_structures/13_red-black_trees/problems.c
 
+# Chapter 14
+ROD_CUTTING_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/1_rod_cutting/rod_cutting.c
+ROD_CUTTING_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/1_rod_cutting/main.c
+
+MATRIX_CHAIN_MULT_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/2_matrix_chain_multiplication/matrix_chain_multiplication.c
+MATRIX_CHAIN_MULT_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/2_matrix_chain_multiplication/main.c
+
+ELEMENTS_DP_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/3_elements_of_dynamic_programming/elements_of_dynamic_programming.c
+ELEMENTS_DP_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/3_elements_of_dynamic_programming/main.c
+
+LCS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/4_longest_common_subsequence/longest_common_subsequence.c
+LCS_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/4_longest_common_subsequence/main.c
+
+OPTIMAL_BST_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/5_optimal_binary_search_trees/optimal_binary_search_trees.c
+OPTIMAL_BST_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/5_optimal_binary_search_trees/main.c
+
+CHAPTER_14_PROBLEMS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/problems.c
+
+# Chapter 15
+ACTIVITY_SELECTION_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/1_activity_selection_problem/activity_selection_problem.c
+ACTIVITY_SELECTION_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/1_activity_selection_problem/main.c
+
+GREEDY_ELEMENTS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/2_elements_of_the_greedy_strategy/elements_of_the_greedy_strategy.c
+GREEDY_ELEMENTS_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/2_elements_of_the_greedy_strategy/main.c
+
+HUFFMAN_CODES_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/3_huffman_codes/huffman_codes.c
+HUFFMAN_CODES_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/3_huffman_codes/main.c
+
+OFFLINE_CACHING_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/4_off-line_caching/off-line_caching.c
+OFFLINE_CACHING_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/4_off-line_caching/main.c
+
+CHAPTER_15_PROBLEMS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/problems.c
+
+# Chapter 16
+AMORTIZED_ANALYSIS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/16_amortized_analysis/amortized_analysis.c
+AMORTIZED_ANALYSIS_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/16_amortized_analysis/main.c
+
+CHAPTER_16_PROBLEMS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/16_amortized_analysis/problems.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -184,7 +224,20 @@ RED_BLACK_TREES_PROBLEMS_MAIN = $(SRCDIR)/part_3_data_structures/13_red-black_tr
         bst-querying run-bst-querying \
         bst-insertion-deletion run-bst-insertion-deletion \
         red-black-trees run-red-black-trees \
-        chapter-13-problems run-chapter-13-problems
+        chapter-13-problems run-chapter-13-problems \
+        rod-cutting run-rod-cutting \
+		matrix-chain-mult run-matrix-chain-mult \
+		elements-dp run-elements-dp \
+		lcs run-lcs \
+		optimal-bst run-optimal-bst \
+		dp-problems run-dp-problems \
+		activity-selection run-activity-selection \
+		greedy-elements run-greedy-elements \
+		huffman-codes run-huffman-codes \
+		offline-caching run-offline-caching \
+		chapter-15-problems run-chapter-15-problems \
+		amortized-analysis run-amortized-analysis \
+		chapter-16-problems run-chapter-16-problems
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -224,51 +277,51 @@ run-complexity-table: complexity-table
 
 # Chapter 2
 insertion-sort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART1_COMMONS_SRC) $(INSERTION_SORT_SRC) $(INSERTION_SORT_MAIN) -o $(BINDIR)/insertion_sort
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(INSERTION_SORT_SRC) $(INSERTION_SORT_MAIN) -o $(BINDIR)/insertion_sort
 
 run-insertion-sort: insertion-sort
 	$(BINDIR)/insertion_sort
 
 analyzing-algorithms: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART1_COMMONS_SRC) $(ANALYZING_ALGORITHMS_SRC) $(ANALYZING_ALGORITHMS_MAIN) -o $(BINDIR)/analyzing_algorithms
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(ANALYZING_ALGORITHMS_SRC) $(ANALYZING_ALGORITHMS_MAIN) -o $(BINDIR)/analyzing_algorithms
 
 run-analyzing-algorithms: analyzing-algorithms
 	$(BINDIR)/analyzing_algorithms
 
 designing-algorithms: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART1_COMMONS_SRC) $(DESIGNING_ALGORITHMS_SRC) $(DESIGNING_ALGORITHMS_MAIN) -o $(BINDIR)/designing_algorithms
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(DESIGNING_ALGORITHMS_SRC) $(DESIGNING_ALGORITHMS_MAIN) -o $(BINDIR)/designing_algorithms
 
 run-designing-algorithms: designing-algorithms
 	$(BINDIR)/designing_algorithms
 
 chapter-2-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART1_COMMONS_SRC) $(CHAPTER_2_PROBLEMS_SRC) -o $(BINDIR)/chapter_2_problems
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(CHAPTER_2_PROBLEMS_SRC) -o $(BINDIR)/chapter_2_problems
 
 run-chapter-2-problems: chapter-2-problems
 	$(BINDIR)/chapter_2_problems
 
 # Chapter 4
 square-matrix-mult: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART1_COMMONS_SRC) $(SQUARE_MATRIX_MULT_SRC) $(SQUARE_MATRIX_MULT_MAIN) -o $(BINDIR)/square_matrix_mult
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(SQUARE_MATRIX_MULT_SRC) $(SQUARE_MATRIX_MULT_MAIN) -o $(BINDIR)/square_matrix_mult
 
 run-square-matrix-mult: square-matrix-mult
 	$(BINDIR)/square_matrix_mult
 
 strassen: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART1_COMMONS_SRC) $(STRASSEN_SRC) $(STRASSEN_MAIN) -o $(BINDIR)/strassen
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(STRASSEN_SRC) $(STRASSEN_MAIN) -o $(BINDIR)/strassen
 
 run-strassen: strassen
 	$(BINDIR)/strassen
 
 # Chapter 5
 hire-assistant: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART1_COMMONS_SRC) $(HIRE_ASSISTANT_SRC) $(HIRE_ASSISTANT_MAIN) -o $(BINDIR)/hire_assistant
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(HIRE_ASSISTANT_SRC) $(HIRE_ASSISTANT_MAIN) -o $(BINDIR)/hire_assistant
 
 run-hire-assistant: hire-assistant
 	$(BINDIR)/hire_assistant
 
 chapter-5-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART1_COMMONS_SRC) $(CHAPTER_5_PROBLEMS_SRC) -o $(BINDIR)/chapter_5_problems
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(CHAPTER_5_PROBLEMS_SRC) -o $(BINDIR)/chapter_5_problems
 
 run-chapter-5-problems: chapter-5-problems
 	$(BINDIR)/chapter_5_problems
@@ -279,88 +332,88 @@ run-chapter-5-problems: chapter-5-problems
 
 # Chapter 6
 maintaining-heap-property: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(MAINTAINING_HEAP_PROPERTY_SRC) $(MAINTAINING_HEAP_PROPERTY_MAIN) -o $(BINDIR)/maintaining_heap_property
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(MAINTAINING_HEAP_PROPERTY_SRC) $(MAINTAINING_HEAP_PROPERTY_MAIN) -o $(BINDIR)/maintaining_heap_property
 
 run-maintaining-heap-property: maintaining-heap-property
 	$(BINDIR)/maintaining_heap_property
 
 heapsort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(MAINTAINING_HEAP_PROPERTY_SRC) $(HEAPSORT_SRC) $(HEAPSORT_MAIN) -o $(BINDIR)/heapsort
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(MAINTAINING_HEAP_PROPERTY_SRC) $(HEAPSORT_SRC) $(HEAPSORT_MAIN) -o $(BINDIR)/heapsort
 
 run-heapsort: heapsort
 	$(BINDIR)/heapsort
 
 priority-queues: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(MAINTAINING_HEAP_PROPERTY_SRC) $(HEAPSORT_SRC) $(PRIORITY_QUEUES_SRC) $(PRIORITY_QUEUES_MAIN) -o $(BINDIR)/priority_queues
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(MAINTAINING_HEAP_PROPERTY_SRC) $(HEAPSORT_SRC) $(PRIORITY_QUEUES_SRC) $(PRIORITY_QUEUES_MAIN) -o $(BINDIR)/priority_queues
 
 run-priority-queues: priority-queues
 	$(BINDIR)/priority_queues
 
 chapter-6-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(MAINTAINING_HEAP_PROPERTY_SRC) $(PRIORITY_QUEUES_SRC) $(CHAPTER_6_PROBLEMS_SRC) -o $(BINDIR)/chapter_6_problems
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(MAINTAINING_HEAP_PROPERTY_SRC) $(PRIORITY_QUEUES_SRC) $(CHAPTER_6_PROBLEMS_SRC) -o $(BINDIR)/chapter_6_problems
 
 run-chapter-6-problems: chapter-6-problems
 	$(BINDIR)/chapter_6_problems
 
 # Chapter 7
 quicksort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(QUICKSORT_SRC) $(QUICKSORT_MAIN) -o $(BINDIR)/quicksort
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(QUICKSORT_SRC) $(QUICKSORT_MAIN) -o $(BINDIR)/quicksort
 
 run-quicksort: quicksort
 	$(BINDIR)/quicksort
 
 chapter-7-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(QUICKSORT_SRC) $(CHAPTER_7_PROBLEMS_SRC) -o $(BINDIR)/chapter_7_problems
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(QUICKSORT_SRC) $(CHAPTER_7_PROBLEMS_SRC) -o $(BINDIR)/chapter_7_problems
 
 run-chapter-7-problems: chapter-7-problems
 	$(BINDIR)/chapter_7_problems
 
 # Chapter 8
 counting-sort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(COUNTING_SORT_SRC) $(COUNTING_SORT_MAIN) -o $(BINDIR)/counting_sort
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(COUNTING_SORT_SRC) $(COUNTING_SORT_MAIN) -o $(BINDIR)/counting_sort
 
 run-counting-sort: counting-sort
 	$(BINDIR)/counting_sort
 
 radix-sort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(COUNTING_SORT_SRC) $(RADIX_SORT_SRC) $(RADIX_SORT_MAIN) -o $(BINDIR)/radix_sort
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(COUNTING_SORT_SRC) $(RADIX_SORT_SRC) $(RADIX_SORT_MAIN) -o $(BINDIR)/radix_sort
 
 run-radix-sort: radix-sort
 	$(BINDIR)/radix_sort
 
 bucket-sort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(BUCKET_SORT_SRC) $(BUCKET_SORT_MAIN) -o $(BINDIR)/bucket_sort
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(BUCKET_SORT_SRC) $(BUCKET_SORT_MAIN) -o $(BINDIR)/bucket_sort
 
 run-bucket-sort: bucket-sort
 	$(BINDIR)/bucket_sort
 
 chapter-8-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(COUNTING_SORT_SRC) $(CHAPTER_8_PROBLEMS_SRC) -o $(BINDIR)/chapter_8_problems
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(COUNTING_SORT_SRC) $(CHAPTER_8_PROBLEMS_SRC) -o $(BINDIR)/chapter_8_problems
 
 run-chapter-8-problems: chapter-8-problems
 	$(BINDIR)/chapter_8_problems
 
 # Chapter 9
 min-max: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(MIN_MAX_SRC) $(MIN_MAX_MAIN) -o $(BINDIR)/min_max
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(MIN_MAX_SRC) $(MIN_MAX_MAIN) -o $(BINDIR)/min_max
 
 run-min-max: min-max
 	$(BINDIR)/min_max
 
 randomized-select: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(RANDOMIZED_SELECT_SRC) $(RANDOMIZED_SELECT_MAIN) -o $(BINDIR)/randomized_select
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(RANDOMIZED_SELECT_SRC) $(RANDOMIZED_SELECT_MAIN) -o $(BINDIR)/randomized_select
 
 run-randomized-select: randomized-select
 	$(BINDIR)/randomized_select
 
 worst-case-select: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(WORST_CASE_SELECT_SRC) $(WORST_CASE_SELECT_MAIN) -o $(BINDIR)/worst_case_select
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(WORST_CASE_SELECT_SRC) $(WORST_CASE_SELECT_MAIN) -o $(BINDIR)/worst_case_select
 
 run-worst-case-select: worst-case-select
 	$(BINDIR)/worst_case_select
 
 chapter-9-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART2_COMMONS_SRC) $(RANDOMIZED_SELECT_SRC) $(CHAPTER_9_PROBLEMS_SRC) -o $(BINDIR)/chapter_9_problems
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(RANDOMIZED_SELECT_SRC) $(CHAPTER_9_PROBLEMS_SRC) -o $(BINDIR)/chapter_9_problems
 
 run-chapter-9-problems: chapter-9-problems
 	$(BINDIR)/chapter_9_problems
@@ -371,89 +424,171 @@ run-chapter-9-problems: chapter-9-problems
 
 # Chapter 10
 stacks-queues: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(STACKS_QUEUES_SRC) $(STACKS_QUEUES_MAIN) -o $(BINDIR)/stacks_queues
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(STACKS_QUEUES_SRC) $(STACKS_QUEUES_MAIN) -o $(BINDIR)/stacks_queues
 
 run-stacks-queues: stacks-queues
 	$(BINDIR)/stacks_queues
 
 linked-lists: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(LINKED_LISTS_SRC) $(LINKED_LISTS_MAIN) -o $(BINDIR)/linked_lists
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(LINKED_LISTS_SRC) $(LINKED_LISTS_MAIN) -o $(BINDIR)/linked_lists
 
 run-linked-lists: linked-lists
 	$(BINDIR)/linked_lists
 
 rooted-trees: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(ROOTED_TREES_SRC) $(ROOTED_TREES_MAIN) -o $(BINDIR)/rooted_trees
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(ROOTED_TREES_SRC) $(ROOTED_TREES_MAIN) -o $(BINDIR)/rooted_trees
 
 run-rooted-trees: rooted-trees
 	$(BINDIR)/rooted_trees
 
 chapter-10-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(CHAPTER_10_PROBLEMS_SRC) -o $(BINDIR)/chapter_10_problems
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(CHAPTER_10_PROBLEMS_SRC) -o $(BINDIR)/chapter_10_problems
 
 run-chapter-10-problems: chapter-10-problems
 	$(BINDIR)/chapter_10_problems
 
 # Chapter 11
 direct-access-tables: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(DIRECT_ACCESS_TABLES_SRC) $(DIRECT_ACCESS_TABLES_MAIN) -o $(BINDIR)/direct_access_tables
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(DIRECT_ACCESS_TABLES_SRC) $(DIRECT_ACCESS_TABLES_MAIN) -o $(BINDIR)/direct_access_tables
 
 run-direct-access-tables: direct-access-tables
 	$(BINDIR)/direct_access_tables
 
 hash-tables: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(HASH_TABLES_SRC) $(HASH_TABLES_MAIN) -o $(BINDIR)/hash_tables
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(HASH_TABLES_SRC) $(HASH_TABLES_MAIN) -o $(BINDIR)/hash_tables
 
 run-hash-tables: hash-tables
 	$(BINDIR)/hash_tables
 
 hash-functions: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(HASH_FUNCTIONS_SRC) $(HASH_FUNCTIONS_MAIN) -o $(BINDIR)/hash_functions
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(HASH_FUNCTIONS_SRC) $(HASH_FUNCTIONS_MAIN) -o $(BINDIR)/hash_functions
 
 run-hash-functions: hash-functions
 	$(BINDIR)/hash_functions
 
 open-addressing: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(HASH_FUNCTIONS_SRC) $(OPEN_ADDRESSING_SRC) $(OPEN_ADDRESSING_MAIN) -o $(BINDIR)/open_addressing
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(HASH_FUNCTIONS_SRC) $(OPEN_ADDRESSING_SRC) $(OPEN_ADDRESSING_MAIN) -o $(BINDIR)/open_addressing
 
 run-open-addressing: open-addressing
 	$(BINDIR)/open_addressing
 
 perfect-hashing: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(HASH_FUNCTIONS_SRC) $(PERFECT_HASHING_SRC) $(PERFECT_HASHING_MAIN) -o $(BINDIR)/perfect_hashing
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(HASH_FUNCTIONS_SRC) $(PERFECT_HASHING_SRC) $(PERFECT_HASHING_MAIN) -o $(BINDIR)/perfect_hashing
 
 run-perfect-hashing: perfect-hashing
 	$(BINDIR)/perfect_hashing
 
 what-is-bst: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(WHAT_IS_BST_SRC) $(WHAT_IS_BST_MAIN) -o $(BINDIR)/what-is-bst
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(WHAT_IS_BST_SRC) $(WHAT_IS_BST_MAIN) -o $(BINDIR)/what-is-bst
 
 run-bst-what-is: what-is-bst
 	$(BINDIR)/what-is-bst
 
 bst-querying: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(BST_QUERYING_SRC) $(BST_QUERYING_MAIN) -o $(BINDIR)/bst_querying
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(BST_QUERYING_SRC) $(BST_QUERYING_MAIN) -o $(BINDIR)/bst_querying
 
 run-bst-querying: bst-querying
 	$(BINDIR)/bst_querying
 
 bst-insertion-deletion: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(BST_QUERYING_SRC) $(BST_INSERTION_DELETION_SRC) $(BST_INSERTION_DELETION_MAIN) -o $(BINDIR)/bst_insertion_deletion
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(BST_QUERYING_SRC) $(BST_INSERTION_DELETION_SRC) $(BST_INSERTION_DELETION_MAIN) -o $(BINDIR)/bst_insertion_deletion
 
 run-bst-insertion-deletion: bst-insertion-deletion
 	$(BINDIR)/bst_insertion_deletion
 
 red-black-trees: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(RED_BLACK_TREES_SRC) $(RED_BLACK_TREES_MAIN) -o $(BINDIR)/red-black_trees
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(RED_BLACK_TREES_SRC) $(RED_BLACK_TREES_MAIN) -o $(BINDIR)/red-black_trees
 
 run-red-black-trees: red-black-trees
 	$(BINDIR)/red-black_trees
 
 chapter-13-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART3_COMMONS_SRC) $(RED_BLACK_TREES_PROBLEMS_SRC) -o $(BINDIR)/chapter_13_problems
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(RED_BLACK_TREES_PROBLEMS_SRC) -o $(BINDIR)/chapter_13_problems
 
 run-chapter-13-problems: chapter-13-problems
 	$(BINDIR)/chapter_13_problems
+
+# Chapter 14
+
+rod-cutting: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(ROD_CUTTING_SRC) $(ROD_CUTTING_MAIN) -o $(BINDIR)/rod_cutting
+
+run-rod-cutting: rod-cutting
+	$(BINDIR)/rod_cutting
+
+matrix-chain-mult: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(MATRIX_CHAIN_MULT_SRC) $(MATRIX_CHAIN_MULT_MAIN) -o $(BINDIR)/matrix_chain_mult
+
+run-matrix-chain-mult: matrix-chain-mult
+	$(BINDIR)/matrix_chain_mult
+
+elements-dp: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART4_COMMONS_SRC) $(ELEMENTS_DP_SRC) $(ELEMENTS_DP_MAIN) -o $(BINDIR)/elements_dp
+
+run-elements-dp: elements-dp
+	$(BINDIR)/elements_dp
+
+lcs: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART4_COMMONS_SRC) $(LCS_SRC) $(LCS_MAIN) -o $(BINDIR)/lcs
+
+run-lcs: lcs
+	$(BINDIR)/lcs
+
+optimal-bst: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(PART_4_COMMONS_SRC) $(BST_QUERYING_SRC) $(OPTIMAL_BST_SRC) $(OPTIMAL_BST_MAIN) -o $(BINDIR)/optimal_bst
+
+run-optimal-bst: optimal-bst
+	$(BINDIR)/optimal_bst
+
+chapter-14-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(CHAPTER_14_PROBLEMS_SRC) -o $(BINDIR)/chapter_14_problems
+
+run-chapter-14-problems: chapter-14-problems
+	$(BINDIR)/chapter_14_problems
+
+# Chapter 15
+activity-selection: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(ACTIVITY_SELECTION_SRC) $(ACTIVITY_SELECTION_MAIN) -o $(BINDIR)/activity_selection
+
+run-activity-selection: activity-selection
+	$(BINDIR)/activity_selection
+
+greedy-elements: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(GREEDY_ELEMENTS_SRC) $(GREEDY_ELEMENTS_MAIN) -o $(BINDIR)/greedy_elements
+
+run-greedy-elements: greedy-elements
+	$(BINDIR)/greedy_elements
+
+huffman-codes: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(HUFFMAN_CODES_SRC) $(HUFFMAN_CODES_MAIN) -o $(BINDIR)/huffman_codes
+
+run-huffman-codes: huffman-codes
+	$(BINDIR)/huffman_codes
+
+offline-caching: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(OFFLINE_CACHING_SRC) $(OFFLINE_CACHING_MAIN) -o $(BINDIR)/offline_caching
+
+run-offline-caching: offline-caching
+	$(BINDIR)/offline_caching
+
+chapter-15-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(CHAPTER_15_PROBLEMS_SRC) -o $(BINDIR)/chapter_15_problems
+
+run-chapter-15-problems: chapter-15-problems
+	$(BINDIR)/chapter_15_problems
+
+# Chapter 16
+amortized-analysis: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(AMORTIZED_ANALYSIS_SRC) $(AMORTIZED_ANALYSIS_MAIN) -o $(BINDIR)/amortized_analysis
+
+run-amortized-analysis: amortized-analysis
+	$(BINDIR)/amortized_analysis
+
+chapter-16-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(CHAPTER_16_PROBLEMS_SRC) -o $(BINDIR)/chapter_16_problems
+
+run-chapter-16-problems: chapter-16-problems
+	$(BINDIR)/chapter_16_problems
 
 # ============================================================================
 # UTILITY TARGETS

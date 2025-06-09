@@ -1,11 +1,5 @@
 #include "part_2_sorting_and_order_statistics/6_heapsort/heapsort.h"
 
-void swap3(int A[], int i, int j) {
-    int temp = A[i];
-    A[i] = A[j];
-    A[j] = temp; 
-}
-
 void max_heapify_iterative(int A[], int n, int i) {
     int largest = i;
     int left, right;
@@ -30,8 +24,7 @@ void max_heapify_iterative(int A[], int n, int i) {
             break;
 
         printf("Swapping %d and %d", A[i], A[largest]);
-        printf("\n");
-        swap3(A, i, largest);
+        SWAP_INT(A[i], A[largest]);
 
         i = largest;
     }
@@ -60,8 +53,7 @@ void max_heapify_recursive(int A[], int n, int i) {
 
     if (largest != i) {
         printf("Swapping %d and %d", A[i], A[largest]);
-        printf("\n");
-        swap3(A, i, largest);
+        SWAP_INT(A[i], A[largest]);
         max_heapify_recursive(A, n, largest);
     }
 }
@@ -89,8 +81,7 @@ void min_heapify_recursive(int A[], int n, int i) {
 
     if (smallest != i) {
         printf("Swapping %d and %d", A[i], A[smallest]);
-        printf("\n");
-        swap3(A, i, smallest);
+        SWAP_INT(A[i], A[smallest]);
         min_heapify_recursive(A, n, smallest);
     }
 }
@@ -123,8 +114,7 @@ void min_heapify_iterative(int A[], int n, int i) {
             break;
 
         printf("Swapping %d and %d", A[i], A[smallest]);
-        printf("\n");
-        swap3(A, i, smallest);
+        SWAP_INT(A[i], A[smallest]);
 
         i = smallest;
     }

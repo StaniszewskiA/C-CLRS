@@ -1,5 +1,15 @@
 #include "../include/common.h"
 
+int compare(const void *a, const void *b) {
+    return (*(char*)a - *(char*)b);
+}
+
+int min_of_three(int a, int b, int c) {
+    if (a <= b && a <= c) return a;
+    else if (b <= a && b <= c) return b;
+    else return c;
+}
+
 // Memory allocation
 void* safe_malloc(size_t size) {
     if (size == 0) return NULL;
@@ -187,12 +197,6 @@ void add_matrices(
     }
 }
 
-void interval_swap(Interval *a,Interval *b ) {
-    Interval temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
 void print_intervals(Interval A[], int size) {
     for (int i = 0; i < size; i++) {
         printf("(%d, %d) ", A[i].low, A[i].high);
@@ -243,4 +247,9 @@ int find_max(int A[], int n) {
 int count_digits(int num) {
     if (num == 0) return 1;
     return (int)log10(abs(num)) + 1;
+}
+
+void generate_random_binary_string(char *str, size_t length) {
+    for (size_t i = 0; i < length; i++) str[i] = (rand() % 2)  ? '1' : '0';
+    str[length] = '\0';
 }

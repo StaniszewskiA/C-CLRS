@@ -8,7 +8,6 @@
 // CHAPTER 7.1 QUICKSORT
 // ============================================================================
 
-void swap4(int *a, int *b);
 int partition(int A[], int p, int r);
 void quicksort(int A[], int p, int r);
 

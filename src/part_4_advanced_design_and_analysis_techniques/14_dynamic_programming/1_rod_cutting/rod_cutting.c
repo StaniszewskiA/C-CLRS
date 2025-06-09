@@ -1,48 +1,35 @@
-#include <stdio.h>
-#include <limits.h>
-#include <time.h>
+#include "part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/dynamic_programming.h"
 
-#define TASK 8
-
-//----------Brute Force----------
-int brute_force(int p[], int n) {
+int rod_cutting_brute_force(int p[], int n) {
     if (n == 0) return 0;
 
     int q = INT_MIN;
 
     for (int i = 1; i <= n; i++)  
-        q = (q > p[i - 1] + brute_force(p, n - i)) 
+        q = (q > p[i - 1] + rod_cutting_brute_force(p, n - i)) 
             ? q 
-            : (p[i - 1] + brute_force(p, n - i));
+            : (p[i - 1] + rod_cutting_brute_force(p, n - i));
 
     return q;
 }
 
-//----------Top-Down-----------
-int memo[100];
-
-void init_memo(int n) {
-    for (int i = 0; i <= n; i++) memo[i] = -1;
-}
-
-int top_down(int p[], int n) {
+int rod_cutting_top_down(int p[], int n) {
     if (memo[n] != -1) return memo[n];
     if (n == 0) return 0;
 
     int q = INT_MIN;
 
     for (int i = 1; i <= n; i++) 
-        q = (q > p[i - 1] + top_down(p, n - i)) 
+        q = (q > p[i - 1] + rod_cutting_top_down(p, n - i)) 
             ? q 
-            : (p[i - 1] + top_down(p, n - i));
+            : (p[i - 1] + rod_cutting_top_down(p, n - i));
 
     memo[n] = q;
 
     return q; 
 }
 
-//----------Bottom-Up-----------
-int bottom_up(int p[], int n) {
+int rod_cutting_bottom_up(int p[], int n) {
     int r[n + 1];
     r[0] = 0;
 
@@ -60,8 +47,7 @@ int bottom_up(int p[], int n) {
     return r[n];
 }
 
-//----------Extended Bottom-Up (returning solution, not just costs)-----------
-void extended_bottom_up(int p[], int n) {
+void rod_cutting_extended_bottom_up(int p[], int n) {
     int r[n + 1];
     int s[n + 1];
 
@@ -91,8 +77,7 @@ void extended_bottom_up(int p[], int n) {
     printf("\n");
 }
 
-//----------14.1-3-----------
-int bottom_up_with_cost(int p[], int n, int c) {
+int rod_cutting_bottom_up_with_cost(int p[], int n, int c) {
     int r[n + 1];
     r[0] = 0;
 
@@ -110,7 +95,6 @@ int bottom_up_with_cost(int p[], int n, int c) {
     return r[n];
 }
 
-//----------14.1-4-----------
 int memoized_cut_rod_aux(int p[], int n, int r[], int s[]) {
     if (r[n] >= 0) return r[n];
     
@@ -151,8 +135,7 @@ void memoized_cut_rod_2(int p[], int n) {
     printf("\n");
 } 
 
-//----------14.1-5-----------
-int extended_top_down(int p[], int n) {
+int rod_cutting_extended_top_down(int p[], int n) {
     if (memo[n] != -1) return memo[n];
     if (n == 0) return 0;
 
@@ -179,10 +162,11 @@ int extended_top_down(int p[], int n) {
         length -= s[length];
     }
     printf("\n");
+
+    return memo[n];
 }
 
-//----------14.1-6-----------
-int fibonacci(int n) {
+int dp_fibonacci(int n) {
     int fib[n + 1];
 
     fib[0] = 1;
@@ -192,94 +176,4 @@ int fibonacci(int n) {
         fib[i] = fib[i - 1] + fib[i - 2];
 
     return fib[n];
-}
-
-int main(void) {
-    int p[] = {
-        2, 3, 5, 7, 11, 13, 17, 
-        19, 23, 29, 31, 37, 41, 
-        43, 47, 53, 59, 61, 67, 
-        71, 73, 79, 83, 89, 97,
-    };
-    int n = sizeof(p) / sizeof(p[0]);
-    int cost = 2;
-
-    switch (TASK)
-    {
-        case 1: {
-            // Brute-Force
-            clock_t start = clock();
-            int max_val = brute_force(p ,n);
-            clock_t end = clock();
-
-            double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC; 
-
-            printf("Maximum Obtainable Value: %d\n", max_val);
-            printf("Execution Time: %.6f seconds\n", time_taken);
-            break;
-        }
-        case 2: {
-            // Top-Down
-            clock_t start = clock();
-            init_memo(n);
-            int max_val = top_down(p ,n);
-            clock_t end = clock();
-
-            double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC; 
-
-            printf("Maximum Obtainable Value: %d\n", max_val);
-            printf("Execution Time: %.6f seconds\n", time_taken);
-            break;
-        }
-        case 3: {
-            // Bottom-Up
-            clock_t start = clock();
-            int max_value = bottom_up(p, n);
-            clock_t end = clock();
-
-            double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC; 
-            printf("Maximum Obtainable Value: %d\n", max_value);
-            printf("Execution Time: %.6f seconds\n", time_taken);
-        }
-        case 4: {
-            // Bottom-Up with actual solution
-            clock_t start = clock();
-            extended_bottom_up(p, n);
-            clock_t end = clock();
-
-            double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC; 
-            printf("Execution Time: %.6f seconds\n", time_taken);
-        }
-        case 5: {
-            // 14.1-3
-            clock_t start = clock();
-            int max_value = bottom_up_with_cost(p, n, cost);
-            clock_t end = clock();
-
-            double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC; 
-            printf("Maximum Obtainable Value: %d\n", max_value);
-            printf("Execution Time: %.6f seconds\n", time_taken);
-        }
-        case 6: {
-            // 14.1-4
-            memoized_cut_rod_2(p, n);
-            break;
-        }
-        case 7: {
-            // 14.1-5
-            init_memo(n);
-            extended_top_down(p, n);
-            break;
-        }
-        case 8: {
-            // 14.1-6
-            int target = 10;
-            printf("Fibonacci number at position %d is: %d\n", target, fibonacci(target));
-            break;
-        }
-        default:
-            break;
-    }
-
-    return 0;
 }

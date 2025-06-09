@@ -1,19 +1,4 @@
-#include <stdio.h>
-#include <limits.h>
-#include <stdlib.h>
-
-int lookup_chain(int **m, int *p, int i, int j);
-int memoized_matrix_chain(int *p, int n);
-
-int main(void) {
-    int p[] = {30, 35, 15, 5, 10, 20, 25};
-    int n = sizeof(p) / sizeof(p[0]) - 1;
-
-    printf("Minimum number of multiplications: %d\n", 
-        memoized_matrix_chain(p, n));
-
-    return 0;
-}
+#include "part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/dynamic_programming.h"
 
 int memoized_matrix_chain(int *p, int n) {
     int **m = (int**)malloc((n + 1) * sizeof(int*));
@@ -34,8 +19,9 @@ int lookup_chain(int **m, int *p, int i, int j) {
     if (m[i][j] != INT_MAX) return m[i][j];
     int min_cost = INT_MAX;
 
-    if (i == j) m[i][j] = 0;
-    else 
+    if (i == j) {
+        m[i][j] = 0;
+    } else 
     {
         for (int k = i; k < j; k++) {
             int q = lookup_chain(m, p, i, k) 

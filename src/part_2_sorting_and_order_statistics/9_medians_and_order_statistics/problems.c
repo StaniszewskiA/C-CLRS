@@ -3,7 +3,7 @@
 int partition_left_right(int A[],  int left, int right, int pivot) {
     for (int i = left; i <= right; i++) {
         if (A[i] == pivot) {
-            swap5(&A[i], &A[right]);
+            SWAP_INT(A[i], A[right]);
             break;
         }
     }
@@ -11,11 +11,11 @@ int partition_left_right(int A[],  int left, int right, int pivot) {
     int idx = left;
     for (int i = left; i < right; i++) {
         if (A[i] < pivot) {
-            swap5(&A[i], &A[idx]);
+            SWAP_INT(A[i], A[idx]);
             idx++;
         }
     }
-    swap5(&A[idx], &A[right]);
+    SWAP_INT(A[idx], A[right]);
     return idx;
 }
 
@@ -42,7 +42,7 @@ int select_median(int A[], int left, int right) {
         int subRight = i + 2;
         if (subRight > right) subRight = right;
         insetion_sort_left_right(A, 1, subRight);
-        swap5(&A[left + numMedians], &A[(i + subRight) / 2]);
+        SWAP_INT(A[left + numMedians], A[(i + subRight) / 2]);
         numMedians++;
     }
 
