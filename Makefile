@@ -15,6 +15,8 @@ PART_2_COMMONS_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/part_2_common
 PART_3_COMMONS_SRC = $(SRCDIR)/part_3_data_structures/part_3_commons.c
 PART_4_COMMONS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/part_4_commons.c
 PART_5_COMMONS_SRC = $(SRCDIR)/part_5_advanced_data_structures/part_5_commons.c
+PART_6_COMMONS_SRC = $(SRCDIR)/part_6_graph_algorithms/part_6_commons.c
+
 
 # ============================================================================
 # PART 1: FOUNDATIONS
@@ -141,8 +143,11 @@ BST_INSERTION_DELETION_MAIN = $(SRCDIR)/part_3_data_structures/12_binary_search_
 RED_BLACK_TREES_SRC = $(SRCDIR)/part_3_data_structures/13_red-black_trees/red-black_trees.c
 RED_BLACK_TREES_MAIN = $(SRCDIR)/part_3_data_structures/13_red-black_trees/main.c
 
-RED_BLACK_TREES_PROBLEMS_SRC = $(SRCDIR)/part_3_data_structures/13_red-black_trees/problems.c
-RED_BLACK_TREES_PROBLEMS_MAIN = $(SRCDIR)/part_3_data_structures/13_red-black_trees/problems.c
+CHAPTER_13_PROBLEMS_SRC = $(SRCDIR)/part_3_data_structures/13_red-black_trees/problems.c
+
+# ============================================================================
+# PART 4: ADVANCED DESIGN AND ANALYSIS TECHNIQUES
+# ============================================================================
 
 # Chapter 14
 ROD_CUTTING_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/1_rod_cutting/rod_cutting.c
@@ -183,6 +188,10 @@ AMORTIZED_ANALYSIS_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniqu
 
 CHAPTER_16_PROBLEMS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/16_amortized_analysis/problems.c
 
+# ============================================================================
+# PART 5: ADVANCED DATA STRUCTURES
+# ============================================================================
+
 # Chapter 17
 DYNAMIC_ORDER_STATISTICS_SRC = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/1_dynamic_order_statistics/dynamic_order_statistics.c
 DYNAMIC_ORDER_STATISTICS_MAIN = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/1_dynamic_order_statistics/main.c
@@ -212,6 +221,75 @@ DISJOINT_SET_FORESTS_SRC = $(SRCDIR)/part_5_advanced_data_structures/19_data_str
 DISJOINT_SET_FORESTS_MAIN = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/3_disjoint_set_forests/main.c
 
 CHAPTER_19_PROBLEMS_SRC = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/problems.c
+
+# ============================================================================
+# PART 6: GRAPH ALGORITHMS
+# ============================================================================
+
+# Chapter 20
+REPRESENTATIONS_OF_GRAPHS_SRC = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/1_representations_of_graphs/representations_of_graphs.c
+REPRESENTATIONS_OF_GRAPHS_MAIN = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/1_representations_of_graphs/main.c
+
+BREADTH_FIRST_SEARCH_SRC = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/2_breadth-first_search/breadth-first_search.c
+BREADTH_FIRST_SEARCH_MAIN = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/2_breadth-first_search/main.c
+
+DEPTH_FIRST_SEARCH_SRC = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/3_depth-first_search/depth-first_search.c
+DEPTH_FIRST_SEARCH_MAIN = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/3_depth-first_search/main.c
+
+TOPOLOGICAL_SORT_SRC = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/4_topological_sort/topological_sort.c
+TOPOLOGICAL_SORT_MAIN = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/4_topological_sort/main.c
+
+STRONGLY_CONNECTED_COMPONENTS_SRC = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/5_strongly_connected_components/strongly_connected_components.c
+STRONGLY_CONNECTED_COMPONENTS_MAIN = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/5_strongly_connected_components/main.c
+
+CHAPTER_20_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/problems.c
+
+# Chapter 21
+GROWING_MST_SRC = $(SRCDIR)/part_6_graph_algorithms/21_minimum_spanning_trees/1_growing_a_minimum_spanning_tree/growing_a_minimum_spanning_tree.c
+GROWING_MST_MAIN = $(SRCDIR)/part_6_graph_algorithms/21_minimum_spanning_trees/1_growing_a_minimum_spanning_tree/main.c
+
+THE_ALGORITHMS_OF_KRUSKAL_AND_PRIM_SRC = $(SRCDIR)/part_6_graph_algorithms/21_minimum_spanning_trees/2_the_algorithms_of_kruskal_and_prim/the_algorithms_of_kruskal_and_prim.c
+THE_ALGORITHMS_OF_KRUSKAL_AND_PRIM_MAIN = $(SRCDIR)/part_6_graph_algorithms/21_minimum_spanning_trees/2_the_algorithms_of_kruskal_and_prim/main.c
+
+CHAPTER_21_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/21_minimum_spanning_trees/problems.c
+
+# Chapter 22
+BELLMAN_FORD_ALGORITHM_SRC = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/1_the_bellman-ford_algorithm/the_bellman-ford_algorithm.c
+BELLMAN_FORD_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/1_the_bellman-ford_algorithm/main.c
+
+DAG_SHORTEST_PATHS_SRC = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/2_single-source_shortest_paths_in_dags/single-source_shortest_paths_in_dags.c
+DAG_SHORTEST_PATHS_MAIN = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/2_single-source_shortest_paths_in_dags/main.c
+
+DIJKSTRA_ALGORITHM_SRC = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/3_dijkstras_algorithm/dijkstras_algorithm.c
+DIJKSTRA_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/3_dijkstras_algorithm/main.c
+
+DIFFERENCE_CONSTRAINTS_SRC = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/4_difference_constraints_and_shortest_paths/difference_constraints_and_shortest_paths.c
+DIFFERENCE_CONSTRAINTS_MAIN = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/4_difference_constraints_and_shortest_paths/main.c
+
+CHAPTER_22_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/problems.c
+
+# Chapter 23
+SHORTEST_PATHS_MATRIX_MULT_SRC = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/1_shortest_paths_and_matrix_multiplication/shortest_paths_and_matrix_multiplication.c
+SHORTEST_PATHS_MATRIX_MULT_MAIN = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/1_shortest_paths_and_matrix_multiplication/main.c
+
+FLOYD_WARSHALL_ALGORITHM_SRC = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/2_the_floyd-warshall_algorithm/the_floyd-warshall_algorithm.c
+FLOYD_WARSHALL_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/2_the_floyd-warshall_algorithm/main.c
+
+JOHNSONS_ALGORITHM_SRC = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/3_johnsons_algorithm_for_sparse_graphs/johnsons_algorithm_for_sparse_graphs.c
+JOHNSONS_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/3_johnsons_algorithm_for_sparse_graphs/main.c
+
+CHAPTER_23_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/problems.c
+
+# Chapter 24
+THE_FORD_FULKERSON_METHOD_SRC = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/2_the_ford_fulkerson_method/the_ford_fulkerson_method.c
+THE_FORD_FULKERSON_METHOD_MAIN = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/2_the_ford_fulkerson_method/main.c
+
+MAXIMUM_BIPARTITE_MATCHING_SRC = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/3_maximum_bipartite_matching/maximum_bipartite_matching.c
+MAXIMUM_BIPARTITE_MATCHING_MAIN = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/3_maximum_bipartite_matching/main.c
+
+CHAPTER_24_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/problems.c
+
+# Chapter 25
 
 # ============================================================================
 # PHONY TARGETS
@@ -280,6 +358,27 @@ CHAPTER_19_PROBLEMS_SRC = $(SRCDIR)/part_5_advanced_data_structures/19_data_stru
 		linked-list-representation run-linked-list-representation \
 		disjoint-set-forests run-disjoint-set-forests \
 		chapter-19-problems run-chapter-19-problems \
+		representations-of-graphs run-representations-of-graphs \
+		breadth-first-search run-breadth-first-search \
+		depth-first-search run-depth-first-search \
+		topological-sort run-topological-sort \
+		strongly-connected-components run-strongly-connected-components \
+		chapter-20-problems run-chapter-20-problems \
+		growing-mst run-growing-mst \
+		kruskal-prim run-kruskal-prim \
+		chapter-21-problems run-chapter-21-problems \
+		bellman-ford run-bellman-ford \
+		dag-shortest-paths run-dag-shortest-paths
+		dijkstra run-dijkstra \
+		difference-constraints run-difference-constraints \
+		chapter-22-problems run-chapter-22-problems \
+		shortest-paths-matrix-mult run-shortest-paths-matrix-mult \
+		floyd-warshall run-floyd-warshall \
+		johnsons-algorithm run-johnsons-algorithm \
+		chapter-23-problems run-chapter-23-problems \
+		ford-fulkerson-method run-ford-fulkerson-method \
+		maximum-bipartite-matching run-maximum-bipartite-matching \
+		chapter-24-problems run-chapter-24-problems
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -309,7 +408,7 @@ run-debug: demo-debug
 # ============================================================================
 # PART 1: FOUNDATIONS
 # ============================================================================
-
+	
 # Chapter 1
 complexity-table: $(BINDIR)
 	$(CC) $(CFLAGS) $(COMMON_SRC) $(COMPLEXITY_TABLE_SRC) $(COMPLEXITY_TABLE_MAIN) -o $(BINDIR)/complexity_table
@@ -545,7 +644,7 @@ run-red-black-trees: red-black-trees
 	$(BINDIR)/red-black_trees
 
 chapter-13-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(RED_BLACK_TREES_PROBLEMS_SRC) -o $(BINDIR)/chapter_13_problems
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(CHAPTER_13_PROBLEMS_SRC) -o $(BINDIR)/chapter_13_problems
 
 run-chapter-13-problems: chapter-13-problems
 	$(BINDIR)/chapter_13_problems
@@ -694,6 +793,139 @@ chapter-19-problems: $(BINDIR)
 
 run-chapter-19-problems: chapter-19-problems
 	$(BINDIR)/chapter_19_problems
+
+# Chapter 20
+representations-of-graphs: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(PART_6_COMMONS_SRC) $(STRASSEN_SRC) $(REPRESENTATIONS_OF_GRAPHS_SRC) $(REPRESENTATIONS_OF_GRAPHS_MAIN) -o $(BINDIR)/representations_of_graphs
+
+run-representations-of-graphs: representations-of-graphs
+	$(BINDIR)/representations_of_graphs
+
+breadth-first-search: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(PART_6_COMMONS_SRC) $(STRASSEN_SRC) $(BREADTH_FIRST_SEARCH_SRC) $(BREADTH_FIRST_SEARCH_MAIN) -o $(BINDIR)/breadth_first_search
+
+run-breadth-first-search: breadth-first-search
+	$(BINDIR)/breadth_first_search	
+
+depth-first-search: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(PART_6_COMMONS_SRC) $(DEPTH_FIRST_SEARCH_SRC) $(DEPTH_FIRST_SEARCH_MAIN) -o $(BINDIR)/depth_first_search
+
+run-depth-first-search: depth-first-search
+	$(BINDIR)/depth_first_search
+
+topological-sort: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(TOPOLOGICAL_SORT_SRC) $(TOPOLOGICAL_SORT_MAIN) -o $(BINDIR)/topological_sort
+
+run-topological-sort: topological-sort
+	$(BINDIR)/topological_sort
+
+strongly-connected-components: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(STRASSEN_SRC) $(TOPOLOGICAL_SORT_SRC) $(STRONGLY_CONNECTED_COMPONENTS_SRC) $(STRONGLY_CONNECTED_COMPONENTS_MAIN) -o $(BINDIR)/strongly_connected_components
+
+run-strongly-connected-components: strongly-connected-components
+	$(BINDIR)/strongly_connected_components
+
+chapter-20-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(TOPOLOGICAL_SORT_SRC) $(STRONGLY_CONNECTED_COMPONENTS_SRC) $(CHAPTER_20_PROBLEMS_SRC) -o $(BINDIR)/chapter_20_problems
+
+run-chapter-20-problems: chapter-20-problems
+	$(BINDIR)/chapter_20_problems
+
+# Chapter 21
+growing-mst: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(GROWING_MST_SRC) $(GROWING_MST_MAIN) -o $(BINDIR)/growing_mst
+
+run-growing-mst: growing-mst
+	$(BINDIR)/growing_mst
+
+kruskal-prim: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(PART_6_COMMONS_SRC) $(DISJOINT_SET_OPERATIONS_SRC) $(THE_ALGORITHMS_OF_KRUSKAL_AND_PRIM_SRC) $(THE_ALGORITHMS_OF_KRUSKAL_AND_PRIM_MAIN) -o $(BINDIR)/kruskal_prim
+
+run-kruskal-prim: kruskal-prim
+	$(BINDIR)/kruskal_prim
+
+chapter-21-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(PART_6_COMMONS_SRC) $(DISJOINT_SET_OPERATIONS_SRC) $(CHAPTER_21_PROBLEMS_SRC) -o $(BINDIR)/chapter_21_problems
+
+run-chapter-21-problems: chapter-21-problems
+	$(BINDIR)/chapter_21_problems
+
+# Chapter 22
+bellman-ford: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(BELLMAN_FORD_ALGORITHM_SRC) $(BELLMAN_FORD_ALGORITHM_MAIN) -o $(BINDIR)/bellman_ford
+
+run-bellman-ford: bellman-ford
+	$(BINDIR)/bellman_ford
+
+dag-shortest-paths: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(DAG_SHORTEST_PATHS_SRC) $(DAG_SHORTEST_PATHS_MAIN) -o $(BINDIR)/dag_shortest_paths
+
+run-dag-shortest-paths: dag-shortest-paths
+	$(BINDIR)/dag_shortest_paths
+
+dijkstra: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(DIJKSTRA_ALGORITHM_SRC) $(DIJKSTRA_ALGORITHM_MAIN) -o $(BINDIR)/dijkstra
+
+run-dijkstra: dijkstra
+	$(BINDIR)/dijkstra
+
+difference-constraints: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(BELLMAN_FORD_ALGORITHM_SRC) $(DIFFERENCE_CONSTRAINTS_SRC) $(DIFFERENCE_CONSTRAINTS_MAIN) -o $(BINDIR)/difference_constraints
+
+run-difference-constraints: difference-constraints
+	$(BINDIR)/difference_constraints
+
+chapter-22-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(BELLMAN_FORD_ALGORITHM_SRC) $(DAG_SHORTEST_PATHS_SRC) $(DIJKSTRA_ALGORITHM_SRC) $(DIFFERENCE_CONSTRAINTS_SRC) $(CHAPTER_22_PROBLEMS_SRC) -o $(BINDIR)/chapter_22_problems
+
+run-chapter-22-problems: chapter-22-problems
+	$(BINDIR)/chapter_22_problems
+
+# Chapter 23
+shortest_paths_matrix_mult: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(SHORTEST_PATHS_MATRIX_MULT_SRC) $(SHORTEST_PATHS_MATRIX_MULT_MAIN) -o $(BINDIR)/shortest_paths_matrix_mult
+
+run-shortest_paths_matrix_mult: shortest_paths_matrix_mult
+	$(BINDIR)/shortest_paths_matrix_mult
+
+floyd-warshall: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(SHORTEST_PATHS_MATRIX_MULT_SRC) $(FLOYD_WARSHALL_ALGORITHM_SRC) $(FLOYD_WARSHALL_ALGORITHM_MAIN) -o $(BINDIR)/floyd_warshall
+
+run-floyd-warshall: floyd-warshall
+	$(BINDIR)/floyd_warshall
+
+johnsons-algorithm: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(JOHNSONS_ALGORITHM_SRC) $(JOHNSONS_ALGORITHM_MAIN) -o $(BINDIR)/johnsons_algorithm
+
+run-johnsons-algorithm: johnsons-algorithm
+	$(BINDIR)/johnsons_algorithm
+
+chapter-23-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(SHORTEST_PATHS_MATRIX_MULT_SRC) $(FLOYD_WARSHALL_ALGORITHM_SRC) $(JOHNSONS_ALGORITHM_SRC) $(CHAPTER_23_PROBLEMS_SRC) -o $(BINDIR)/chapter_23_problems
+
+run-chapter-23-problems: chapter-23-problems
+	$(BINDIR)/chapter_23_problems
+
+# Chapter 24
+ford-fulkerson-method: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(THE_FORD_FULKERSON_METHOD_SRC) $(THE_FORD_FULKERSON_METHOD_MAIN) -o $(BINDIR)/ford_fulkerson_method
+
+run-ford-fulkerson-method: ford-fulkerson-method
+	$(BINDIR)/ford_fulkerson_method
+
+maximum-bipartite-matching: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(THE_FORD_FULKERSON_METHOD_SRC) $(MAXIMUM_BIPARTITE_MATCHING_SRC) $(MAXIMUM_BIPARTITE_MATCHING_MAIN) -o $(BINDIR)/maximum_bipartite_matching
+
+run-maximum-bipartite-matching: maximum-bipartite-matching
+	$(BINDIR)/maximum_bipartite_matching
+
+chapter-24-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(THE_FORD_FULKERSON_METHOD_SRC) $(CHAPTER_24_PROBLEMS_SRC) -o $(BINDIR)/chapter_24_problems
+
+run-chapter-24-problems: chapter-24-problems
+	$(BINDIR)/chapter_24_problems
+
+# Chapter 25
 
 # ============================================================================
 # UTILITY TARGETS

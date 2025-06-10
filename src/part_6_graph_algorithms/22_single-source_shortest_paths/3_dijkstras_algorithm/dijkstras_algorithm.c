@@ -1,55 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <math.h>
-
-#define TASK 6
-#define MAX_VERTICES 10
-#define INF INT_MAX
-
-#pragma region Matrix graph utils
-
-typedef struct MatGraph {
-    int adjMat[MAX_VERTICES][MAX_VERTICES];
-    int numVertices;
-} MatGraph;
-
-MatGraph* mat_graph_create(int numVertices) {
-    MatGraph* g = malloc(sizeof(MatGraph));
-    g->numVertices = numVertices;
-
-    for (int i = 0; i < numVertices; i++)
-        for (int j = 0; j < numVertices; j++) g->adjMat[i][j] = INF; 
-    return g;
-}
-
-void mat_graph_free(MatGraph* g) {
-    free(g);
-}
-
-void mat_graph_add_directed_edge(MatGraph* g, int u, int v, int weight) {
-    g->adjMat[u][v] = weight;
-}
-
-#pragma region Matrix graph utils
-
-void init_single_source(int dist[], int pred[], int numVertices, int src) {
-    for (int i = 0; i < numVertices; i++) {
-        dist[i] = INT_MAX;
-        pred[i] = -1;
-    }
-    dist[src] = 0;
-}
-
-void relax(int u, int v, int weight, int dist[], int pred[]) {
-    if (dist[u] != INT_MAX && dist[u] + weight < dist[v]) {
-        dist[v] = dist[u] + weight;
-        pred[v] = u;
-    }
-}
+#include "part_6_graph_algorithms/22_single-source_shortest_paths/single-source_shortest_paths.h"
 
 void dijkstra(MatGraph* g, int src, int dist[], int pred[]) {
-    int visited[MAX_VERTICES] = {0};
+    int visited[MAX_GRAPH_VERTICES] = {0};
     init_single_source(dist, pred, g->numVertices, src);
 
     for (int iters = 0; iters < g->numVertices - 1; iters++) {
@@ -69,12 +21,17 @@ void dijkstra(MatGraph* g, int src, int dist[], int pred[]) {
 
         for (int v = 0; v < g->numVertices; v++) {
             if (!visited[v] && g->adjMat[u][v] != INF)
-                relax(u, v, g->adjMat[u][v], dist, pred);
+                relax_edge(u, v, g->adjMat[u][v], dist, pred);
         }
     }
 }
 
-void print_solution(int dist[], int pred[], int numVertices, int src) {
+void print_dijkstra_solution(
+    int dist[], 
+    int pred[], 
+    int numVertices, 
+    int src
+) {
     printf("Shortest paths from source %d:\n", src);
     for (int i = 0; i < numVertices; i++) {
         printf("To vertex %d: ", i);
@@ -89,18 +46,8 @@ void print_solution(int dist[], int pred[], int numVertices, int src) {
 
 #pragma region 22.3-4
 
-typedef struct PriorityQueueNode {
-    int vertex;
-    int distance;
-} PriorityQueueNode;
-
-typedef struct PriorityQueue {
-    PriorityQueueNode nodes[MAX_VERTICES];
-    int size;
-} PriorityQueue;
-
-void pq_init(PriorityQueue* pg) {
-    pg->size = 0;
+void pq_init(PriorityQueue* pq) {
+    pq->size = 0;
 }
 
 void pq_push(PriorityQueue* pq, int vertex, int dist) {
@@ -134,7 +81,14 @@ int pq_is_empty(PriorityQueue* pq) {
     return pq->size == 0;
 }
 
-void pq_relax(int u, int v, int weight, int dist[], int pred[], PriorityQueue* pq) {
+void pq_relax(
+    int u, 
+    int v, 
+    int weight, 
+    int dist[], 
+    int pred[], 
+    PriorityQueue* pq
+) {
     if (dist[u] != INT_MAX && dist[u] + weight < dist[v]) {
         dist[v] = dist[u] + weight;
         pred[v] = u;
@@ -147,7 +101,7 @@ void pq_dijkstra(MatGraph* g, int src, int dist[], int pred[]) {
     PriorityQueue pq;
     pq_init(&pq);
 
-    int visited[MAX_VERTICES] = {0};
+    int visited[MAX_GRAPH_VERTICES] = {0};
     init_single_source(dist, pred, g->numVertices, src);
     pq_push(&pq, src, 0);
 
@@ -200,19 +154,8 @@ void mat_graph_add_directed_reliability_edge(
 
 #pragma region 22.3-9
 
-#define MAX_WEIGHT 10
-
-typedef struct BucketNode {
-    int vertex;
-    struct BucketNode* next;
-} BucketNode;
-
-typedef struct Bucket {
-    BucketNode* head;
-} Bucket;
-
 void bucket_add(Bucket* bucket, int vertex) {
-    BucketNode* newNode = malloc(sizeof(BucketNode));
+    BucketNode* newNode = safe_malloc(sizeof(BucketNode));
     newNode->vertex = vertex;
     newNode->next = bucket->head;
     bucket->head = newNode;
@@ -227,7 +170,7 @@ int bucket_pop(Bucket* bucket) {
     return vertex;
 }
 
-int is_bucket_empty(Bucket* bucket) {
+int bucket_is_empty(Bucket* bucket) {
     return bucket->head == NULL;
 }
 
@@ -245,12 +188,12 @@ void dial(MatGraph* g, int src, int dist[], int pred[]) {
     bucket_add(&buckets[0], src);
 
     for (int i = 0; i <= maxDistance; i++) {
-        while (!is_bucket_empty(&buckets[i])) {
+        while (!bucket_is_empty(&buckets[i])) {
             int u = bucket_pop(&buckets[i]);
             for (int v = 0; v < g->numVertices; v++) {
                 if (g->adjMat[u][v] != INF) {
                     int oldDist = dist[v];
-                    relax(u, v, g->adjMat[u][v], dist, pred);
+                    relax_edge(u, v, g->adjMat[u][v], dist, pred);
                     if (dist[v] < oldDist) bucket_add(&buckets[dist[v]], v);
                 }
             }
@@ -262,20 +205,9 @@ void dial(MatGraph* g, int src, int dist[], int pred[]) {
 
 #pragma region 22.3-10
 
-typedef struct BinaryHeapNode {
-    int vertex;
-    int distance;
-} BinaryHeapNode;
-
-typedef struct BinaryHeap {
-    BinaryHeapNode* nodes;
-    int size;
-    int capacity;
-} BinaryHeap;
-
 BinaryHeap* binary_heap_create(int capacity) {
-    BinaryHeap* heap = malloc(sizeof(BinaryHeap));
-    heap->nodes = malloc(sizeof(BinaryHeapNode) * capacity);
+    BinaryHeap* heap = safe_malloc(sizeof(BinaryHeap));
+    heap->nodes = safe_malloc(sizeof(BinaryHeapNode) * capacity);
     heap->size = 0;
     heap->capacity = capacity;
     return heap;
@@ -313,7 +245,7 @@ BinaryHeapNode binary_heap_pop(BinaryHeap* heap) {
     return minNode;
 }
 
-int is_binary_heap_empty(BinaryHeap* heap) {
+int binary_heap_is_empty(BinaryHeap* heap) {
     return heap->size == 0;
 }
 
@@ -324,13 +256,13 @@ void heap_dial(MatGraph* g, int src, int dist[], int pred[]) {
     init_single_source(dist, pred, g->numVertices, src);
     binary_heap_push(heap, src, 0);
 
-    while (!is_binary_heap_empty(heap)) {
+    while (!binary_heap_is_empty(heap)) {
         BinaryHeapNode node = binary_heap_pop(heap);
         int u = node.vertex;
         for (int v = 0; v < g->numVertices; v++) {
             if (g->adjMat[u][v] != INF) {
                 int oldDist = dist[v];
-                relax(u, v, g->adjMat[u][v], dist, pred);
+                relax_edge(u, v, g->adjMat[u][v], dist, pred);
                 if (dist[v] < oldDist) binary_heap_push(heap, v, dist[v]);
             }
         }
@@ -352,12 +284,12 @@ void bucket_dijkstra(MatGraph* g, int src, int dist[], int pred[], int C) {
     bucket_add(&buckets[0], src);
 
     for (int i = 0; i < numBuckets; i++) {
-        while (!is_bucket_empty(&buckets[i])) {
+        while (!bucket_is_empty(&buckets[i])) {
             int u = bucket_pop(&buckets[i]);
             for (int v = 0; v < g->numVertices; v++) {
                 if (g->adjMat[u][v] != INF) {
                     int oldDist = dist[v];
-                    relax(u, v, g->adjMat[u][v], dist, pred);
+                    relax_edge(u, v, g->adjMat[u][v], dist, pred);
                     if (dist[v] < oldDist) {
                         int bucketIdx = dist[v] / C;
                         bucket_add(&buckets[bucketIdx], v);
@@ -369,174 +301,3 @@ void bucket_dijkstra(MatGraph* g, int src, int dist[], int pred[], int C) {
 }
 
 #pragma endregion 22.3-12
-
-int main(void) {
-    switch (TASK)
-    {
-        case 1: {
-            // Basic Dijkstra's
-            int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
-
-            mat_graph_add_directed_edge(g, 0, 1, 4);
-            mat_graph_add_directed_edge(g, 0, 2, 1);
-            mat_graph_add_directed_edge(g, 2, 1, 2);
-            mat_graph_add_directed_edge(g, 1, 3, 1);
-            mat_graph_add_directed_edge(g, 2, 3, 5);
-            mat_graph_add_directed_edge(g, 3, 4, 3);
-            mat_graph_add_directed_edge(g, 4, 5, 2);
-
-            int dist[MAX_VERTICES];
-            int pred[MAX_VERTICES];
-            int src = 0;
-
-            dijkstra(g, src, dist, pred);
-            print_solution(dist, pred, numVertices, src);
-
-            mat_graph_free(g);
-            break;
-        }
-
-        case 2: {
-            // 22.3-4 and 22.3-5
-            int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
-
-            mat_graph_add_directed_edge(g, 0, 1, 4);
-            mat_graph_add_directed_edge(g, 0, 2, 1);
-            mat_graph_add_directed_edge(g, 2, 1, 2);
-            mat_graph_add_directed_edge(g, 1, 3, 1);
-            mat_graph_add_directed_edge(g, 2, 3, 5);
-            mat_graph_add_directed_edge(g, 3, 4, 3);
-            mat_graph_add_directed_edge(g, 4, 5, 2);
-
-            int dist[MAX_VERTICES];
-            int pred[MAX_VERTICES];
-            int src = 0;
-
-            pq_dijkstra(g, src, dist, pred);
-            print_solution(dist, pred, numVertices, src);
-
-            if (verify_dijkstra_output(g, dist, pred, src)) 
-                printf("The output is valid");
-            else printf("The output is invalid");
-
-            mat_graph_free(g);
-            break;
-        }
-
-        case 3: {
-            // 22.3-7
-            int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
-
-            mat_graph_add_directed_reliability_edge(g, 0, 1, 0.4);
-            mat_graph_add_directed_reliability_edge(g, 0, 2, 0.1);
-            mat_graph_add_directed_reliability_edge(g, 2, 1, 0.2);
-            mat_graph_add_directed_reliability_edge(g, 1, 3, 0.1);
-            mat_graph_add_directed_reliability_edge(g, 2, 3, 0.5);
-            mat_graph_add_directed_reliability_edge(g, 3, 4, 0.3);
-            mat_graph_add_directed_reliability_edge(g, 4, 5, 0.2);
-
-            int dist[MAX_VERTICES];
-            int pred[MAX_VERTICES];
-            int src = 0;
-
-            pq_dijkstra(g, src, dist, pred);
-            print_solution(dist, pred, numVertices, src);
-
-            if (verify_dijkstra_output(g, dist, pred, src)) 
-                printf("The output is valid");
-            else printf("The output is invalid");
-
-            mat_graph_free(g);
-            break;
-        }
-
-        case 4: {
-            // 22.3-9
-            int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
-
-            mat_graph_add_directed_reliability_edge(g, 0, 1, 0.4);
-            mat_graph_add_directed_reliability_edge(g, 0, 2, 0.1);
-            mat_graph_add_directed_reliability_edge(g, 2, 1, 0.2);
-            mat_graph_add_directed_reliability_edge(g, 1, 3, 0.1);
-            mat_graph_add_directed_reliability_edge(g, 2, 3, 0.5);
-            mat_graph_add_directed_reliability_edge(g, 3, 4, 0.3);
-            mat_graph_add_directed_reliability_edge(g, 4, 5, 0.2);
-
-            int dist[MAX_VERTICES];
-            int pred[MAX_VERTICES];
-            int src = 0;
-
-            dial(g, src, dist, pred);
-            print_solution(dist, pred, numVertices, src);
-
-            if (verify_dijkstra_output(g, dist, pred, src)) 
-                printf("The output is valid");
-            else printf("The output is invalid");
-
-            break;
-        }
-
-        case 5: {
-            // 22.3.10
-            int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
-
-            mat_graph_add_directed_reliability_edge(g, 0, 1, 0.4);
-            mat_graph_add_directed_reliability_edge(g, 0, 2, 0.1);
-            mat_graph_add_directed_reliability_edge(g, 2, 1, 0.2);
-            mat_graph_add_directed_reliability_edge(g, 1, 3, 0.1);
-            mat_graph_add_directed_reliability_edge(g, 2, 3, 0.5);
-            mat_graph_add_directed_reliability_edge(g, 3, 4, 0.3);
-            mat_graph_add_directed_reliability_edge(g, 4, 5, 0.2);
-
-            int dist[MAX_VERTICES];
-            int pred[MAX_VERTICES];
-            int src = 0;
-
-            heap_dial(g, src, dist, pred);
-            print_solution(dist, pred, numVertices, src);
-
-            if (verify_dijkstra_output(g, dist, pred, src)) 
-                printf("The output is valid");
-            else printf("The output is invalid");
-
-            break;
-        }
-
-        case 6: {
-            // 22.3.12
-            int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
-
-            mat_graph_add_directed_reliability_edge(g, 0, 1, 0.4);
-            mat_graph_add_directed_reliability_edge(g, 0, 2, 0.1);
-            mat_graph_add_directed_reliability_edge(g, 2, 1, 0.2);
-            mat_graph_add_directed_reliability_edge(g, 1, 3, 0.1);
-            mat_graph_add_directed_reliability_edge(g, 2, 3, 0.5);
-            mat_graph_add_directed_reliability_edge(g, 3, 4, 0.3);
-            mat_graph_add_directed_reliability_edge(g, 4, 5, 0.2);
-
-            int dist[MAX_VERTICES];
-            int pred[MAX_VERTICES];
-            int src = 0;
-            int C = 2;
-
-            bucket_dijkstra(g, src, dist, pred, C);
-            print_solution(dist, pred, numVertices, src);
-
-            if (verify_dijkstra_output(g, dist, pred, src)) 
-                printf("The output is valid");
-            else printf("The output is invalid");
-
-            break;
-        }
-        
-        default:
-            break;
-    }
-    return 0;
-}

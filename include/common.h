@@ -60,6 +60,7 @@ typedef enum {
 typedef int (*compare_func_t)(const void* a, const void* b);
 int compare(const void *a, const void *b);
 int min_of_three(int a, int b, int c);
+int compare_ints(const void* a, const void* b);
 
 // Memory allocation
 void* safe_malloc(size_t size);
@@ -70,6 +71,7 @@ void safe_free(void* ptr);
 // Other
 
 #define NARRAY 10
+#define MAX_MAT_SIZE 6
 
 void print_separator(const char* title);
 void print_error(const char* msg);
@@ -79,19 +81,25 @@ void print_arr(int arr[], int size);
 void print_arr_slice(int arr[], int left, int right);
 void print_arr_double(double arr[], int size);
 void print_arr_float(float A[]);
+void print_named_mat(int mat[MAX_MAT_SIZE][MAX_MAT_SIZE], const char* name);
+void print_named_vec(int v[MAX_MAT_SIZE], const char* name);
+void print_named_bool_mat(
+    int mat[MAX_MAT_SIZE][MAX_MAT_SIZE], 
+    const char* name
+);
 
 // Matrix utils
 
 #define MAX_MATRIX_SIZE 100
 
 void print_matrix(int matrix[MAX_MATRIX_SIZE][MAX_MATRIX_SIZE], int n);
-double** allocate_matrix(int size);
-void input_matrix(double** matrix, int size, const char* name);
-void free_matrix(double** matrix, int size);
+int** allocate_matrix(int size);
+void input_matrix(int** matrix, int size, const char* name);
+void free_matrix(int** matrix, int size);
 void add_matrices(
-    double** A, 
-    double** B, 
-    double** C, 
+    int** A, 
+    int** B, 
+    int** C, 
     int size, 
     int multiplier
 );
@@ -126,6 +134,9 @@ int find_max(int A[], int n);
 
 // Counting
 int count_digits(int num);
+int next_power_of_two(int n);
+int median_of_five(int arr[], int n);
+int select_kth(int arr[], int left, int right, int k);
 
 // Random
 void generate_random_binary_string(char *str, size_t length);

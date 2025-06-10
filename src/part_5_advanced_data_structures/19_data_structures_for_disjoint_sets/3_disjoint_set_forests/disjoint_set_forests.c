@@ -34,20 +34,20 @@ void print_disjoint_sets(DisjointSet* ds, int n) {
 /*
     19.3-2: Nonrecursive disjoint_set_find operation.
 */
-Node* create_node(int* elemPtr) {
-    Node* new_node = (Node*)malloc(sizeof(Node));
+DSNode* create_ds_node(int* elemPtr) {
+    DSNode* new_node = (DSNode*)malloc(sizeof(DSNode));
     new_node->elemPtr = elemPtr;
     new_node->next = NULL;
     return new_node;
 }
 
 int find_non_recursive(DisjointSet* ds, int x) {
-    Node* A = NULL;
+    DSNode* A = NULL;
 
     int curr = x;
 
     while (ds->parent[curr] != curr) {
-        Node* new_node = create_node(&ds->parent[curr]);
+        DSNode* new_node = create_ds_node(&ds->parent[curr]);
         new_node->next = A;
         A = new_node;
         curr = ds->parent[curr];
@@ -55,10 +55,10 @@ int find_non_recursive(DisjointSet* ds, int x) {
 
     int root = curr;
 
-    Node* temp = A;
+    DSNode* temp = A;
     while (temp != NULL) {
         *(temp->elemPtr) = root;
-        Node *toFree = temp;
+        DSNode *toFree = temp;
         temp = temp->next;
         free(toFree);
     }
@@ -72,14 +72,14 @@ int find_non_recursive(DisjointSet* ds, int x) {
 Node2* nodes2[MAX_DISJOINT_SET_SIZE];
 
 Node2* make_set2(int val) {
-    Node2* node = (Node2*)malloc(sizeof(Node2));
-    node->value = val;
-    node->parent = node;
-    node->rank = 0;
-    node->next = NULL;
-    node->tail = node;
-    nodes2[val] = node;
-    return node;
+    Node2* DSNode = (Node2*)malloc(sizeof(Node2));
+    DSNode->value = val;
+    DSNode->parent = DSNode;
+    DSNode->rank = 0;
+    DSNode->next = NULL;
+    DSNode->tail = DSNode;
+    nodes2[val] = DSNode;
+    return DSNode;
 }
 
 Node2* find_set2(Node2* x) {

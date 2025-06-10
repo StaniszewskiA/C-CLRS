@@ -15,7 +15,7 @@ typedef struct {
     int edges[MAX_VERTICES][MAX_VERTICES];
 } Graph;
 
-void make_set(int n);
+void make_set(int n, int initRanks);
 void union_sets(int u, int v);
 int find(int u);
 int is_same_component(int u, int v);
@@ -59,12 +59,12 @@ void disjoint_set_link(DisjointSet* ds, int xRoot, int yRoot);
 void union_disjoint_sets(DisjointSet* ds, int x, int y);
 void print_disjoint_sets(DisjointSet* ds, int n);
 
-typedef struct Node {
+typedef struct DSNode {
     int *elemPtr;
-    struct Node* next;
-} Node;
+    struct DSNode* next;
+} DSNode;
 
-Node* create_node(int* elemPtr);
+DSNode* create_ds_node(int* elemPtr);
 int find_non_recursive(DisjointSet* ds, int x);
 
 typedef struct Node2 {

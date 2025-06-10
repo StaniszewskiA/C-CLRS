@@ -3,10 +3,10 @@
 int parents[MAX_VERTICES];
 int ranks[MAX_VERTICES];
 
-void make_set(int n) {
+void make_set(int n, int initRanks) {
     for (int i = 0; i < n; i++) {
         parents[i] = i;
-        ranks[i] = 0;
+        ranks[i] = initRanks;
     }
 }
 
@@ -33,7 +33,7 @@ int is_same_component(int u, int v) {
 
 void connected_components(Graph* g) {
     int numVerts = g->numVertices;
-    make_set(numVerts);
+    make_set(numVerts, 0);
     int i, j;
 
     for (i = 0; i < numVerts; i++) {

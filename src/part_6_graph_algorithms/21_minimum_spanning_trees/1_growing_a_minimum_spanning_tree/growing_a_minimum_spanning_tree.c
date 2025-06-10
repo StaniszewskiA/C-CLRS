@@ -1,41 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-#pragma region Graph utils
-
-#define MAX_VERTICES 10
-
-typedef struct MatGraph {
-    // Graph represented by adjacency matrix
-    int adjMat[MAX_VERTICES][MAX_VERTICES];
-    int numVertices;
-} MatGraph;
-
-MatGraph* mat_graph_create(int numVertices) {
-    MatGraph* g = malloc(sizeof(MatGraph));
-    g->numVertices = numVertices;
-
-    for (int i = 0; i < numVertices; i++) 
-        for (int j = 0; j < numVertices; j++) g->adjMat[i][j] = 0;
-
-    return g;
-}
-
-void mat_graph_free(MatGraph* g) {
-    free(g);
-}
-
-void mat_graph_add_undirected_edge(MatGraph* g, int u, int v, int weight) {
-    g->adjMat[u][v] = weight;
-    g->adjMat[v][u] = weight;
-}
-
-void mat_graph_remove_undirected_edge(MatGraph* g, int u, int v) {
-    g->adjMat[u][v] = 0;
-    g->adjMat[v][u] = 0;
-}
-
-#pragma endregion Graph utils
+#include "part_6_graph_algorithms/21_minimum_spanning_trees/minimum_spanning_trees.h"
 
 #pragma region 21.1-11
 
@@ -88,25 +51,10 @@ void update_mst(MatGraph* mst, int u, int v, int newWeight) {
             printf("Replacing edge (%d, %d) with (%d, %d) of weight %d\n", 
                 maxU, maxV, u, v, newWeight);
             mat_graph_remove_undirected_edge(mst, maxU, maxV);
-            mat_graph_add_undirected_edge(mst, u, v, newWeight);
+            mat_graph_add_undirected_weighted_edge(mst, u, v, newWeight);
         } else {
             printf("No need to update the MST.\n");
         }
 }
 
 #pragma endregion 21.1-11
-
-int main(void) {
-    MatGraph* mst = mat_graph_create(5);
-
-    mat_graph_add_undirected_edge(mst, 0, 1, 4);
-    mat_graph_add_undirected_edge(mst, 1, 2, 3);
-    mat_graph_add_undirected_edge(mst, 2, 3, 5);
-    mat_graph_add_undirected_edge(mst, 3, 4, 6);
-
-    update_mst(mst, 0, 4, 2);
-
-    mat_graph_free(mst);
-
-    return 0;
-}

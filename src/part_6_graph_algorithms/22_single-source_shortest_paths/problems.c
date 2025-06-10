@@ -1,64 +1,14 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <float.h>
-
+#include "part_6_graph_algorithms/22_single-source_shortest_paths/single-source_shortest_paths.h"
 #define TASK 6
 
 #pragma region Graph utils
 
-#define MAX_VERTICES 10
-#define MAX_EDGES 100
-
-typedef struct MatGraph {
-    int adjMat[MAX_VERTICES][MAX_VERTICES];
-    int numVertices;
-} MatGraph;
-
-MatGraph* mat_graph_create(int numVertices) {
-    MatGraph* g = malloc(sizeof(MatGraph));
-    g->numVertices = numVertices;
-
-    for (int i = 0; i < numVertices; i++) {
-        for (int j = 0; j < numVertices; j++) g->adjMat[i][j] = 0;
-    }
-
-    return g;
-}
-
-void mat_graph_free(MatGraph* g) {
-    free(g);
-}
-
-void mat_graph_add_undirected_edge(MatGraph* g, int u, int v, int weight) {
-    g->adjMat[u][v] = weight;
-    g->adjMat[v][u] = weight;
-}
-
-void mat_graph_remove_undirected_edge(MatGraph* g, int u, int v) {
-    g->adjMat[u][v] = 0;
-    g->adjMat[v][u] = 0;
-}
-
-void mat_graph_add_directed_edge(MatGraph* g, int u, int v, int weight) {
-    g->adjMat[u][v] = weight;
-}
-
-void mat_graph_remove_directed_edge(MatGraph* g, int u, int v, int weight) {
-    g->adjMat[u][v] = 0;
-}
-
-void print_path(int pred[], int dest) {
-    if (dest == -1) return;
-    if (pred[dest] != -1) {
-        print_path(pred, pred[dest]);
-        printf(" -> ");
-    }
-    printf("%d", dest);
-}
-
-void print_solution(int dist[], int pred[], int numVertices, int src) {
+void print_solution_part_22_problems_solution(
+    int dist[], 
+    int pred[], 
+    int numVertices, 
+    int src
+) {
     printf("Shortest paths from source %d:\n", src);
     for (int i = 0; i < numVertices; i++) {
         if (i != src) {
@@ -77,23 +27,6 @@ void print_solution(int dist[], int pred[], int numVertices, int src) {
 #pragma endregion Graph utils
 
 #pragma region 22-1 Yens improvement to Bellman-Ford
-
-#define INF INT_MAX 
-
-void init_single_source(int dist[], int pred[], int numVertices, int src) {
-    for (int i = 0; i < numVertices; i++) {
-        dist[i] = INF;
-        pred[i] = -1;
-    }
-    dist[src] = 0;
-}
-
-void relax_edge(int u, int v, int weight, int dist[], int pred[]) {
-    if (dist[u] != INT_MAX && dist[u] + weight < dist[v]) {
-        dist[v] = dist[u] + weight;
-        pred[v] = u;
-    }
-}
 
 void yens_bellman_ford(MatGraph* g, int src, int dist[], int pred[]) {
     int n = g->numVertices;
@@ -124,13 +57,9 @@ void yens_bellman_ford(MatGraph* g, int src, int dist[], int pred[]) {
 
 #pragma region 22-2 Nesting boxes
 
-int compare_ints(const void* a, const void* b) {
-    return (*(int*)a - *(int*)b);
-}
-
 int nests_inside(int dims1[], int dims2[], int d) {
-    int sortedBox1[MAX_VERTICES];
-    int sortedBox2[MAX_VERTICES];
+    int sortedBox1[MAX_GRAPH_VERTICES];
+    int sortedBox2[MAX_GRAPH_VERTICES];
 
     memcpy(sortedBox1, dims1, d * sizeof(int));
     memcpy(sortedBox2, dims2, d * sizeof(int));
@@ -150,20 +79,20 @@ int nests_inside(int dims1[], int dims2[], int d) {
 
     Overall: O(nd*max(lg(d), n))
 */
-void find_longest_nesting_seq(int boxes[][MAX_VERTICES], int n, int d) {
+void find_longest_nesting_seq(int boxes[][MAX_GRAPH_VERTICES], int n, int d) {
     MatGraph* nestingGraph = mat_graph_create(n);
     
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (i != j && nests_inside(boxes[i], boxes[j], d)) {
-                mat_graph_add_directed_edge(nestingGraph, i, j, 1);
+                mat_graph_add_directed_weighted_edge(nestingGraph, i, j, 1);
                 printf("Box %d nests inside Box %d\n", i, j);
             }
         } 
     }
 
-    int dp[MAX_VERTICES];
-    int pred[MAX_VERTICES];
+    int dp[MAX_GRAPH_VERTICES];
+    int pred[MAX_GRAPH_VERTICES];
 
     for (int i = 0; i < n; i++) {
         dp[i] = 1;
@@ -185,7 +114,7 @@ void find_longest_nesting_seq(int boxes[][MAX_VERTICES], int n, int d) {
 
     printf("Length of the longest nesting seq: %d\n", dp[maxIdx]);
     
-    int seq[MAX_VERTICES];
+    int seq[MAX_GRAPH_VERTICES];
     int len = dp[maxIdx];
     int curr = maxIdx;
     for (int i = len - 1; i >= 0; i--) {
@@ -215,9 +144,10 @@ void find_longest_nesting_seq(int boxes[][MAX_VERTICES], int n, int d) {
 
 #pragma region 22-3 Arbitrage
 
-#include <math.h>
-
-void build_exchange_rate_graph(MatGraph* g, double rates[][MAX_VERTICES]) {
+void build_exchange_rate_graph(
+    MatGraph* g, 
+    double rates[][MAX_GRAPH_VERTICES]
+) {
     int n = g->numVertices;
 
     for (int i = 0; i < n; i++) {
@@ -257,10 +187,14 @@ int detect_currency_arbitrage(MatGraph* g, int src, int dist[], int pred[]) {
     return -1;
 }
 
-void print_arbitrage_cycle(int vertex, int pred[], double rates[][MAX_VERTICES]) {
-    int cycle[MAX_VERTICES];
+void print_arbitrage_cycle(
+    int vertex, 
+    int pred[], 
+    double rates[][MAX_GRAPH_VERTICES]
+) {
+    int cycle[MAX_GRAPH_VERTICES];
     int cycleLen = 0;
-    int visited[MAX_VERTICES] = {0};
+    int visited[MAX_GRAPH_VERTICES] = {0};
     int curr = vertex;
 
     do {
@@ -305,7 +239,7 @@ void print_arbitrage_cycle(int vertex, int pred[], double rates[][MAX_VERTICES])
 
 #pragma region 22-4 Gabows scaling algorithm for single-source shortest paths
 
-int calculate_bits(int W) {
+int calculate_bits_gabow(int W) {
     int k = 0;
 
     while (W > 0) {
@@ -320,7 +254,13 @@ int scale_weight(int weight, int i, int k) {
     return weight >> (k - i);
 }
 
-void bucket_dijkstra(MatGraph* g, int src, int dist[], int pred[], int maxW) {
+void bucket_dijkstra_gabow(
+    MatGraph* g, 
+    int src, 
+    int dist[], 
+    int pred[], 
+    int maxW
+) {
     int n = g->numVertices;
     init_single_source(dist, pred, n, src);
 
@@ -352,7 +292,13 @@ void bucket_dijkstra(MatGraph* g, int src, int dist[], int pred[], int maxW) {
     free(bucketSize);
 }
 
-void reweight_edges(MatGraph* g, MatGraph* reweighted, int i, int k, int prevDist[]) {
+void mat_graph_reweight_edges(
+    MatGraph* g, 
+    MatGraph* reweighted, 
+    int i, 
+    int k, 
+    int prevDist[]
+) {
     int n = g->numVertices;
 
     for (int u = 0; u < n; u++) {
@@ -380,7 +326,7 @@ void gabows_scaling(MatGraph* g, int src, int dist[], int pred[]) {
         }
     }
 
-    int k = calculate_bits(maxW);
+    int k = calculate_bits_gabow(maxW);
     printf("Max weight: %d, Number of bits (k): %d\n", maxW, k);
 
     MatGraph* reweighted = mat_graph_create(n);
@@ -395,7 +341,7 @@ void gabows_scaling(MatGraph* g, int src, int dist[], int pred[]) {
         }
     }
 
-    bucket_dijkstra(reweighted, src, dist, pred, 1);
+    bucket_dijkstra_gabow(reweighted, src, dist, pred, 1);
 
     printf("Distances after the first iteration:\n");
     for (int v = 0; v < n; v++) printf("%d: %d, ", v, dist[v]);
@@ -409,8 +355,8 @@ void gabows_scaling(MatGraph* g, int src, int dist[], int pred[]) {
             for (int v = 0; v < n; v++) reweighted->adjMat[u][v] = 0;
         }
 
-        reweight_edges(g, reweighted, i, k, prevDist);
-        bucket_dijkstra(reweighted, src, dist, pred, n - 1);
+        mat_graph_reweight_edges(g, reweighted, i, k, prevDist);
+        bucket_dijkstra_gabow(reweighted, src, dist, pred, n - 1);
 
         for (int v = 0; v < n; v++) {
             if (dist[v] != INF && prevDist[v] != INF)
@@ -444,10 +390,9 @@ void gabows_scaling(MatGraph* g, int src, int dist[], int pred[]) {
 
 #pragma region 22-5 Karps minimum mean-weight cycle algorithm
 
-
 double karps_minimum_mean_weight(MatGraph* g, int pred[]) {
     int n = g->numVertices;
-    int dist[MAX_VERTICES][MAX_VERTICES];
+    int dist[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES];
     double minMeanW = DBL_MAX;
 
     for (int k = 0; k <= n; k++) {
@@ -487,11 +432,7 @@ double karps_minimum_mean_weight(MatGraph* g, int pred[]) {
 
 #pragma region 22-6 Bitonic shortest paths
 
-typedef struct Edge {
-    int u, v, w;
-} Edge;
-
-int extract_edges(MatGraph* g, Edge edges[]) {
+int mat_graph_extract_edges(MatGraph* g, WeightedEdge edges[]) {
     int n = g->numVertices;
     int edgeCnt = 0;
 
@@ -509,12 +450,12 @@ int extract_edges(MatGraph* g, Edge edges[]) {
     return edgeCnt;
 }
 
-int edge_cmp_inc(const void* a, const void* b) {
-    return ((Edge*)a)->w - ((Edge*)b)->w; 
+int edge_weight_cmp_inc(const void* a, const void* b) {
+    return ((WeightedEdge*)a)->w - ((WeightedEdge*)b)->w; 
 }
 
-int edge_cmp_dec(const void* a, const void* b) {
-    return ((Edge*)b)->w - ((Edge*)a)->w; 
+int edge_weight_cmp_dec(const void* a, const void* b) {
+    return ((WeightedEdge*)b)->w - ((WeightedEdge*)a)->w; 
 }
 
 /*
@@ -524,25 +465,25 @@ int edge_cmp_dec(const void* a, const void* b) {
 */
 void bitonic_shortest_paths(MatGraph* g, int src, int dist[], int pred[]) {
     int n = g->numVertices;
-    Edge edges[MAX_EDGES];
-    int edgeCnt = extract_edges(g, edges);
+    WeightedEdge edges[MAX_GRAPH_EDGES];
+    int edgeCnt = mat_graph_extract_edges(g, edges);
     
     init_single_source(dist, pred, n, src);
 
     // We need 4 passes, 2 for inc, 2 for dec
-    qsort(edges, edgeCnt, sizeof(Edge), edge_cmp_inc);
+    qsort(edges, edgeCnt, sizeof(WeightedEdge), edge_weight_cmp_inc);
     for (int i = 0; i < edgeCnt; i++) 
         relax_edge(edges[i].u, edges[i].v, edges[i].w, dist, pred);
 
-    qsort(edges, edgeCnt, sizeof(Edge), edge_cmp_dec);
+    qsort(edges, edgeCnt, sizeof(WeightedEdge), edge_weight_cmp_dec);
     for (int i = 0; i < edgeCnt; i++) 
         relax_edge(edges[i].u, edges[i].v, edges[i].w, dist, pred);
 
-    qsort(edges, edgeCnt, sizeof(Edge), edge_cmp_inc);
+    qsort(edges, edgeCnt, sizeof(WeightedEdge), edge_weight_cmp_inc);
     for (int i = 0; i < edgeCnt; i++) 
         relax_edge(edges[i].u, edges[i].v, edges[i].w, dist, pred);
 
-    qsort(edges, edgeCnt, sizeof(Edge), edge_cmp_dec);
+    qsort(edges, edgeCnt, sizeof(WeightedEdge), edge_weight_cmp_dec);
     for (int i = 0; i < edgeCnt; i++) 
         relax_edge(edges[i].u, edges[i].v, edges[i].w, dist, pred);
 }
@@ -557,21 +498,21 @@ int main(void) {
             int numVertices = 6;
             MatGraph* g = mat_graph_create(numVertices);
 
-            mat_graph_add_directed_edge(g, 0, 1, 10);
-            mat_graph_add_directed_edge(g, 1, 2, 5);
-            mat_graph_add_directed_edge(g, 2, 3, 7);
-            mat_graph_add_directed_edge(g, 3, 1, -8); 
-            mat_graph_add_directed_edge(g, 4, 3, 4);
-            mat_graph_add_directed_edge(g, 0, 4, 3);
-            mat_graph_add_directed_edge(g, 5, 0, 2);
+            mat_graph_add_directed_weighted_edge(g, 0, 1, 10);
+            mat_graph_add_directed_weighted_edge(g, 1, 2, 5);
+            mat_graph_add_directed_weighted_edge(g, 2, 3, 7);
+            mat_graph_add_directed_weighted_edge(g, 3, 1, -8); 
+            mat_graph_add_directed_weighted_edge(g, 4, 3, 4);
+            mat_graph_add_directed_weighted_edge(g, 0, 4, 3);
+            mat_graph_add_directed_weighted_edge(g, 5, 0, 2);
 
-            int dist[MAX_VERTICES];
-            int pred[MAX_VERTICES];
+            int dist[MAX_GRAPH_VERTICES];
+            int pred[MAX_GRAPH_VERTICES];
             int src = 0;
 
             yens_bellman_ford(g, src, dist, pred);
 
-            print_solution(dist, pred, numVertices, src);
+            print_solution_part_22_problems_solution(dist, pred, numVertices, src);
             mat_graph_free(g);
             break;
         }
@@ -586,7 +527,7 @@ int main(void) {
             else printf("Box 1 does not nest inside Box 2\n");
 
             int n = 5;
-            int boxes[MAX_VERTICES][MAX_VERTICES] = {
+            int boxes[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES] = {
                 {2, 6, 8}, 
                 {1, 3, 4}, 
                 {5, 7, 9},  
@@ -601,7 +542,7 @@ int main(void) {
         case 3: {
             // 22-3
             int n = 4;
-            double rates[MAX_VERTICES][MAX_VERTICES] = {
+            double rates[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES] = {
                 {1.0, 0.82, 0.72, 110.0},   
                 {1.22, 1.0, 0.88, 134.0},   
                 {1.39, 1.14, 1.0, 153.0},   
@@ -627,8 +568,8 @@ int main(void) {
             MatGraph* g = mat_graph_create(n);
             build_exchange_rate_graph(g, rates);
 
-            int dist[MAX_VERTICES];
-            int pred[MAX_VERTICES];
+            int dist[MAX_GRAPH_VERTICES];
+            int pred[MAX_GRAPH_VERTICES];
 
             int vertex = detect_currency_arbitrage(g, 0, dist, pred);
 
@@ -644,19 +585,19 @@ int main(void) {
             int numVertices = 5;
             MatGraph* g = mat_graph_create(numVertices);
 
-            mat_graph_add_directed_edge(g, 0, 1, 4);  
-            mat_graph_add_directed_edge(g, 0, 2, 2);  
-            mat_graph_add_directed_edge(g, 1, 2, 5); 
-            mat_graph_add_directed_edge(g, 1, 3, 10); 
-            mat_graph_add_directed_edge(g, 2, 3, 3); 
-            mat_graph_add_directed_edge(g, 2, 4, 12); 
-            mat_graph_add_directed_edge(g, 3, 4, 2);  
+            mat_graph_add_directed_weighted_edge(g, 0, 1, 4);  
+            mat_graph_add_directed_weighted_edge(g, 0, 2, 2);  
+            mat_graph_add_directed_weighted_edge(g, 1, 2, 5); 
+            mat_graph_add_directed_weighted_edge(g, 1, 3, 10); 
+            mat_graph_add_directed_weighted_edge(g, 2, 3, 3); 
+            mat_graph_add_directed_weighted_edge(g, 2, 4, 12); 
+            mat_graph_add_directed_weighted_edge(g, 3, 4, 2);  
 
             printf("Orignal graph's weights:\n");
             for (int u = 0; u < numVertices; u++) {
                 for (int v = 0; v < numVertices; v++) {
                     if (g->adjMat[u][v] != 0) {
-                        printf("Edge (%d,%d): %d (binary: ", u, v, g->adjMat[u][v]);
+                        printf("WeightedEdge (%d,%d): %d (binary: ", u, v, g->adjMat[u][v]);
                         int weight = g->adjMat[u][v];
                         int pos = 1 << 30;
                         int printed = 0;
@@ -675,8 +616,8 @@ int main(void) {
             }
             printf("\n");
 
-            int dist[MAX_VERTICES];
-            int pred[MAX_VERTICES];
+            int dist[MAX_GRAPH_VERTICES];
+            int pred[MAX_GRAPH_VERTICES];
             int src = 0;
 
             gabows_scaling(g, src, dist, pred);
@@ -690,12 +631,12 @@ int main(void) {
             int numVertices = 4;
             MatGraph* g = mat_graph_create(numVertices);
 
-            mat_graph_add_directed_edge(g, 0, 1, 1);
-            mat_graph_add_directed_edge(g, 1, 2, 1);
-            mat_graph_add_directed_edge(g, 2, 3, -3);
-            mat_graph_add_directed_edge(g, 3, 0, 1);
+            mat_graph_add_directed_weighted_edge(g, 0, 1, 1);
+            mat_graph_add_directed_weighted_edge(g, 1, 2, 1);
+            mat_graph_add_directed_weighted_edge(g, 2, 3, -3);
+            mat_graph_add_directed_weighted_edge(g, 3, 0, 1);
 
-            int pred[MAX_VERTICES];
+            int pred[MAX_GRAPH_VERTICES];
 
             double minMeanW = karps_minimum_mean_weight(g, pred);
             printf("Minimum mean-weight cycle: %.2f\n", minMeanW);
@@ -709,19 +650,19 @@ int main(void) {
             int numVertices = 6;
             MatGraph* g = mat_graph_create(numVertices);
 
-            mat_graph_add_directed_edge(g, 0, 1, 2);
-            mat_graph_add_directed_edge(g, 1, 2, 4);
-            mat_graph_add_directed_edge(g, 2, 3, 6);
-            mat_graph_add_directed_edge(g, 3, 4, 5);
-            mat_graph_add_directed_edge(g, 4, 5, 1);
-            mat_graph_add_directed_edge(g, 1, 4, 3);
+            mat_graph_add_directed_weighted_edge(g, 0, 1, 2);
+            mat_graph_add_directed_weighted_edge(g, 1, 2, 4);
+            mat_graph_add_directed_weighted_edge(g, 2, 3, 6);
+            mat_graph_add_directed_weighted_edge(g, 3, 4, 5);
+            mat_graph_add_directed_weighted_edge(g, 4, 5, 1);
+            mat_graph_add_directed_weighted_edge(g, 1, 4, 3);
 
-            int dist[MAX_VERTICES];
-            int pred[MAX_VERTICES];
+            int dist[MAX_GRAPH_VERTICES];
+            int pred[MAX_GRAPH_VERTICES];
             int src = 0;
 
             bitonic_shortest_paths(g, src, dist, pred);
-            print_solution(dist, pred, numVertices, src);
+            print_solution_part_22_problems_solution(dist, pred, numVertices, src);
 
             mat_graph_free(g);
             break;

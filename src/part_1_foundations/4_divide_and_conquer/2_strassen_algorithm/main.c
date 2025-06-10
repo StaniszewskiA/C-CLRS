@@ -3,16 +3,16 @@
 int main() {
     int n = 2;
     
-    double** A = allocate_matrix(n);
-    double** B = allocate_matrix(n);
-    double** C = allocate_matrix(n);
+    int** A = allocate_matrix(n);
+    int** B = allocate_matrix(n);
+    int** C = allocate_matrix(n);
 
     
-    A[0][0] = 1.0; A[0][1] = 2.0;
-    A[1][0] = 3.0; A[1][1] = 4.0;
+    A[0][0] = 1; A[0][1] = 2;
+    A[1][0] = 3; A[1][1] = 4;
     
-    B[0][0] = 5.0; B[0][1] = 6.0;
-    B[1][0] = 7.0; B[1][1] = 8.0;
+    B[0][0] = 5; B[0][1] = 6;
+    B[1][0] = 7; B[1][1] = 8;
     
     printf("Matrix A:\n");
     for (int i = 0; i < n; i++) {
@@ -45,8 +45,8 @@ int main() {
     printf("\n");
 
     printf("Expected result should be:\n");
-    printf("   19.00    22.00\n");
-    printf("   43.00    50.00\n");
+    printf("   19    22\n");
+    printf("   43    50\n");
     printf("\n");
 
     free_matrix(A, n);

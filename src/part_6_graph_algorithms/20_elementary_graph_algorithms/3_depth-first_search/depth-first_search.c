@@ -1,108 +1,70 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "part_6_graph_algorithms/20_elementary_graph_algorithms/elementary_graph_algorithms.h"
 
-#define TASK 6
-
-typedef struct Node {
-    int data;
-    struct Node* next;
-} Node;
-
-struct List {
-    struct Node* head;
-};
-
-struct Graph {
-    int numVertices;
-    struct List* array;
-};
-
-void graph_free(struct Graph* g) {
-    for (int i = 0; i < g->numVertices; i++) {
-        struct Node* current = g->array[i].head;
-        while (current) {
-            struct Node* temp = current;
-            current = current->next;
-            free(temp); 
-        }
-    }
-    free(g->array);
-    free(g);
-}
-
-struct Node* create_node(int data) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-    newNode->data = data;
-    newNode->next = NULL;
-    return newNode;
-}
-
-struct Graph* graph_create(int numVertices) {
-    struct Graph* g = (struct Graph*)malloc(sizeof(struct Graph));
-    g->numVertices = numVertices;
-    g->array = (struct List*)malloc(numVertices * sizeof(struct List));
-
-    for (int i = 0; i < numVertices; i++) g->array[i].head = NULL;
-
-    return g;
-}
-
-void graph_add_edge(struct Graph* g, int src, int dest) {
-    struct Node* newNode = create_node(dest);
-    newNode->next = g->array[src].head;
-    g->array[src].head = newNode;
-}
-
-void dfs_visit(struct Graph* g, int vertex, int visited[]) {
+void dfs_visit(ListGraph* g, int vertex, int visited[]) {
     visited[vertex] = 1;
     printf("%d ", vertex);
 
-    struct Node* currNode = g->array[vertex].head;
+    Node* currNode = g->adjList[vertex]; 
     while (currNode) {
-        int adjacent = currNode->data;
+        int adjacent = currNode->vertex; 
         if (!visited[adjacent]) dfs_visit(g, adjacent, visited);
         currNode = currNode->next;
     }
 }
 
-void dfs(struct Graph* g, int* order, int orderSize) {
-    int* visited = (int*)malloc(g->numVertices * sizeof(int));
+void dfs(ListGraph* g, int* order, int orderSize) {
+    int* visited = (int*)safe_malloc(g->numVertices * sizeof(int));
     for (int i = 0; i < g->numVertices; i++) visited[i] = 0;
     for (int i = 0; i < orderSize; i++)
-        if (!visited[order[i]]) dfs_visit(g, order[i], visited);
+        if (order[i] < g->numVertices && !visited[order[i]]) dfs_visit(g, order[i], visited);
     free(visited);
 }
 
 #pragma region 20.3-6
 
-void iterative_dfs_visit(struct Graph* g, int source, int visited[]) {
-    int* stack = (int*)malloc(g->numVertices * sizeof(int));
+void iterative_dfs_visit(ListGraph* g, int source, int visited[]) {
+    int* stack = (int*)safe_malloc(g->numVertices * sizeof(int));
     int top = -1;
-    stack[++top] = source;
+    
+    if (source < g->numVertices) { 
+        stack[++top] = source;
+    }
 
     while (top != -1) {
         int vertex = stack[top--];
-        if (!visited[vertex]) {
-            visited[vertex] = 1;
+        if (vertex < g->numVertices && !visited[vertex]) {
             printf("%d ", vertex);
 
-            struct Node* currNode = g->array[vertex].head;
+            Node* currNode = g->adjList[vertex]; 
+            Node* prev = NULL;
+            while(currNode) {
+                Node* nextNode = currNode->next;
+                currNode->next = prev;
+                prev = currNode;
+                currNode = nextNode;
+            }
+            currNode = prev; 
+
             while (currNode) {
-                if (!visited[currNode->data]) stack[++top] = currNode->data;
+                int adjacentNodeVertex = currNode->vertex; 
+                if (adjacentNodeVertex < g->numVertices && !visited[adjacentNodeVertex]) {
+                     if (top < g->numVertices - 1) { 
+                        stack[++top] = adjacentNodeVertex;
+                }
                 currNode = currNode->next;
             }
         }
     }
-
+    }
     free(stack);
 }
 
-void iterative_dfs(struct Graph* g, int* order, int orderSize) {
-    int* visited = (int*)malloc(g->numVertices * sizeof(int));
+void iterative_dfs(ListGraph* g, int* order, int orderSize) {
+    int* visited = (int*)safe_malloc(g->numVertices * sizeof(int));
     for (int i = 0; i < g->numVertices; i++) visited[i] = 0;
 
     for (int i = 0; i < orderSize; i++)
-        if (!visited[order[i]]) iterative_dfs_visit(g, order[i], visited);
+        if (order[i] < g->numVertices && !visited[order[i]]) iterative_dfs_visit(g, order[i], visited);
 
     free(visited);
 }
@@ -110,24 +72,6 @@ void iterative_dfs(struct Graph* g, int* order, int orderSize) {
 #pragma endregion 20.3-6
 
 #pragma region 20.3-9
-
-#define WHITE 0
-#define GRAY 1
-#define BLACK 2
-
-typedef struct ColoredVertex {
-    int id;
-    int color;
-    int d;
-    int f;
-    int pi;
-} ColoredVertex;
-
-typedef struct ColoredGraph {
-    int numVertices;
-    int** adj;
-    ColoredVertex* vertices;
-} ColoredGraph;
 
 int coloredVertextime = 0;
 
@@ -169,12 +113,12 @@ void colored_dfs_print(ColoredGraph* g) {
 }
 
 ColoredGraph* colored_graph_create(int numVertices) {
-    ColoredGraph* g = malloc(sizeof(ColoredGraph));
+    ColoredGraph* g = safe_malloc(sizeof(ColoredGraph));
     g->numVertices = numVertices;
-    g->adj = malloc(numVertices * sizeof(int *));
-    g->vertices = malloc(numVertices * sizeof(numVertices));
+    g->adj = safe_malloc(numVertices * sizeof(int *));
+    g->vertices = safe_malloc(numVertices * sizeof(numVertices));
     for (int i = 0; i < numVertices; i++) {
-        g->adj[i] = calloc(numVertices, sizeof(int));
+        g->adj[i] = safe_calloc(numVertices, sizeof(int));
         g->vertices[i].id = i;
     }
     return g;
@@ -195,33 +139,10 @@ void colored_graph_free(ColoredGraph* g) {
 
 #pragma region 20.3-11
 
-void graph_add_undirected_edge(struct Graph* g, int u, int v) {
-    struct Node* node1 = create_node(v);
-    node1->next = g->array[u].head;
-    g->array[u].head = node1;
-
-    struct Node* node2 = create_node(u);
-    node2->next = g->array[v].head;
-    g->array[v].head = node2;
-}
-
-void dfs_visit_both_dirs(struct Graph* g, int u, int* visited) {
-    visited[u] = 1;
-    struct Node* currNode = g->array[u].head;
-
-    while (currNode) {
-        int v = currNode->data;
-        printf("%d -> %d\n", u, v);
-        if (!visited[u]) dfs_visit_both_dirs(g, v, visited);
-        printf("%d -> %d\n", v, u);
-        currNode = currNode->next;
-    }
-}
-
-void dfs_both_dirs(struct Graph* g) {
-    int* visited = (int*)calloc(g->numVertices, sizeof(int));
+void dfs_both_dirs(ListGraph* g) {
+    int* visited = (int*)safe_calloc(g->numVertices, sizeof(int));
     for (int i = 0; i < g->numVertices; i++)
-        if (!visited[i]) dfs_visit_both_dirs(g, i, visited);
+        if (!visited[i]) dfs_both_dirs(g);
     free(visited);
 }
 
@@ -229,28 +150,10 @@ void dfs_both_dirs(struct Graph* g) {
 
 #pragma region 20.3-12
 
-typedef struct CCNode {
-    int cc;
-    int color;
-    int pi;
-    int d;
-    int f;
-    struct CCNode* next;
-} CCNode;
-
-typedef struct CCList {
-    struct CCNode* head;
-} CCList;
-
-typedef struct CCGraph {
-    int numVertices;
-    struct CCList* array;
-} CCGraph;
-
 CCGraph* cc_graph_create(int numVertices) {
-    CCGraph* g = (CCGraph*)malloc(sizeof(CCGraph));
+    CCGraph* g = (CCGraph*)safe_malloc(sizeof(CCGraph));
     g->numVertices = numVertices;
-    g->array = (CCList*)malloc(numVertices * sizeof(CCList));
+    g->array = (CCList*)safe_malloc(numVertices * sizeof(CCList));
 
     for (int i = 0; i < numVertices; i++) g->array[i].head = NULL;
     
@@ -258,7 +161,7 @@ CCGraph* cc_graph_create(int numVertices) {
 }
 
 CCNode* cc_node_create(int cc) {
-    CCNode* new_node = (CCNode*)malloc(sizeof(CCNode));
+    CCNode* new_node = (CCNode*)safe_malloc(sizeof(CCNode));
     new_node->cc = cc;
     new_node->color = WHITE;
     new_node->pi = -1;
@@ -334,22 +237,24 @@ void cc_dfs(CCGraph* g) {
 
 #pragma region 20.3-13
 
-void topo_sort_helper(struct Graph* g, int v, int* visited, int* stack, int* stackIdx) {
+void topo_sort_helper(ListGraph* g, int v, int* visited, int* stack, int* stackIdx) {
     visited[v] = 1;
 
-    struct Node* currNode = g->array[v].head;
+    Node* currNode = g->adjList[v]; 
     while (currNode) {
-        int adjacent = currNode->data;
+        int adjacent = currNode->vertex; 
         if (!visited[adjacent]) 
             topo_sort_helper(g, adjacent, visited, stack, stackIdx);
         currNode = currNode->next;
     }
-    stack[(*stackIdx)--] = v;
+    if (*stackIdx >= 0) { 
+        stack[(*stackIdx)--] = v;
+    }
 }
 
-int* topological_sort(struct Graph* g) {
-    int* visited = (int*)calloc(g->numVertices, sizeof(int));
-    int* stack = (int*)malloc(g->numVertices * sizeof(int));
+int* topological_sort(ListGraph* g) {
+    int* visited = (int*)safe_calloc(g->numVertices, sizeof(int));
+    int* stack = (int*)safe_malloc(g->numVertices * sizeof(int));
     int stackIdx = g->numVertices - 1;
 
     for (int i = 0; i < g->numVertices; i++) {
@@ -360,181 +265,25 @@ int* topological_sort(struct Graph* g) {
     return stack;
 }
 
-int is_singly_connected(struct Graph* g) {
+int list_graph_is_singly_connected(ListGraph* g) {
     int* topoOrder = topological_sort(g);
-    int** ancestors = (int**)malloc(g->numVertices * sizeof(int*));
-    int* ancestorSizes = (int*)calloc(g->numVertices, sizeof(int));
 
+    if (!topoOrder) return 0; 
     for (int i = 0; i < g->numVertices; i++) {
-        ancestors[i] = (int*)calloc(g->numVertices, sizeof(int));
-        ancestors[i][ancestorSizes[i]++] = i;
-    }
-
-    for (int i = 0; i < g->numVertices; i++) {
+        if (i >= g->numVertices || topoOrder[i] >= g->numVertices) continue; 
         int u = topoOrder[i];
 
-        struct Node* currNode = g->array[u].head;
+        Node* currNode = g->adjList[u]; 
         while (currNode) {
-            int v = currNode->data;
-
-            for (int j = 0; j < ancestorSizes[u]; j++) {
-                for (int k = 0; k < ancestorSizes[v]; k++) {
-                    if (ancestors[u][j] == ancestors[v][k]) {
-                        free(topoOrder);
-                        for (int l = 0; l < g->numVertices; l++) free(ancestors[l]);
-                        free(ancestors);
-                        free(ancestorSizes);
-                        return 0;
-                    }
-                }
-            }
-
-            for (int j = 0; j < ancestorSizes[u]; j++) {
-                ancestors[v][ancestorSizes[v]++] = ancestors[u][j];
-            }
+            int v = currNode->vertex; 
+            if (v >= g->numVertices) { currNode = currNode->next; continue; } 
 
             currNode = currNode->next;
         }
     }
 
     free(topoOrder);
-    for (int i = 0; i < g->numVertices; i++) free(ancestors[i]);
-    free(ancestors);
-    free(ancestorSizes);
-
     return 1;
 }
 
 #pragma endregion 20.3-13
-
-int main(void) {
-    switch (TASK)
-    {
-        case 1: {
-            int numVertices = 5;
-            struct Graph* g = graph_create(numVertices);
-
-            graph_add_edge(g, 2, 0);
-            graph_add_edge(g, 0, 2);
-            graph_add_edge(g, 1, 2);
-            graph_add_edge(g, 0, 1);
-            graph_add_edge(g, 3, 3);
-            graph_add_edge(g, 1, 3);
-            graph_add_edge(g, 3, 4);
-
-            int order[] = {2, 0, 1, 3};
-            int orderSize = sizeof(order) / sizeof(order[0]);
-
-            printf("DFS: \n");
-            dfs(g, order, orderSize);
-
-            graph_free(g);
-
-            break;
-        }
-
-        case 2: {
-            // 20.3-6
-            int numVertices = 5;
-            struct Graph* g = graph_create(numVertices);
-
-            graph_add_edge(g, 2, 0);
-            graph_add_edge(g, 0, 2);
-            graph_add_edge(g, 1, 2);
-            graph_add_edge(g, 0, 1);
-            graph_add_edge(g, 3, 3);
-            graph_add_edge(g, 1, 3);
-            graph_add_edge(g, 3, 4);
-
-            int order[] = {2, 0, 1, 3};
-            int orderSize = sizeof(order) / sizeof(order[0]);
-
-            printf("DFS: \n");
-            iterative_dfs(g, order, orderSize);
-
-            graph_free(g);
-
-            break;
-        }
-
-        case 3: {
-            // 20.3-9
-            int numVertices = 5;
-            struct ColoredGraph* g = colored_graph_create(numVertices);
-
-            colored_graph_add_edge(g, 2, 0);
-            colored_graph_add_edge(g, 0, 2);
-            colored_graph_add_edge(g, 1, 2);
-            colored_graph_add_edge(g, 0, 1);
-            colored_graph_add_edge(g, 3, 3);
-            colored_graph_add_edge(g, 1, 3);
-            colored_graph_add_edge(g, 3, 4);
-
-            colored_dfs_print(g);
-            colored_graph_free(g);
-
-            break;
-        }
-
-        case 4: {
-            // 20.3-11
-            int numVertices = 5;
-            struct Graph* g = graph_create(numVertices);
-
-            graph_add_undirected_edge(g, 2, 0);
-            graph_add_undirected_edge(g, 0, 2);
-            graph_add_undirected_edge(g, 1, 2);
-            graph_add_undirected_edge(g, 0, 1);
-            graph_add_undirected_edge(g, 3, 3);
-            graph_add_undirected_edge(g, 1, 3);
-            graph_add_undirected_edge(g, 3, 4);
-
-            dfs_both_dirs(g);
-
-            graph_free(g);
-            
-            break;
-        }
-
-        case 5: {
-            // 20.3-12
-            int numVertices = 7;
-            CCGraph* g = cc_graph_create(numVertices);
-
-            cc_graph_add_undirected_edge(g, 0, 1);
-            cc_graph_add_undirected_edge(g, 1, 2);
-            cc_graph_add_undirected_edge(g, 3, 4);
-            cc_graph_add_undirected_edge(g, 5, 6);
-
-            cc_dfs(g);
-            cc_graph_free(g);
-
-            break;
-        }
-
-        case 6: {
-            // 20.3.13
-            int numVertices = 6;
-            struct Graph* g = graph_create(numVertices);
-
-            graph_add_edge(g, 0, 1);
-            graph_add_edge(g, 0, 2);
-            graph_add_edge(g, 1, 3);
-            graph_add_edge(g, 2, 3);
-            graph_add_edge(g, 3, 4);
-            graph_add_edge(g, 4, 5);
-
-            if (is_singly_connected(g)) printf("The graph is singly connected.\n");
-            else printf("The graph is not singly connected.\n");
-
-            graph_free(g);
-
-            break;
-        }
-        
-        default:
-            break;
-    }
-
-    return 0;
-}

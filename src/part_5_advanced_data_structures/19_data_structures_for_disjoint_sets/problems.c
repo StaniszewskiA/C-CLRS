@@ -143,10 +143,10 @@ int color[MAX_DISJOINT_SET_SIZE];
 int n;
 
 void tarjan_add_edge(int u, int v) {
-    ListNode* node = (ListNode*)malloc(sizeof(ListNode));
-    node->value = v;
-    node->next = tree[u];
-    tree[u] = node;
+    ListNode* DSNode = (ListNode*)malloc(sizeof(ListNode));
+    DSNode->value = v;
+    DSNode->next = tree[u];
+    tree[u] = DSNode;
 }
 
 void tarjan_add_query(int u, int v) {

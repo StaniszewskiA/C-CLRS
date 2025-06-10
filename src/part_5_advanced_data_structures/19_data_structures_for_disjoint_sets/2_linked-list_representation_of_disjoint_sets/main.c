@@ -19,7 +19,7 @@ int main(void) {
             union_set_nodes(a, c);
 
             SetNode* rep = find_set_node(c);
-            printf("Representative of node c (key = %d): %d\n", c->key, rep->key);
+            printf("Representative of DSNode c (key = %d): %d\n", c->key, rep->key);
 
             SetNode* iter = find_set_node(a);
             printf("Set members: ");
