@@ -291,6 +291,9 @@ CHAPTER_24_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/prob
 
 # Chapter 25
 
+MAXIMUM_BIPARTITE_MATCHING_2_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/1_maximum_bipartite_matching/main.c
+MAXIMUM_BIPARTITE_MATCHING_2_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/1_maximum_bipartite_matching/maximum_bipartite_matching.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -379,6 +382,7 @@ CHAPTER_24_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/prob
 		ford-fulkerson-method run-ford-fulkerson-method \
 		maximum-bipartite-matching run-maximum-bipartite-matching \
 		chapter-24-problems run-chapter-24-problems
+		maximum-bipartite-matching-2 run-maximum-bipartite-matching-2 \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -926,6 +930,11 @@ run-chapter-24-problems: chapter-24-problems
 	$(BINDIR)/chapter_24_problems
 
 # Chapter 25
+maximum-bipartite-matching-2: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(MAXIMUM_BIPARTITE_MATCHING_2_SRC) $(MAXIMUM_BIPARTITE_MATCHING_2_MAIN) -o $(BINDIR)/maximum_bipartite_matching
+
+run-maximum-bipartite-matching-2: maximum-bipartite-matching-2
+	$(BINDIR)/maximum_bipartite_matching
 
 # ============================================================================
 # UTILITY TARGETS
