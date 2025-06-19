@@ -294,6 +294,10 @@ CHAPTER_24_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/prob
 MAXIMUM_BIPARTITE_MATCHING_2_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/1_maximum_bipartite_matching/main.c
 MAXIMUM_BIPARTITE_MATCHING_2_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/1_maximum_bipartite_matching/maximum_bipartite_matching.c
 
+STABLE_MARRIAGE_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/2_stable_marriage_problem/stable_marriage_problem.c
+STABLE_MARRIAGE_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/2_stable_marriage_problem/main.c
+
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -383,6 +387,7 @@ MAXIMUM_BIPARTITE_MATCHING_2_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartit
 		maximum-bipartite-matching run-maximum-bipartite-matching \
 		chapter-24-problems run-chapter-24-problems
 		maximum-bipartite-matching-2 run-maximum-bipartite-matching-2 \
+		stable-marriage run-stable-marriage
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -935,6 +940,12 @@ maximum-bipartite-matching-2: $(BINDIR)
 
 run-maximum-bipartite-matching-2: maximum-bipartite-matching-2
 	$(BINDIR)/maximum_bipartite_matching
+
+stable-marriage: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(STABLE_MARRIAGE_SRC) $(STABLE_MARRIAGE_MAIN) -o $(BINDIR)/stable_marriage
+
+run-stable-marriage: stable-marriage
+	$(BINDIR)/stable_marriage
 
 # ============================================================================
 # UTILITY TARGETS

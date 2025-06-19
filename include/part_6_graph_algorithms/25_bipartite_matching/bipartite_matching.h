@@ -41,7 +41,103 @@ void test_early_stopping_hopcroft_karp_algorithm(void);
 // CHAPTER 25.2: STABLE MARRIAGE PROBLEM
 // ============================================================================
 
+#define MAX_PEOPLE 100
+#define MAX_RESIDENTS_PER_HOSPITAL 100
 
+typedef struct {
+    int n;
+    int menPref[MAX_PEOPLE][MAX_PEOPLE];
+    int womenPref[MAX_PEOPLE][MAX_PEOPLE];
+    int womenRanking[MAX_PEOPLE][MAX_PEOPLE];
+} StableMarriageInstance;
+
+typedef struct {
+    int manPartner[MAX_PEOPLE];
+    int womanPartner[MAX_PEOPLE];
+    int n;
+} StableMarriageResult;
+
+StableMarriageInstance* stable_marriage_init(int n);
+void stable_marriage_set_men_prefs(
+    StableMarriageInstance* 
+    instance, 
+    int man, 
+    int prefs[]
+);
+void stable_marriage_set_women_prefs(
+    StableMarriageInstance* 
+    instance, 
+    int woman, 
+    int prefs[]
+);
+void print_stable_marriage_instance(StableMarriageInstance* instance);
+void print_stable_marriage_result(StableMarriageResult* res);
+int woman_prefers(
+    StableMarriageInstance* instance, 
+    int woman, 
+    int man1, 
+    int man2
+);
+StableMarriageResult* gale_shapley(StableMarriageInstance* instance);
+int verify_stability(
+    StableMarriageInstance* instance, 
+    StableMarriageResult* res
+);
+void test_gale_shapley_algorithm(void);
+
+#define MAX_RESIDENTS_PER_HOSPITAL 100
+
+typedef struct NRMPInstance {
+    int numStudents;
+    int numHospitals;
+    int hospitalCapacity[MAX_PEOPLE];
+    int studentPref[MAX_PEOPLE][MAX_PEOPLE];           
+    int hospitalPref[MAX_PEOPLE][MAX_PEOPLE]; 
+    int hospitalRanking[MAX_PEOPLE][MAX_PEOPLE];
+} NRMPInstance;
+
+typedef struct NRMPResult {
+    int studentsHospital[MAX_PEOPLE];
+    int hospitalsStudents[MAX_PEOPLE][MAX_RESIDENTS_PER_HOSPITAL];
+    int hospitalCapacity[MAX_PEOPLE];
+    int numStudents;
+    int numHospitals;
+} NRMPResult;
+
+NRMPInstance* nrmp_init(int numStudents, int numHospitals);
+void nrmp_set_hospital_capacity(
+    NRMPInstance* instance, 
+    int hospital, 
+    int capacity
+);
+void nrmp_set_student_prefs(NRMPInstance* instance, int student, int prefs[]);
+void nrmp_set_hospital_prefs(NRMPInstance* instance, int hospital, int prefs[]);
+void print_nrmp_instance(NRMPInstance* instance);
+void print_nrmp_result(NRMPResult* res);
+int hospital_prefers_student(
+    NRMPInstance* instance,
+    int hospital,
+    int student1,
+    int student2
+);
+int find_worst_student_in_hospital(
+    NRMPInstance* instance, 
+    NRMPResult* res, 
+    int hospital
+);
+void remove_student_from_hospital(
+    NRMPResult* res,
+    int student,
+    int hospital
+);
+void add_student_to_hospital(
+    NRMPResult* res,
+    int student,
+    int hospital
+);
+NRMPResult* nrmp_gale_shapley(NRMPInstance* instance);
+int verify_nrmp_stability(NRMPInstance* instance, NRMPResult* res);
+void test_nrmp_solver(void);
 
 // ============================================================================
 // CHAPTER 25.3: THE HUNGARIAN ALGORITHM FOR ASSIGNMENT PROBLEM
