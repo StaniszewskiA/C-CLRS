@@ -629,3 +629,399 @@ void test_nrmp_solver(void) {
 }
 
 #pragma endregion NRMP problem
+
+#pragma region Stable roommates problem
+
+StableRoommatesInstance* stable_roommates_init(int n) {
+    if (n <= 0 || n >= MAX_PEOPLE || (n & 1)) return NULL;
+
+    StableRoommatesInstance* instance = (StableRoommatesInstance*)safe_malloc(sizeof(StableRoommatesInstance));
+    instance->n = n;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            instance->prefs[i][j] = -1;
+            instance->ranking[i][j] = -1;
+        }
+    }
+
+    printf("Stable roommates instantiated for %d people\n", n);
+    return instance;
+}
+
+void stable_roommates_set_prefs(
+    StableRoommatesInstance* instance, 
+    int person, 
+    int prefs[]
+) {
+    if (!instance || person < 0 || person >= instance->n) return;
+
+    for (int rank = 0; rank < instance->n - 1; rank++) {
+        instance->prefs[person][rank] = prefs[rank];
+        instance->ranking[person][prefs[rank]] = rank;
+    }
+}
+
+void print_stable_roommates_instace(StableRoommatesInstance* instance) {
+    if (!instance) return;
+
+    printf("Stable roommates instance\n");
+    printf("Number of people: %d\n\n", instance->n);
+
+    printf("Preferences:\n");
+    for (int person = 0; person < instance->n; person++) {
+        printf(" Person %d: ", person);
+        for (int rank = 0; rank < instance->n - 1; rank++) {
+            printf("Person %d ", instance->prefs[person][rank]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void print_stable_roommates_result(StableRoommatesResult* res) {
+    if (!res) return;
+
+    printf("Stable roommates result\n");
+    printf("Matching:\n");
+
+    int printed[MAX_PEOPLE] = {0};
+    for (int person = 0; person < res->n; person++) {
+        if (res->partner[person] != -1 && !printed[person]) {
+            printf(" Person %d -- Person %d\n", person, res->partner[person]);
+            printed[person] = 1;
+            printed[res->partner[person]] = 1;
+        } else if (res->partner[person] == -1 && !printed[person]) {
+            printf(" Person %d -> UNMATCHED\n", person);
+            printed[person] = 1;
+        }
+    }
+
+    printf("\n");
+}
+
+int person_prefers(
+    StableRoommatesInstance* instance, 
+    int person,
+    int cand1,
+    int cand2
+) {
+    if (!instance || person < 0 || person >= instance->n) return 0;
+    if (cand1 < 0 || cand1 >= instance->n || cand2 < 0 || cand2 >= instance->n)
+        return 0;
+
+    return instance->ranking[person][cand1] < instance->ranking[person][cand2];
+}
+
+void irving_phase1_proposals(
+    StableRoommatesInstance* instance,
+    int props[MAX_PEOPLE][MAX_PEOPLE],
+    int propCnt[MAX_PEOPLE]
+) {
+    if (!instance) return;
+    
+    printf("Phase 1: Initial proposals\n");
+    int n = instance->n;
+
+    for (int i = 0; i < n; i++) {
+        propCnt[i] = 0;
+        for (int j = 0; j < n; j++) {
+            props[i][j] = 0;
+        }
+    }
+
+    for (int person = 0; person < n; person++) {
+        printf("Person %d proposes to: ", person);
+        for (int rank = 0; rank < n - 1; rank++) {
+            int target = instance->prefs[person][rank];
+            props[person][target] = 1;
+            propCnt[target]++;
+            printf("person %d ", target);
+        }
+        printf("\n");
+    }
+
+    printf("Proposal counts:\n");
+    for (int person = 0; person < n; person++) {
+        printf("Person %d received %d proposals\n", person, propCnt[person]);
+    }
+
+    printf("Phase 1 completed\n");
+}
+
+int irving_phase2_reduction(
+    StableRoommatesInstance* instance,
+    int activeProps[MAX_PEOPLE][MAX_PEOPLE]
+) {
+    if (!instance) return 0;
+    
+    printf("Phase 2: Reduction phase\n");
+    int n = instance->n;
+    int changed = 1;
+    int iters = 0;
+
+    while (changed) {
+        changed = 0;
+        iters++;
+        printf("\n--- Reduction iteration %d ---\n", iters);
+        for (int person = 0; person < n; person++) {
+            int activeProposals[MAX_PEOPLE];
+            int activeProposalsCnt = 0;
+
+            for (int proposer = 0; proposer < n; proposer++) {
+                if (!activeProps[proposer][person]) continue;
+                activeProposals[activeProposalsCnt++] = proposer;
+            }
+
+            if (activeProposalsCnt <= 1) continue;
+
+            printf("Person %d has %d active proposals from: ", person, activeProposalsCnt);
+            for (int i = 0; i < activeProposalsCnt; i++) {
+                printf("Person %d ", activeProposals[i]);
+            }
+            printf("\n");
+
+            for (int i = 0; i < activeProposalsCnt - 1; i++) {
+                for (int j = i + 1; j < activeProposalsCnt; j++) {
+                    if (person_prefers(instance, person, activeProposals[i], activeProposals[j]))
+                        continue;
+                    int temp = activeProposals[i];
+                    activeProposals[i] = activeProposals[j];
+                    activeProposals[j] = temp;
+                }
+            }
+
+            printf("Person %d keeps only proposal from Person %d\n", person, activeProposals[0]);
+            for (int i = 1; i < activeProposalsCnt; i++) {
+                int rejectedProposer = activeProposals[i];
+                activeProps[rejectedProposer][person] = 0;
+                activeProps[person][rejectedProposer] = 0;
+                changed = 1;
+                printf("Person %d rejects Person %d\n", person, rejectedProposer);
+            }
+        }
+    }
+
+    printf("Phase 2 completed in %d iterations\n", iters);
+    return 1;
+}
+
+int irving_phase3_matching(
+    StableRoommatesInstance* instance,
+    int activeProps[MAX_PEOPLE][MAX_PEOPLE],
+    StableRoommatesResult* res
+) {
+    if (!instance || !res) return 0;
+    
+    printf("Phase 3: Final matching construction\n");
+    int n = instance->n;
+
+    for (int i = 0; i < n; i++) {
+        res->partner[i] = -1;
+    }
+
+    for (int person = 0; person < n; person++) {
+        int activeCnt = 0;
+        int partner = -1;
+
+        for (int other = 0; other < n; other++) {
+            if (!activeProps[person][other]) continue;;
+            activeCnt++;
+            partner = other;
+        }
+
+        printf("Person %d has %d active proposal(s)", person, activeCnt);
+
+        if (activeCnt == 1) {
+            res->partner[person] = partner;
+            printf(" to person %d\n", partner);
+        } else if (activeCnt == 0) {
+            printf(" - there's no stable matching\n");
+            for (int i = 0; i < n; i++) {
+                res->partner[i] = -1;
+            }
+            return 0;
+        } else {
+            return 0;
+        }
+    }
+
+    printf("Checking mutual assignments:\n");
+    for (int person = 0; person < n; person++) {
+        int currPartner = res->partner[person];
+        if (currPartner == -1) continue;
+
+        if (res->partner[currPartner] == person) {
+            printf("Person %d <-> Person %d: mutual\n", person, currPartner);
+            continue;
+        }
+
+        printf("Person %d -> Person %d but Person %d -> Person %d: non-mutual\n", 
+           person, currPartner, currPartner, res->partner[currPartner]);
+
+        for (int i = 0; i < n; i++) {
+            res->partner[i] = -1;
+        }
+
+        return 0;
+    }
+
+    printf("Phase 3 completed - stable matching found\n");
+    return 1;
+}
+
+StableRoommatesResult* irving_algorithm(StableRoommatesInstance* instance) {
+    if (!instance) return NULL; 
+
+    printf("Starting Irving's algorithm...\n");
+
+    int n = instance->n;
+    StableRoommatesResult* res = (StableRoommatesResult*)safe_malloc(sizeof(StableMarriageResult));
+    res->n = n;
+
+    int props[MAX_PEOPLE][MAX_PEOPLE];
+    int propCnt[MAX_PEOPLE] = {0};
+    int activeProps[MAX_PEOPLE][MAX_PEOPLE];
+
+    irving_phase1_proposals(instance, props, propCnt);
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            activeProps[i][j] = props[i][j];
+        }
+    }
+
+    if (!irving_phase2_reduction(instance, activeProps)) {
+        printf("Phase 2 failed - there's no stable matching");
+        for (int i = 0; i < n; i++) {
+            res->partner[i] = -1;
+        }
+        return res;
+    }
+
+    if (!irving_phase3_matching(instance, activeProps, res)) {
+        printf("Phase 3 failed - there's no stable matching\n");
+        for (int i = 0; i < n; i++) {
+            res->partner[i] = -1;
+        }
+        return res;
+    }
+
+    printf("Irving's algorithm completed successfully\n");
+    return res;
+
+}
+
+int verify_roommates_stability(
+    StableRoommatesInstance* instance,
+    StableRoommatesResult* res
+) {
+    if (!instance || !res) return 0;
+
+    printf("Veryfying stable roommates solution...\n");
+    int n = instance->n;
+    int blockingPairs = 0;
+
+    for (int person1 = 0; person1 < n; person1++) {
+        int currPartner1 = res->partner[person1];
+        for (int person2 = person1 + 1; person2 < n; person2++) {
+            int currPartner2 = res->partner[person2];
+            if (currPartner1 == person2) continue;
+            int p1PrefersP2 = 0;
+            if (currPartner1 == -1) {
+                p1PrefersP2 = 1;
+            } else {
+                p1PrefersP2 = person_prefers(instance, person1, person2, currPartner1);
+            }
+
+            int p2PrefersP1 = 0;
+            if (currPartner2 == -1) {
+                p2PrefersP1 = 1;
+            } else {
+                p2PrefersP1 = person_prefers(instance, person2, person1, currPartner2);
+            }
+
+            if (p1PrefersP2 && p2PrefersP1) {
+                printf("  BLOCKING PAIR: Person %d and Person %d\n", person1, person2);
+                printf("    Person %d prefers Person %d over current partner\n", person1, person2);
+                printf("    Person %d prefers Person %d over current partner\n", person2, person1);
+                blockingPairs++;
+            }
+        }
+    }
+
+    if (blockingPairs == 0) {
+        printf("The solution is stable");
+        return 1;
+    }
+
+    printf("The solution is unstable. Found %d blocking pair(s)", 
+        blockingPairs);
+    return 0;
+}
+
+void test_stable_roommates_solver(void) {
+    const char* title = "Stable Roommates Problem - Irving's Algorithm";
+    print_separator(title);
+
+    const char* testCaseTitle1 = "TEST 1: Example with stable solution";
+    print_separator(testCaseTitle1);
+
+    int n1 = 4;
+    StableRoommatesInstance* instance1 = stable_roommates_init(n1);
+
+    int prefs1[4][3] = {
+        {1, 2, 3},
+        {0, 3, 2},
+        {3, 0, 1},
+        {2, 1, 0},
+    };
+
+    for (int i = 0; i < n1; i++) {
+        stable_roommates_set_prefs(instance1, i, prefs1[i]);
+    }
+
+    print_stable_roommates_instace(instance1);
+
+    StableRoommatesResult* res1 = irving_algorithm(instance1);
+
+    if (res1) {
+        print_stable_roommates_result(res1);
+        verify_roommates_stability(instance1, res1);
+        safe_free(res1);
+    }
+
+    safe_free(instance1);
+    printf("\n");
+
+    const char* testCaseTitle2 = "TEST 2: Example with unstable solution";
+    print_separator(testCaseTitle2);
+
+    int n2 = 4;
+    StableRoommatesInstance* instance2 = stable_roommates_init(n1);
+
+    int prefs2[4][3] = {
+        {1, 2, 3},  // A (Person 0): B > C > D
+        {2, 0, 3},  // B (Person 1): C > A > D
+        {0, 1, 3},  // C (Person 2): A > B > D
+        {0, 1, 2}   // D (Person 3): A > B > C
+    };
+
+    for (int i = 0; i < n2; i++) {
+        stable_roommates_set_prefs(instance2, i, prefs2[i]);
+    }
+
+    print_stable_roommates_instace(instance2);
+
+    StableRoommatesResult* res2 = irving_algorithm(instance2);
+
+    if (res2) {
+        print_stable_roommates_result(res2);
+        verify_roommates_stability(instance2, res2);
+        safe_free(res2);
+    }
+
+    safe_free(instance2);
+    printf("\n");
+} 
+#pragma endregion Stable roommates problem

@@ -139,6 +139,52 @@ NRMPResult* nrmp_gale_shapley(NRMPInstance* instance);
 int verify_nrmp_stability(NRMPInstance* instance, NRMPResult* res);
 void test_nrmp_solver(void);
 
+typedef struct StableRoommatesInstance {
+    int n;
+    int prefs[MAX_PEOPLE][MAX_PEOPLE];
+    int ranking[MAX_PEOPLE][MAX_PEOPLE];
+} StableRoommatesInstance;
+
+typedef struct StableRoommatesResult {
+    int n;
+    int partner[MAX_PEOPLE];
+} StableRoommatesResult;
+
+StableRoommatesInstance* stable_roommates_init(int n);
+void stable_roommates_set_prefs(
+    StableRoommatesInstance* instance, 
+    int person, 
+    int prefs[]
+);
+void print_stable_roommates_instace(StableRoommatesInstance* instance);
+void print_stable_roommates_result(StableRoommatesResult* res);
+int person_prefers(
+    StableRoommatesInstance* instance, 
+    int person,
+    int cand1,
+    int cand2
+);
+void irving_phase1_proposals(
+    StableRoommatesInstance* instance,
+    int props[MAX_PEOPLE][MAX_PEOPLE],
+    int propCnt[MAX_PEOPLE]
+);
+int irving_phase2_reduction(
+    StableRoommatesInstance* instance,
+    int activeProps[MAX_PEOPLE][MAX_PEOPLE]
+);
+int irving_phase3_matching(
+    StableRoommatesInstance* instance,
+    int activeProps[MAX_PEOPLE][MAX_PEOPLE],
+    StableRoommatesResult* res
+);
+StableRoommatesResult* irving_algorithm(StableRoommatesInstance* instance);
+int verify_roommates_stability(
+    StableRoommatesInstance* instance,
+    StableRoommatesResult* res
+);
+void test_stable_roommates_solver(void);
+
 // ============================================================================
 // CHAPTER 25.3: THE HUNGARIAN ALGORITHM FOR ASSIGNMENT PROBLEM
 // ============================================================================
