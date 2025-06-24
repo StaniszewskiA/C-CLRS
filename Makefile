@@ -290,16 +290,15 @@ MAXIMUM_BIPARTITE_MATCHING_MAIN = $(SRCDIR)/part_6_graph_algorithms/24_maximum_f
 CHAPTER_24_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/problems.c
 
 # Chapter 25
-MAXIMUM_BIPARTITE_MATCHING_2_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/1_maximum_bipartite_matching/main.c
-MAXIMUM_BIPARTITE_MATCHING_2_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/1_maximum_bipartite_matching/maximum_bipartite_matching.c
+CHAPTER_25_PROBLEMS_SRC = \
+	$(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/problems.c \
+	$(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/1_maximum_bipartite_matching/maximum_bipartite_matching.c
 
-STABLE_MARRIAGE_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/2_stable_marriage_problem/stable_marriage_problem.c
-STABLE_MARRIAGE_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/2_stable_marriage_problem/main.c
+chapter-25-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(STACKS_QUEUES_SRC) $(CHAPTER_25_PROBLEMS_SRC) -o $(BINDIR)/chapter_25_problems
 
-HUNGARIAN_ALGORITHM_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/3_the_hungarian_algorithm_for_assignment_problem/the_hungarian_algorithm_for_assignment_problem.c
-HUNGARIAN_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/3_the_hungarian_algorithm_for_assignment_problem/main.c
-
-CHAPTER_25_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/problems.c
+run-chapter-25-problems: chapter-25-problems
+	$(BINDIR)/chapter_25_problems
 
 # ============================================================================
 # PHONY TARGETS

@@ -225,4 +225,21 @@ void test_assignment_solver(void);
 void hierholzer_euler_cycle(MatGraph* g, int start);
 void test_hierholzer_algorithm(void);
 
+BipartiteGraph* bipartite_graph_copy(BipartiteGraph* target);
+void split_bipartite_graph(
+    BipartiteGraph* g,
+    BipartiteGraph* g1,
+    BipartiteGraph* g2
+);
+void extract_perfect_matching(BipartiteGraph* g, int* matching);
+void find_d_perfect_matchings(
+    BipartiteGraph* g,
+    int d,
+    int leftSize,
+    int rightSize,
+    int** matchings,
+    int* matchingIdx
+);
+void test_perfect_matching_decomposition(void);
+
 #endif // BIPARTITE_MATCHING_H
