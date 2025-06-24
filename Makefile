@@ -290,7 +290,6 @@ MAXIMUM_BIPARTITE_MATCHING_MAIN = $(SRCDIR)/part_6_graph_algorithms/24_maximum_f
 CHAPTER_24_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/problems.c
 
 # Chapter 25
-
 MAXIMUM_BIPARTITE_MATCHING_2_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/1_maximum_bipartite_matching/main.c
 MAXIMUM_BIPARTITE_MATCHING_2_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/1_maximum_bipartite_matching/maximum_bipartite_matching.c
 
@@ -299,6 +298,8 @@ STABLE_MARRIAGE_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/2
 
 HUNGARIAN_ALGORITHM_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/3_the_hungarian_algorithm_for_assignment_problem/the_hungarian_algorithm_for_assignment_problem.c
 HUNGARIAN_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/3_the_hungarian_algorithm_for_assignment_problem/main.c
+
+CHAPTER_25_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/problems.c
 
 # ============================================================================
 # PHONY TARGETS
@@ -360,7 +361,6 @@ HUNGARIAN_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matchi
 		how-to-enrich-data-structure run-how-to-enrich-data-structure \
 		interval-trees run-interval-trees \
 		chapter-17-problems run-chapter-17-problems \
-		chapter-17-problems run-chapter-17-problems \
         b-trees run-b-trees \
 		chapter-18-problems run-chapter-18-problems \
 		disjoint-set-operations run-disjoint-set-operations \
@@ -377,7 +377,7 @@ HUNGARIAN_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matchi
 		kruskal-prim run-kruskal-prim \
 		chapter-21-problems run-chapter-21-problems \
 		bellman-ford run-bellman-ford \
-		dag-shortest-paths run-dag-shortest-paths
+		dag-shortest-paths run-dag-shortest-paths \
 		dijkstra run-dijkstra \
 		difference-constraints run-difference-constraints \
 		chapter-22-problems run-chapter-22-problems \
@@ -387,10 +387,11 @@ HUNGARIAN_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matchi
 		chapter-23-problems run-chapter-23-problems \
 		ford-fulkerson-method run-ford-fulkerson-method \
 		maximum-bipartite-matching run-maximum-bipartite-matching \
-		chapter-24-problems run-chapter-24-problems
+		chapter-24-problems run-chapter-24-problems \
 		maximum-bipartite-matching-2 run-maximum-bipartite-matching-2 \
 		stable-marriage run-stable-marriage \
 		hungarian-algorithm run-hungarian-algorithm \
+		chapter-25-problems run-chapter-25-problems
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -954,6 +955,12 @@ hungarian-algorithm: $(BINDIR)
 
 run-hungarian-algorithm: hungarian-algorithm
 	$(BINDIR)/hungarian_algorithm
+
+chapter-25-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(STACKS_QUEUES_SRC) $(CHAPTER_25_PROBLEMS_SRC) -o $(BINDIR)/chapter_25_problems
+
+run-chapter-25-problems: chapter-25-problems
+	$(BINDIR)/chapter_25_problems
 
 # ============================================================================
 # UTILITY TARGETS

@@ -1,7 +1,7 @@
 #include "part_6_graph_algorithms/21_minimum_spanning_trees/minimum_spanning_trees.h"
 
 int main(void) {
-    MatGraph* mst = mat_graph_create(5);
+    MatGraph* mst = mat_graph_create(5, INF);
 
     mat_graph_add_undirected_weighted_edge(mst, 0, 1, 4);
     mat_graph_add_undirected_weighted_edge(mst, 1, 2, 3);

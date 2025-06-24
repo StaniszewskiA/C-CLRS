@@ -80,7 +80,7 @@ int nests_inside(int dims1[], int dims2[], int d) {
     Overall: O(nd*max(lg(d), n))
 */
 void find_longest_nesting_seq(int boxes[][MAX_GRAPH_VERTICES], int n, int d) {
-    MatGraph* nestingGraph = mat_graph_create(n);
+    MatGraph* nestingGraph = mat_graph_create(n, INF);
     
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -329,7 +329,7 @@ void gabows_scaling(MatGraph* g, int src, int dist[], int pred[]) {
     int k = calculate_bits_gabow(maxW);
     printf("Max weight: %d, Number of bits (k): %d\n", maxW, k);
 
-    MatGraph* reweighted = mat_graph_create(n);
+    MatGraph* reweighted = mat_graph_create(n, INF);
     int* prevDist = (int*)malloc(n * sizeof(int));
 
     // Most significant bits
@@ -496,7 +496,7 @@ int main(void) {
         case 1: {
             // 22-1
             int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_weighted_edge(g, 0, 1, 10);
             mat_graph_add_directed_weighted_edge(g, 1, 2, 5);
@@ -565,7 +565,7 @@ int main(void) {
             }
             printf("\n");
 
-            MatGraph* g = mat_graph_create(n);
+            MatGraph* g = mat_graph_create(n, INF);
             build_exchange_rate_graph(g, rates);
 
             int dist[MAX_GRAPH_VERTICES];
@@ -583,7 +583,7 @@ int main(void) {
         case 4: {
             // 22-4
             int numVertices = 5;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_weighted_edge(g, 0, 1, 4);  
             mat_graph_add_directed_weighted_edge(g, 0, 2, 2);  
@@ -629,7 +629,7 @@ int main(void) {
         case 5: {
             // 22-5
             int numVertices = 4;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_weighted_edge(g, 0, 1, 1);
             mat_graph_add_directed_weighted_edge(g, 1, 2, 1);
@@ -648,7 +648,7 @@ int main(void) {
         case 6: {
             // 22-6
             int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_weighted_edge(g, 0, 1, 2);
             mat_graph_add_directed_weighted_edge(g, 1, 2, 4);

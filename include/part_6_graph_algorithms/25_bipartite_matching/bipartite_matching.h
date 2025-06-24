@@ -3,6 +3,7 @@
 
 #include "../../common.h"
 #include "../part_6_commons.h"
+#include "../../part_3_data_structures/10_elementary_data_structures/elementary_data_structures.h" // Stack utils
 
 // ============================================================================
 // CHAPTER 25.1: MAXIMUM BIPARTITE MATCHING
@@ -220,5 +221,8 @@ void test_assignment_solver(void);
 // ============================================================================
 // PROBLEMS
 // ============================================================================
+
+void hierholzer_euler_cycle(MatGraph* g, int start);
+void test_hierholzer_algorithm(void);
 
 #endif // BIPARTITE_MATCHING_H

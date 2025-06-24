@@ -157,7 +157,7 @@ void mst_reduce(MatGraph* g, MatGraph** gPrimePtr, Edge* t, int* tSize) {
     }
 
     // Create reduced graph
-    MatGraph* gPrime = mat_graph_create(repCnt);
+    MatGraph* gPrime = mat_graph_create(repCnt, INF);
     *gPrimePtr = gPrime;
 
     for (int u = 0; u < n; u++) {
@@ -246,7 +246,7 @@ void mst_reduce_optimized(MatGraph* g, MatGraph** gPrimePtr, Edge* t, int* tSize
         }
     }
 
-    MatGraph* gPrime = mat_graph_create(compCnt);
+    MatGraph* gPrime = mat_graph_create(compCnt, INF);
     *gPrimePtr = gPrime;
 
     for (int u = 0; u < n; u++) {
@@ -315,7 +315,7 @@ void maybe_mst_a(MatGraph* g, Edge* resultEdges, int* resultSize) {
 
     qsort(edges, edgeCnt, sizeof(Edge), compare_edges_descending);
 
-    MatGraph* T = mat_graph_create(g->numVertices);
+    MatGraph* T = mat_graph_create(g->numVertices, INF);
     for (int i = 0; i < edgeCnt; i++) {
         mat_graph_add_undirected_weighted_edge(T, edges[i].u, edges[i].v, edges[i].weight);
     }
@@ -453,7 +453,7 @@ void maybe_mst_c(MatGraph* g, Edge* resultEdges, int* resultSize) {
     int n = g->numVertices;
     *resultSize = 0;
 
-    MatGraph* T = mat_graph_create(n);
+    MatGraph* T = mat_graph_create(n, INF);
 
     Edge edges[MAX_EDGES];
     int edgeCnt = 0;
@@ -514,7 +514,7 @@ void maybe_mst_c(MatGraph* g, Edge* resultEdges, int* resultSize) {
 #pragma region 21-4 Bottleneck spanning tree
 
 int mat_graph_has_bottleneck_spanning_tree(MatGraph* g, int b) {
-    MatGraph* filtered = mat_graph_create(g->numVertices);
+    MatGraph* filtered = mat_graph_create(g->numVertices, INF);
 
     for (int u = 0; u < g->numVertices; u++) {
         for (int v = u + 1; v < g->numVertices; v++) {
@@ -567,7 +567,7 @@ void mat_graph_contract_edges(
         }
     }
 
-    MatGraph* gPrime = mat_graph_create(compCnt);
+    MatGraph* gPrime = mat_graph_create(compCnt, INF);
     *contractedGraph = gPrime;
 
     for (int u = 0; u < n; u++) {
@@ -613,7 +613,7 @@ int find_bottleneck_spanning_tree(MatGraph* g) {
 
     if (mat_graph_has_bottleneck_spanning_tree(g, median)) {
         printf("Found botteleneck spanning tree weight weight <= %d\n", median);
-        MatGraph* filtered = mat_graph_create(n);
+        MatGraph* filtered = mat_graph_create(n, INF);
         for (int u = 0; u < n; u++) {
             for (int v = u + 1; v < n; v++) {
                 if (g->adjMat[u][v] > 0 && g->adjMat[u][v] <= median)
@@ -644,7 +644,7 @@ int main(void) {
     {
         case 1: {
             // 21-1
-            MatGraph* g = mat_graph_create(5);
+            MatGraph* g = mat_graph_create(5, INF);
 
             mat_graph_add_undirected_weighted_edge(g, 0, 1, 4);
             mat_graph_add_undirected_weighted_edge(g, 1, 2, 3);
@@ -673,7 +673,7 @@ int main(void) {
                 }
             }
 
-            MatGraph* mst = mat_graph_create(g->numVertices);
+            MatGraph* mst = mat_graph_create(g->numVertices, INF);
             int mst_weight = mst_kruskal(g, edges, edgeCnt, mst);
 
             printf("MST weight: %d\n", mst_weight);
@@ -689,7 +689,7 @@ int main(void) {
 
         case 2: {
             // 21.2
-            MatGraph* g = mat_graph_create(6);
+            MatGraph* g = mat_graph_create(6, INF);
 
             mat_graph_add_undirected_weighted_edge(g, 0, 1, 4);
             mat_graph_add_undirected_weighted_edge(g, 0, 2, 3);
@@ -725,7 +725,7 @@ int main(void) {
         case 3: {
             // 21-3 
             printf("Testing alternative MST algorithms:\n");
-            MatGraph* g = mat_graph_create(6);
+            MatGraph* g = mat_graph_create(6, INF);
             
             mat_graph_add_undirected_weighted_edge(g, 0, 1, 4);
             mat_graph_add_undirected_weighted_edge(g, 0, 2, 3);
@@ -769,7 +769,7 @@ int main(void) {
 
         case 4: {
             // 21-4
-            MatGraph* g = mat_graph_create(6);
+            MatGraph* g = mat_graph_create(6, INF);
         
             mat_graph_add_undirected_weighted_edge(g, 0, 1, 4);
             mat_graph_add_undirected_weighted_edge(g, 0, 2, 3);

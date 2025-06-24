@@ -1,7 +1,7 @@
 #include "../../include/part_6_graph_algorithms/part_6_commons.h"
 
-Node* create_node(int vertex) {
-    Node* newNode = safe_malloc(sizeof(Node));
+GraphNode* create_node(int vertex) {
+    GraphNode* newNode = safe_malloc(sizeof(GraphNode));
     newNode->vertex = vertex;
     newNode->next = NULL;
     return newNode;
@@ -17,9 +17,9 @@ ListGraph* list_graph_create(int numVertices) {
 
 void list_graph_free(ListGraph* g) {
     for (int i = 0; i < g->numVertices; i++) {
-        Node* temp = g->adjList[i];
+        GraphNode* temp = g->adjList[i];
         while (temp) {
-            Node* toDelete = temp;
+            GraphNode* toDelete = temp;
             temp = temp->next;
             free(toDelete);
         }
@@ -28,17 +28,17 @@ void list_graph_free(ListGraph* g) {
 }
 
 void list_graph_add_edge(ListGraph* g, int u, int v) {
-    Node* newNode = create_node(v);
+    GraphNode* newNode = create_node(v);
     newNode->next = g->adjList[u];
     g->adjList[u] = newNode;
 }
 
-MatGraph* mat_graph_create(int numVertices) {
+MatGraph* mat_graph_create(int numVertices, int initialValue) {
     MatGraph* g = safe_malloc(sizeof(MatGraph));
     g->numVertices = numVertices;
 
     for (int i = 0; i < numVertices; i++)
-        for (int j = 0; j < numVertices; j++) g->adjMat[i][j] = INF;
+        for (int j = 0; j < numVertices; j++) g->adjMat[i][j] = initialValue;
     return g;
 }
 
@@ -47,12 +47,12 @@ void mat_graph_free(MatGraph* g) {
 }
 
 void list_graph_add_undirected_edge(ListGraph* g, int u, int v) {
-    Node* node1 = create_node(v); 
+    GraphNode* node1 = create_node(v); 
     if (!node1) return; 
     node1->next = g->adjList[u];
     g->adjList[u] = node1;
 
-    Node* node2 = create_node(u);
+    GraphNode* node2 = create_node(u);
     if (!node2) { free(node1); return; } 
     node2->next = g->adjList[v];
     g->adjList[v] = node2;
@@ -101,7 +101,7 @@ void mat_graph_dfs(MatGraph* g, int v, int visited[], int stack[], int* stackIdx
 }
 
 MatGraph* transpose_mat_graph(MatGraph* g) {
-    MatGraph* gt = mat_graph_create(g->numVertices);
+    MatGraph* gt = mat_graph_create(g->numVertices, INF);
     for (int u = 0; u < g->numVertices; u++) {
         for (int v = 0; v < g->numVertices; v++) {
             if (g->adjMat[u][v]) mat_graph_add_directed_edge(gt, v, u);
@@ -373,14 +373,14 @@ void mat_graph_remove_directed_weighted_edge(
 
 
 FibNode* fib_node_create(int vertex, int key) {
-    FibNode* node = (FibNode*)malloc(sizeof(FibNode));
-    node->vertex = vertex;
-    node->key = key;
-    node->parent = node->child = NULL;
-    node->left = node->right = node;
-    node->degree = 0;
-    node->mark = 0;
-    return node;
+    FibNode* GraphNode = (FibNode*)malloc(sizeof(FibNode));
+    GraphNode->vertex = vertex;
+    GraphNode->key = key;
+    GraphNode->parent = GraphNode->child = NULL;
+    GraphNode->left = GraphNode->right = GraphNode;
+    GraphNode->degree = 0;
+    GraphNode->mark = 0;
+    return GraphNode;
 }
 
 FibHeap* fib_heap_create() {
@@ -390,16 +390,16 @@ FibHeap* fib_heap_create() {
     return heap;
 }
 
-void fib_insert(FibHeap* heap, FibNode* node) {
+void fib_insert(FibHeap* heap, FibNode* GraphNode) {
     if (!heap->min) {
-        heap->min = node;
-        node->left = node->right = node;
+        heap->min = GraphNode;
+        GraphNode->left = GraphNode->right = GraphNode;
     } else {
-        node->left = heap->min;
-        node->right = heap->min->right;
-        heap->min->right->left = node;
-        heap->min->right = node;
-        if (node->key < heap->min->key) heap->min = node;
+        GraphNode->left = heap->min;
+        GraphNode->right = heap->min->right;
+        heap->min->right->left = GraphNode;
+        heap->min->right = GraphNode;
+        if (GraphNode->key < heap->min->key) heap->min = GraphNode;
     }
     heap->size++;
 }
@@ -532,15 +532,15 @@ void fib_dec_key(FibHeap* heap, FibNode* x, int k) {
     if (x->key < heap->min->key) heap->min = x;
 }
 
-void fib_free(FibNode* node) {
-    if (!node) return;
-    FibNode* start = node;
+void fib_free(FibNode* GraphNode) {
+    if (!GraphNode) return;
+    FibNode* start = GraphNode;
     do {
-        FibNode* next = node->right;
-        if (node->child) fib_free(node->child);
-        free(node);
-        node = next;
-    } while (node != start);
+        FibNode* next = GraphNode->right;
+        if (GraphNode->child) fib_free(GraphNode->child);
+        free(GraphNode);
+        GraphNode = next;
+    } while (GraphNode != start);
 }
 
 FlowMatGraph* flow_mat_graph_create(int numVertices) {

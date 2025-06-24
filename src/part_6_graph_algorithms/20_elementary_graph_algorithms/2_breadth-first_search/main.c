@@ -19,7 +19,7 @@ int main(void) {
     {
         case 1: {
             // 20.2-4
-            MatGraph* matG = mat_graph_create(4);
+            MatGraph* matG = mat_graph_create(4, INF);
             mat_graph_add_undirected_edge(matG, 0, 1);
             mat_graph_add_undirected_edge(matG, 0, 2);
             mat_graph_add_undirected_edge(matG, 1, 2);

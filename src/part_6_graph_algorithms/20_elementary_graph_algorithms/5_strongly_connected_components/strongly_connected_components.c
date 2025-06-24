@@ -7,7 +7,7 @@ MatGraph* build_component_graph(
     int component[], 
     int numComponents
 ) {
-    MatGraph* cg = mat_graph_create(numComponents);
+    MatGraph* cg = mat_graph_create(numComponents, INF);
 
     for (int u = 0; u < g->numVertices; u++) {
         for (int v = 0; v < g->numVertices; v++) {
@@ -28,7 +28,7 @@ MatGraph* create_minimal_scc_graph(
     int component[], 
     int numComponents
 ) {
-    MatGraph* gPrime = mat_graph_create(g->numVertices);
+    MatGraph* gPrime = mat_graph_create(g->numVertices, INF);
 
     // Minimal edges within each SCC
     for (int compId = 0; compId < numComponents; compId++) {

@@ -8,7 +8,7 @@ int main(void) {
         case 1: {
             // Basic Dijkstra's
             int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_weighted_edge(g, 0, 1, 4);
             mat_graph_add_directed_weighted_edge(g, 0, 2, 1);
@@ -32,7 +32,7 @@ int main(void) {
         case 2: {
             // 22.3-4 and 22.3-5
             int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_weighted_edge(g, 0, 1, 4);
             mat_graph_add_directed_weighted_edge(g, 0, 2, 1);
@@ -60,7 +60,7 @@ int main(void) {
         case 3: {
             // 22.3-7
             int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_reliability_edge(g, 0, 1, 0.4);
             mat_graph_add_directed_reliability_edge(g, 0, 2, 0.1);
@@ -88,7 +88,7 @@ int main(void) {
         case 4: {
             // 22.3-9
             int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_reliability_edge(g, 0, 1, 0.4);
             mat_graph_add_directed_reliability_edge(g, 0, 2, 0.1);
@@ -115,7 +115,7 @@ int main(void) {
         case 5: {
             // 22.3.10
             int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_reliability_edge(g, 0, 1, 0.4);
             mat_graph_add_directed_reliability_edge(g, 0, 2, 0.1);
@@ -142,7 +142,7 @@ int main(void) {
         case 6: {
             // 22.3.12
             int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_reliability_edge(g, 0, 1, 0.4);
             mat_graph_add_directed_reliability_edge(g, 0, 2, 0.1);

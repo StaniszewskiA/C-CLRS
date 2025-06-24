@@ -9,7 +9,7 @@ int main(void) {
         case 1: {
             // 20.4-2
             int numVertices = 5;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_edge(g, 0, 1);
             mat_graph_add_directed_edge(g, 0, 2);
@@ -30,7 +30,7 @@ int main(void) {
         case 2: {
             // 20.4-2
             int numVertices = 5;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_undirected_edge(g, 0, 1);
             mat_graph_add_undirected_edge(g, 0, 2);
@@ -48,7 +48,7 @@ int main(void) {
         case 3: {
             // 20.4-5
             int numVertices = 5;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_edge(g, 0, 1);
             mat_graph_add_directed_edge(g, 0, 2);

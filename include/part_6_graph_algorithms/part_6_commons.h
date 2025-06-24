@@ -5,17 +5,17 @@
 
 #define MAX_GRAPH_VERTICES 100
 
-typedef struct Node {
+typedef struct GraphNode {
     int vertex;
-    struct Node* next;
-} Node;
+    struct GraphNode* next;
+} GraphNode;
 
 typedef struct ListGraph {
     int numVertices;
-    Node* adjList[MAX_GRAPH_VERTICES];
+    GraphNode* adjList[MAX_GRAPH_VERTICES];
 } ListGraph;
 
-Node* create_node(int vertex);
+GraphNode* create_node(int vertex);
 ListGraph* list_graph_create(int numVertices);
 void list_graph_free(ListGraph* g);
 void list_graph_add_edge(ListGraph* g, int u, int v);
@@ -25,7 +25,7 @@ typedef struct MatGraph {
     int adjMat[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES];
 } MatGraph;
 
-MatGraph* mat_graph_create(int numVertices);
+MatGraph* mat_graph_create(int numVertices, int initialValue);
 void mat_graph_free(MatGraph* g);
 void mat_graph_add_undirected_edge(MatGraph* g, int u, int v);
 
@@ -139,14 +139,14 @@ typedef struct FibHeap {
 
 FibNode* fib_node_create(int vertex, int key);
 FibHeap* fib_heap_create();
-void fib_insert(FibHeap* heap, FibNode* node);
+void fib_insert(FibHeap* heap, FibNode* GraphNode);
 void fib_link(FibNode* y, FibNode* x);
 void fib_consolidate(FibHeap* heap);
 FibNode* fib_extract_min(FibHeap* heap);
 void fib_cut(FibHeap* heap, FibNode* x, FibNode* y);
 void fib_cascading_cut(FibHeap* heap, FibNode* y);
 void fib_dec_key(FibHeap* heap, FibNode* x, int k);
-void fib_free(FibNode* node);
+void fib_free(FibNode* GraphNode);
 
 typedef struct FlowMatGraph {
     /*
