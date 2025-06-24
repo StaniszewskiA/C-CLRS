@@ -297,6 +297,8 @@ MAXIMUM_BIPARTITE_MATCHING_2_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartit
 STABLE_MARRIAGE_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/2_stable_marriage_problem/stable_marriage_problem.c
 STABLE_MARRIAGE_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/2_stable_marriage_problem/main.c
 
+HUNGARIAN_ALGORITHM_SRC = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/3_the_hungarian_algorithm_for_assignment_problem/the_hungarian_algorithm_for_assignment_problem.c
+HUNGARIAN_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/3_the_hungarian_algorithm_for_assignment_problem/main.c
 
 # ============================================================================
 # PHONY TARGETS
@@ -387,7 +389,8 @@ STABLE_MARRIAGE_MAIN = $(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/2
 		maximum-bipartite-matching run-maximum-bipartite-matching \
 		chapter-24-problems run-chapter-24-problems
 		maximum-bipartite-matching-2 run-maximum-bipartite-matching-2 \
-		stable-marriage run-stable-marriage
+		stable-marriage run-stable-marriage \
+		hungarian-algorithm run-hungarian-algorithm \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -813,8 +816,7 @@ run-representations-of-graphs: representations-of-graphs
 breadth-first-search: $(BINDIR)
 	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(PART_6_COMMONS_SRC) $(STRASSEN_SRC) $(BREADTH_FIRST_SEARCH_SRC) $(BREADTH_FIRST_SEARCH_MAIN) -o $(BINDIR)/breadth_first_search
 
-run-breadth-first-search: breadth-first-search
-	$(BINDIR)/breadth_first_search	
+run-breadth-first-search: breadth-first-search	
 
 depth-first-search: $(BINDIR)
 	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(PART_6_COMMONS_SRC) $(DEPTH_FIRST_SEARCH_SRC) $(DEPTH_FIRST_SEARCH_MAIN) -o $(BINDIR)/depth_first_search
@@ -946,6 +948,12 @@ stable-marriage: $(BINDIR)
 
 run-stable-marriage: stable-marriage
 	$(BINDIR)/stable_marriage
+
+hungarian-algorithm: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(HUNGARIAN_ALGORITHM_SRC) $(HUNGARIAN_ALGORITHM_MAIN) -o $(BINDIR)/hungarian_algorithm
+
+run-hungarian-algorithm: hungarian-algorithm
+	$(BINDIR)/hungarian_algorithm
 
 # ============================================================================
 # UTILITY TARGETS

@@ -189,7 +189,33 @@ void test_stable_roommates_solver(void);
 // CHAPTER 25.3: THE HUNGARIAN ALGORITHM FOR ASSIGNMENT PROBLEM
 // ============================================================================
 
+typedef struct {
+    int n;
+    int cost[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES];
+    int leftLabel[MAX_GRAPH_VERTICES];
+    int rightLabel[MAX_GRAPH_VERTICES];
+    int matching[MAX_GRAPH_VERTICES];
+    int matchedRight[MAX_GRAPH_VERTICES];
+    int visitedLeft[MAX_GRAPH_VERTICES];
+    int visitedRight[MAX_GRAPH_VERTICES];
+    int parentLeft[MAX_GRAPH_VERTICES];
+    int parentRight[MAX_GRAPH_VERTICES]; 
+} AssignmentInstance;
 
+AssignmentInstance* assignment_init(int n);
+void assignment_set_cost(AssignmentInstance* instance, int i, int j, int cost);
+void assignment_free(AssignmentInstance* instance);
+void print_assignment_instance(AssignmentInstance* instance);
+void print_assignment_matching(AssignmentInstance* instance);
+void assignment_init_labels(AssignmentInstance* instance);
+int assignment_find_initial_matching(AssignmentInstance* instance);
+void assignment_update_matching_from_path(AssignmentInstance* instance);
+void assignment_update_equality_graph(AssignmentInstance* instance);
+int* assignment_solver(AssignmentInstance* instance);
+int assignment_is_perfect_matching(AssignmentInstance* instance);
+void print_assignment_equality_graph(AssignmentInstance* instance);
+int assignment_calculate_total_cost(AssignmentInstance* instance);
+void test_assignment_solver(void); 
 
 // ============================================================================
 // PROBLEMS
