@@ -242,4 +242,17 @@ void find_d_perfect_matchings(
 );
 void test_perfect_matching_decomposition(void);
 
+#define NMAX 1000
+
+typedef struct {
+    int n;
+    int cost[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES];
+} HungarianInstance;
+
+HungarianInstance* hungarian_init(int n);
+void hungarian_set_cost(HungarianInstance* instance, int i, int j, int cost);
+void hungarian_free(HungarianInstance* instance);
+int hungarian_solve(HungarianInstance* instance, int* result);
+void test_hungarian_algorithm_n3(void);
+
 #endif // BIPARTITE_MATCHING_H

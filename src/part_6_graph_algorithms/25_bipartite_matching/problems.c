@@ -1,6 +1,6 @@
 #include "part_6_graph_algorithms/25_bipartite_matching/bipartite_matching.h"
 
-#define TASK 2
+#define TASK 3
 
 #pragma region Perfect matching in regular bipartite graphs
 
@@ -205,6 +205,142 @@ void test_perfect_matching_decomposition(void) {
 
 #pragma region Reducing the running time of the Hungarian algorithm to O(n^3)
 
+HungarianInstance* hungarian_init(int n) {
+    HungarianInstance* instance = (HungarianInstance*)safe_malloc(sizeof(HungarianInstance));
+    instance->n = n;
+
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            instance->cost[i][j] = 0;
+
+    return instance;
+}
+
+void hungarian_set_cost(HungarianInstance* instance, int i, int j, int cost) {
+    instance->cost[i][j] = cost;
+}
+
+void hungarian_free(HungarianInstance* instance) {
+    if (instance) safe_free(instance);
+}
+
+int hungarian_solve(HungarianInstance* instance, int* matching) {
+    int n = instance->n;
+    int leftPotential[NMAX + 1] = {0};
+    int rightPotential[NMAX + 1] = {0};
+    int rightAssignment[NMAX + 1] = {0}; 
+    int left, right;
+
+    for (left = 1; left <= n; ++left) {
+        leftPotential[left] = 0;
+        for (right = 1; right <= n; ++right) {
+            if (instance->cost[left - 1][right - 1] > leftPotential[left]) {
+                leftPotential[left] = instance->cost[left - 1][right - 1];
+            }
+        }
+    }
+
+    for (left = 1; left <= n; ++left) {  
+        rightAssignment[0] = left;
+        int sigma[NMAX + 1];
+        int leftSigma[NMAX + 1];
+        int previousRight[NMAX + 1] = {0};
+        char rightVisited[NMAX + 1] = {0};
+        char leftVisited[NMAX + 1] = {0};
+        int currRight = 0;
+
+        // Initialize sigmas 
+        for (right = 1; right <= n; ++right) {
+            sigma[right] = leftPotential[left] + rightPotential[right] - instance->cost[left - 1][right - 1];
+            leftSigma[right] = left;
+        }
+
+        do {
+            rightVisited[currRight] = 1;
+            int leftIdx = rightAssignment[currRight];
+            leftVisited[leftIdx] = 1;
+            int delta = INF;
+            int nextRight = -1;
+
+            for (right = 1; right <= n; ++right) {
+                if (rightVisited[right]) continue;
+                if (sigma[right] >= delta) continue;
+                delta = sigma[right];
+                nextRight = right;
+            }
+
+            for (int l = 1; l <= n; ++l) 
+                if (leftVisited[l]) leftPotential[l] -= delta;
+            
+            for (int r = 0; r <= n; ++r) {
+                if (rightVisited[r]) rightPotential[r] += delta;
+                else sigma[r] -= delta;
+            }
+
+            for (right = 1; right <= n; ++right) {
+                if (!rightVisited[right] && sigma[right] == 0) {
+                    for (int l = 1; l <= n; ++l) {
+                        if (!leftVisited[l]) continue;
+                        int cost = instance->cost[l - 1][right - 1];
+                        if (leftPotential[l] + rightPotential[right] - cost == 0) {
+                            leftSigma[right] = l;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            currRight = nextRight;
+            previousRight[currRight] = leftSigma[currRight];
+
+        } while (rightAssignment[currRight] != 0);
+
+        do {
+            int prevLeft = previousRight[currRight];
+            int temp = rightAssignment[currRight];
+            rightAssignment[currRight] = prevLeft;
+            currRight = temp;
+        } while (currRight != 0);
+    }
+
+    int totalCost = 0;
+    for (right = 1; right <= n; ++right) {
+        left = rightAssignment[right];
+        if (left <= 0) continue; 
+        matching[left - 1] = right - 1;
+        totalCost += instance->cost[left - 1][right - 1];
+    }
+
+    return totalCost;
+}
+
+void test_hungarian_algorithm_n3(void) {
+    int n = 4;
+    int i, j;
+    int costMat[4][4] = {
+        {54, 54, 51, 53},
+        {51, 57, 52, 52},
+        {50, 53, 54, 56},
+        {56, 54, 55, 53}
+    };
+
+    HungarianInstance* instance = hungarian_init(n);
+    for (i = 0; i < n; ++i)
+        for (j = 0; j < n; ++j)
+            hungarian_set_cost(instance, i, j, -costMat[i][j]);
+
+        
+
+    int matching[4];
+    int minCost = hungarian_solve(instance, matching);
+
+    printf("Optimal assignmeneted:\n");
+    for (i = 0; i < n; ++i)
+        printf(" %d -> %d (cost %d)\n", i, matching[i], costMat[i][matching[i]]);
+    printf("Minimum cost: %d\n", -minCost);
+    hungarian_free(instance);
+}
+
 #pragma endregion Reducing the running time of the Hungarian algorithm to O(n^3)
 
 #pragma region Other matching-related problems
@@ -230,6 +366,12 @@ int main(void) {
         case 2: {
             // Perfect matching decomposition
             test_perfect_matching_decomposition();
+            break;
+        }
+
+        case 3: {
+            // O(n^3) hungarian algorithm
+            test_hungarian_algorithm_n3();
             break;
         }
     }
