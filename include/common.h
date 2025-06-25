@@ -45,17 +45,6 @@
 // Types
 typedef unsigned int uint;
 
-// Error codes
-typedef enum {
-    SUCCESS = 0,
-    ERROR_NULL_POINTER = -1,
-    ERROR_OUT_OF_MEMORY = -2,
-    ERROR_INVALID_INPUT = -3,
-    ERROR_INDEX_OUT_OF_BOUND = -4,
-    ERROR_EMPTY_STRUCTURE = -5,
-    ERROR_FULL_STORAGE = -6,
-} error_code_t;
-
 // Comparisons
 typedef int (*compare_func_t)(const void* a, const void* b);
 int compare(const void *a, const void *b);

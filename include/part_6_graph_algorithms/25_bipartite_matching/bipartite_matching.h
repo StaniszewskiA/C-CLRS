@@ -255,4 +255,16 @@ void hungarian_free(HungarianInstance* instance);
 int hungarian_solve(HungarianInstance* instance, int* result);
 void test_hungarian_algorithm_n3(void);
 
+void hungarian_non_full_graph(
+    BipartiteGraph* g,
+    int costs[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES],
+    int leftSize,
+    int rightSize,
+    int* matching,
+    int dummyEdgeMarker
+);
+void test_hungarian_non_full(void);
+void hungarian_vertex_cycle_cover(MatGraph* g);
+void test_hungarian_vertex_cycle_cover(void);
+
 #endif // BIPARTITE_MATCHING_H

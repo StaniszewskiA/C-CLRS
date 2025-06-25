@@ -1,6 +1,6 @@
 #include "part_6_graph_algorithms/25_bipartite_matching/bipartite_matching.h"
 
-#define TASK 3
+#define TASK 5
 
 #pragma region Perfect matching in regular bipartite graphs
 
@@ -345,6 +345,164 @@ void test_hungarian_algorithm_n3(void) {
 
 #pragma region Other matching-related problems
 
+void hungarian_non_full_graph(
+    BipartiteGraph* g,
+    int costs[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES],
+    int leftSize,
+    int rightSize,
+    int* matching,
+    int dummyEdgeMarker
+) {
+    int n = (leftSize > rightSize) ? leftSize : rightSize;
+    AssignmentInstance* instance = assignment_init(n);
+
+    for (int u = 0; u < n; ++u) {
+        for (int v = 0; v < n; ++v) {
+            if (u > leftSize || v > rightSize) {
+                assignment_set_cost(instance, u, v, dummyEdgeMarker);
+                continue;
+            }
+            char found = 0;
+
+            for (int i = 0; i < g->adjSize[u]; ++i) {
+                if (g->adj[u][i] == v) {
+                    found = 1;
+                    break;
+                }
+            }
+            
+            if (found) assignment_set_cost(instance, u, v, costs[u][v]);
+            else assignment_set_cost(instance, u, v, dummyEdgeMarker);
+        }
+    } 
+
+    int* tempMatching = assignment_solver(instance);
+
+    // Reconstruct
+    for (int u = 0; u < leftSize; ++u) {
+        int v = tempMatching[u];
+        if (v >= 0 && rightSize && costs[u][v] != INF) matching[u] = v;
+        else matching[u] = -1;
+    }
+
+    safe_free(tempMatching);
+    assignment_free(instance);
+}
+
+void test_hungarian_non_full(void) {
+    int leftSize = 3;
+    int rightSize = 4;
+    BipartiteGraph* g = bipartite_graph_init(leftSize, rightSize);
+    
+    int edges[][2] = {
+        {0, 0},
+        {0, 1},
+        {1, 1},
+        {1, 2},
+        {2, 0},
+        {2, 3}
+    };
+    int n = ARRAY_SIZE(edges);
+    for (int i = 0; i < n; ++i)
+        bipartite_graph_add_edge(g, edges[i][0], edges[i][1]);
+
+    int costs[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES] = {{0}};
+    costs[0][0] = 5; costs[0][1] = 8;
+    costs[1][1] = 7; costs[1][2] = 6;
+    costs[2][0] = 4; costs[2][3] = 9;
+
+    int matching[MAX_GRAPH_VERTICES];
+    hungarian_non_full_graph(g, costs, leftSize, rightSize, matching, 0);
+    printf("Max weight matching:\n");
+    int total = 0;
+
+    for (int u = 0; u < leftSize; ++u) {
+        if (matching[u] != -1) {
+            printf("%d -> %d (w=%d)\n", u, matching[u], costs[u][matching[u]]);
+            total += costs[u][matching[u]];
+        } else printf("%d -> -\n", u);
+    }
+
+    printf("Total weight: %d\n", total);
+    safe_free(g);
+}
+
+void hungarian_vertex_cycle_cover(MatGraph* g) {
+    int n = g->numVertices;
+    HungarianInstance* instance = hungarian_init(n);
+
+    for (int u = 0; u < n; ++u) {
+        for (int v = 0; v < n; ++v) {
+            if (g->adjMat[u][v] > 0) hungarian_set_cost(instance, u, v, -g->adjMat[u][v]);
+            else hungarian_set_cost(instance, u, v, INF);
+        }
+    }
+
+    int* matching = (int*)safe_malloc(n * sizeof(int));
+    hungarian_solve(instance, matching);
+    char* visited = (char*)safe_calloc(n, sizeof(char));
+
+    printf("Cycle cover:\n");
+    for (int i = 0; i < n; ++i) {
+        if (visited[i]) continue;
+        int v = i;
+        printf("Cycle: ");
+        do {
+            printf("%d ", v);
+            visited[v] = 1;
+            v = matching[v];
+        } while (v != i && !visited[v]);
+        printf("\n");
+    } 
+
+    int total = 0;
+    for (int u = 0; u < n; ++u) {
+        int v = matching[u];
+        if (g->adjMat[u][v] != INF) total += g->adjMat[u][v];
+    }
+
+    printf("Total weight: %d\n", total);
+    safe_free(matching);
+    safe_free(visited);
+    hungarian_free(instance);
+}
+
+void test_hungarian_vertex_cycle_cover(void) {
+    int weightedEdges[][3] = {
+        {0, 1, 10},
+        {1, 2, 20},
+        {2, 0, 30},
+        {3, 1, 40},
+        {1, 3, 50},
+        {2, 3, 60},
+        {3, 0, 70}
+    };
+    int numEdges = ARRAY_SIZE(weightedEdges);
+    int n = 0;
+
+    for (int i = 0; i < numEdges; ++i) {
+        if (weightedEdges[i][0] > n) n = weightedEdges[i][0];
+        if (weightedEdges[i][1] > n) n = weightedEdges[i][1];
+    }
+    n++;
+
+    MatGraph* g = mat_graph_create(n, 0);
+
+    for (int i = 0; i < numEdges; i++)
+        mat_graph_add_directed_weighted_edge(g, weightedEdges[i][0], 
+            weightedEdges[i][1], weightedEdges[i][2]);
+
+    printf("Directed weighted graph adjacency matrix:\n");
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) printf("%3d ", g->adjMat[i][j]);
+        printf("\n");
+    }
+
+    hungarian_vertex_cycle_cover(g);
+
+    mat_graph_free(g);
+}
+
 #pragma endregion Other matching-related problems
 
 #pragma region Fractional matching
@@ -372,6 +530,21 @@ int main(void) {
         case 3: {
             // O(n^3) hungarian algorithm
             test_hungarian_algorithm_n3();
+            break;
+        }
+
+        case 4: {
+            // The hungarian method for non-full graphs
+            test_hungarian_non_full();
+            break;
+        }
+
+        case 5: {
+            /*
+                The vertex cycle cover problem
+                reduced to perfect matching.
+            */
+            test_hungarian_vertex_cycle_cover();
             break;
         }
     }

@@ -950,7 +950,13 @@ run-hungarian-algorithm: hungarian-algorithm
 	$(BINDIR)/hungarian_algorithm
 
 chapter-25-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(STACKS_QUEUES_SRC) $(CHAPTER_25_PROBLEMS_SRC) -o $(BINDIR)/chapter_25_problems
+	$(CC) $(CFLAGS) \
+	$(COMMON_SRC) \
+	$(PART_6_COMMONS_SRC) \
+	$(STACKS_QUEUES_SRC) \
+	$(CHAPTER_25_PROBLEMS_SRC) \
+	src/part_6_graph_algorithms/25_bipartite_matching/3_the_hungarian_algorithm_for_assignment_problem/the_hungarian_algorithm_for_assignment_problem.c \
+	-o $(BINDIR)/chapter_25_problems
 
 run-chapter-25-problems: chapter-25-problems
 	$(BINDIR)/chapter_25_problems
