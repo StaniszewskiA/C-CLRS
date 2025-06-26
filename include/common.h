@@ -1,0 +1,142 @@
+#ifndef COMMON_H
+#define COMMON_H
+
+// Libs
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <math.h>
+#include <time.h>
+#include <limits.h>
+#include <float.h>
+
+// Constants
+#define MAX_SIZE 1000
+#define MAX_VALUE 10000
+#define MIX_VALUE -10000
+#define INF INT_MAX
+#define NEG_INF INT_MIN
+#define NIL -1
+
+// Macros
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MAX3(a, b, c) (((a) > (b)) ? (((a) > (c)) ? (a) : (c)) : (((b) > (c)) ? (b) : (c)))
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define ABS(x) ((x) < 0 ? -(x) : x)
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr)[0])
+
+#define SWAPS(a, b, type) do { \
+    type temp = (a); \
+    (a) = (b); \
+    (b) = temp; \
+} while(0);
+
+#define SWAP_INT(a, b) SWAPS(a, b, int);
+#define SWAP_DOUBLE(a, b) SWAPS(a, b, double);
+#define SWAP_INTERVAL(a, b) SWAPS(a, b, Interval);
+
+// Color flags
+// #define RED 0
+// #define BLACK 1
+
+// Types
+typedef unsigned int uint;
+
+// Comparisons
+typedef int (*compare_func_t)(const void* a, const void* b);
+int compare(const void *a, const void *b);
+int min_of_three(int a, int b, int c);
+int compare_ints(const void* a, const void* b);
+
+// Memory allocation
+void* safe_malloc(size_t size);
+void* safe_calloc(size_t num, size_t size);
+void* safe_realloc(void* ptr, size_t size);
+void safe_free(void* ptr);
+
+// Other
+
+#define NARRAY 10
+#define MAX_MAT_SIZE 6
+
+void print_separator(const char* title);
+void print_error(const char* msg);
+double get_time_ms(void);
+int random_int(int min, int max);
+void print_arr(int arr[], int size);
+void print_arr_slice(int arr[], int left, int right);
+void print_arr_double(double arr[], int size);
+void print_arr_float(float A[]);
+void print_named_mat(int mat[MAX_MAT_SIZE][MAX_MAT_SIZE], const char* name);
+void print_named_vec(int v[MAX_MAT_SIZE], const char* name);
+void print_named_bool_mat(
+    int mat[MAX_MAT_SIZE][MAX_MAT_SIZE], 
+    const char* name
+);
+
+// Matrix utils
+
+#define MAX_MATRIX_SIZE 100
+
+void print_matrix(int matrix[MAX_MATRIX_SIZE][MAX_MATRIX_SIZE], int n);
+int** allocate_matrix(int size);
+void input_matrix(int** matrix, int size, const char* name);
+void free_matrix(int** matrix, int size);
+void add_matrices(
+    int** A, 
+    int** B, 
+    int** C, 
+    int size, 
+    int multiplier
+);
+
+// Intervals
+typedef struct {
+    int low;
+    int high;
+} Interval;
+
+void interval_swap(Interval *a, Interval *b );
+void print_intervals(Interval A[], int size);
+
+// System conversions
+#define MAX_BASE_DIGITS 3
+
+void convert_to_base_n(
+    int A[],
+    int n,
+    int base,
+    int converted[][MAX_BASE_DIGITS]
+);
+void convert_back_from_base_n(
+    int converted[][MAX_BASE_DIGITS], 
+    int n, 
+    int base, 
+    int A[]
+);
+
+// Array utils
+int find_max(int A[], int n);
+
+// Counting
+int count_digits(int num);
+int next_power_of_two(int n);
+int median_of_five(int arr[], int n);
+int select_kth(int arr[], int left, int right, int k);
+
+// Random
+void generate_random_binary_string(char *str, size_t length);
+
+// Debug
+#ifdef DEBUG
+#define DEBUG_PRINT(fmt, ...) \
+    do { fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt "\n", \
+                __FILE__, __LINE__, __func__, ##__VA_ARGS__); } while(0)
+#else
+#define DEBUG_PRINT(fmt, ...) do {} while(0)
+#endif
+
+#endif // COMMON_H

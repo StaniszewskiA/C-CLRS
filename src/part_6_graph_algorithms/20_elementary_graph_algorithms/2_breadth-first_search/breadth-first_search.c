@@ -1,52 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#define TASK 3
-#define MAX_VERTICES 50
-
-typedef struct Node {
-    int vertex;
-    struct Node* next;
-} Node;
-
-typedef struct ListGraph {
-    int numVertices;
-    Node* adjList[MAX_VERTICES];
-} ListGraph;
-
-Node* create_node(int vertex) {
-    Node* new_node = malloc(sizeof(Node));
-    new_node->vertex = vertex;
-    new_node->next = NULL;
-    return new_node;
-}
-
-ListGraph* list_graph_create(int numVertices) {
-    ListGraph* g = malloc(sizeof(ListGraph));
-    g->numVertices = numVertices;
-
-    for (int i = 0; i < numVertices; i++) g->adjList[i] = NULL;
-    return g;
-}
-
-void list_graph_free(ListGraph* g) {
-    for (int i = 0; i < g->numVertices; i++) {
-        Node* temp = g->adjList[i];
-        while (temp) {
-            Node* toDelete = temp;
-            temp = temp->next;
-            free(toDelete);
-        }
-    }
-    free(g);
-}
-
-void list_graph_add_edge(ListGraph* g, int u, int v) {
-    Node* new_node = create_node(v);
-    new_node->next = g->adjList[u];
-    g->adjList[u] = new_node;
-}
+#include "part_6_graph_algorithms/20_elementary_graph_algorithms/elementary_graph_algorithms.h"
 
 void list_graph_bfs(ListGraph* g, int source) {
     int visited[MAX_VERTICES] = {0};
@@ -74,28 +26,6 @@ void list_graph_bfs(ListGraph* g, int source) {
 
 #pragma region 20.2-4
 
-typedef struct MatGraph {
-    int numVertices;
-    int adjMat[MAX_VERTICES][MAX_VERTICES];
-} MatGraph;
-
-MatGraph* mat_graph_create(int numVertices) {
-    MatGraph* g = malloc(sizeof(MatGraph));
-    g->numVertices = numVertices;
-
-    for (int i = 0; i < numVertices; i++) 
-        for (int j = 0; j < numVertices; j++) g->adjMat[i][j] = 0;
-    return g;
-}
-
-void mat_graph_free(MatGraph* g) {
-    free(g);
-}
-
-void mat_graph_add_edge(MatGraph* g, int u, int v) {
-    g->adjMat[u][v] = 1;
-}
-
 void mat_graph_bfs(MatGraph* g, int source) {
     int visited[MAX_VERTICES];
     for (int i = 0; i < g->numVertices; i++) visited[i] = 0;
@@ -121,8 +51,6 @@ void mat_graph_bfs(MatGraph* g, int source) {
 #pragma endregion 20.2-4
 
 #pragma region 20.2-7
-
-typedef enum { UNCOLORED = -1, BABYFACE = 0, HEEL = 1} Role;
 
 int check_wrestlers(ListGraph* g, Role* roles, int source) {
     int queue[MAX_VERTICES];
@@ -199,85 +127,3 @@ int tree_diameter(ListGraph* g) {
 }
 
 #pragma endregion 20.2-8
-
-int main(void) {
-    // ListGraph* listG = list_graph_create(4);
-    // list_graph_add_edge(listG, 0, 1);
-    // list_graph_add_edge(listG, 0, 2);
-    // list_graph_add_edge(listG, 1, 2);
-    // list_graph_add_edge(listG, 2, 0);
-    // list_graph_add_edge(listG, 2, 3);
-    // list_graph_add_edge(listG, 3, 3);
-
-    // printf("BFS with source 2\n");
-    // list_graph_bfs(listG, 2);
-    // list_graph_free(listG);
-
-    switch (TASK)
-    {
-        case 1: {
-            // 20.2-4
-            MatGraph* matG = mat_graph_create(4);
-            mat_graph_add_edge(matG, 0, 1);
-            mat_graph_add_edge(matG, 0, 2);
-            mat_graph_add_edge(matG, 1, 2);
-            mat_graph_add_edge(matG, 2, 0);
-            mat_graph_add_edge(matG, 2, 3);
-            mat_graph_add_edge(matG, 3, 3);
-
-            printf("BFS with source 2\n");
-            mat_graph_bfs(matG, 2);
-            mat_graph_free(matG);
-
-            break;
-        }
-
-        case 2: {
-            // 20.2-7
-            int n = 6;
-            int rivalries[][2] = {
-                {0, 1},
-                {1, 2},
-                {2, 3},
-                {3, 4},
-                {4, 5},
-                {5, 0}
-            };
-            int r = sizeof(rivalries) / sizeof(rivalries[0]);
-
-            ListGraph* g = list_graph_create(n);
-            Role roles[MAX_VERTICES];
-            for (int i = 0; i < n; i++) roles[i] = UNCOLORED;
-
-            for (int i = 0; i < r; i++) 
-                list_graph_add_edge(g, rivalries[i][0], rivalries[i][1]);
-
-            if (can_assign_wrestlers(g, roles)) printf("Wrestlers can be assigned");
-            else printf("Wrestlers can't be assigned.");
-            
-            list_graph_free(g);
-
-            break;
-        }
-
-        case 3: {
-            // 20.2-8
-            ListGraph* g = list_graph_create(6);
-            list_graph_add_edge(g, 0, 1);
-            list_graph_add_edge(g, 1, 2);
-            list_graph_add_edge(g, 1, 3);
-            list_graph_add_edge(g, 3, 4);
-            list_graph_add_edge(g, 4, 5);
-
-            int diameter = tree_diameter(g);
-            printf("Diameter of the tree: %d\n", diameter);
-
-            break;
-        }
-        
-        default:
-            break;
-    }
-
-    return 0;
-}

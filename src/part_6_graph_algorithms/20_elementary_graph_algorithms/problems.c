@@ -1,80 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include "part_6_graph_algorithms/20_elementary_graph_algorithms/elementary_graph_algorithms.h"
 
 #define TASK 4
-
-#pragma region Graph utils
-
-#define MAX_VERTICES 10
-
-typedef struct MatGraph {
-    // Graph represented by adjacency matrix
-    int adjMat[MAX_VERTICES][MAX_VERTICES];
-    int numVertices;
-} MatGraph;
-
-MatGraph* mat_graph_create(int numVertices) {
-    MatGraph* g = malloc(sizeof(MatGraph));
-    g->numVertices = numVertices;
-
-    for (int i = 0; i < numVertices; i++)
-        for (int j = 0; j < numVertices; j++) g->adjMat[i][j] = 0;
-    return g;
-}
-
-void mat_graph_free(MatGraph* g) {
-    // printf("Freeing graph...\n");
-    free(g);
-    // printf("Graph freed\n");
-}
-
-void mat_graph_add_directed_edge(MatGraph* g, int u, int v) {
-    g->adjMat[u][v] = 1;
-}
-
-void mat_graph_add_undirected_edge(MatGraph* g, int u, int v) {
-    g->adjMat[u][v] = 1;
-    g->adjMat[v][u] = 1;
-}
-
-int has_cycle(MatGraph* g, int v, int visited[], int recursionStack[]) {
-    if (!visited[v]) {
-        visited[v] = 1;
-        recursionStack[v] = 1;
-        for (int i = 0; i < g->numVertices; i++) {
-            if (g->adjMat[v][i]) {
-                if (!visited[i] && has_cycle(g, i, visited, recursionStack)) return 1;
-                else if (recursionStack[i]) return 1;
-            }
-        }
-    }
-    recursionStack[v] = 0;
-    return 0;
-}
-
-int is_dag(MatGraph* g) {
-    int visited[MAX_VERTICES] = {0};
-    int recursionStack[MAX_VERTICES] = {0};
-
-    for (int i = 0; i < g->numVertices; i++) 
-        if (has_cycle(g, i, visited, recursionStack)) return 0;
-    return 1;
-}
-
-MatGraph* transpose_graph(MatGraph* g) {
-    MatGraph* gt = mat_graph_create(g->numVertices);
-    for (int u = 0; u < g->numVertices; u++) {
-        for (int v = 0; v < g->numVertices; v++) {
-            if (g->adjMat[u][v]) mat_graph_add_directed_edge(gt, v, u);
-        }
-    }
-    return gt;
-}
-
-
-#pragma endregion Graph utils
 
 #pragma region 20.2
 
@@ -87,7 +13,7 @@ void compute_low_values(
     int* low,
     int* time
 ) {
-    // Using DFS
+    // Using mat_graph_dfs
     visited[u] = 1;
     discovery[u] = low[u] = ++(*time);
 
@@ -159,7 +85,6 @@ void find_articulation_points(MatGraph* g) {
     int discovery[MAX_VERTICES] = {0};
     int low[MAX_VERTICES] = {0};
     int articulationPoints[MAX_VERTICES] = {0};
-    int time = 0;
 
     compute_articulation_points(g, visited, discovery, low, articulationPoints);
 
@@ -345,89 +270,6 @@ void find_euler_tour(MatGraph* g, int source) {
 
 #pragma region 20.4
 
-void dfs(MatGraph* g, int u, int visited[], int stack[], int* stackIdx) {
-    visited[u] = 1;
-    for (int v = 0; v < g->numVertices; v++) {
-        if (g->adjMat[u][v] && !visited[v]) {
-            dfs(g, v, visited, stack, stackIdx);
-        }
-    }
-    stack[(*stackIdx)++] = u;
-}
-
-void assign_scc(
-    MatGraph* gt, 
-    int v, 
-    int visited[], 
-    int component[], 
-    int compId
-) {
-    visited[v] = 1;
-    component[v] = compId;
-    for (int u = 0; u < gt->numVertices; u++) {
-        if (gt->adjMat[v][u] && !visited[u])
-            assign_scc(gt, u, visited, component, compId);
-    } 
-}
-
-int kosaraju(MatGraph* g, int component[]) {
-    int stack[MAX_VERTICES];
-    int stackIdx = 0;
-    int visited[MAX_VERTICES] = {0};
-
-    // DFS
-    for (int v = 0; v < g->numVertices; v++) {
-        if (!visited[v]) dfs(g, v, visited, stack, &stackIdx);
-    }
-
-    // Transposition
-    MatGraph* gt = transpose_graph(g);
-
-    // Assignment
-    memset(visited, 0, sizeof(visited));
-    int compId = 0;
-    for (int i = stackIdx - 1; i >= 0; i--) {
-        int v = stack[i];
-        if (!visited[v]) {
-            assign_scc(gt, v, visited, component, compId);
-            compId++;
-        }
-    }
-
-    printf("SCCs:\n");
-    for (int v = 0; v < g->numVertices; v++) {
-        printf("Vertex %d -> Component %d\n", v, component[v]);
-    }
-
-    mat_graph_free(gt);
-    return compId;
-}
-
-MatGraph* build_component_graph(
-    MatGraph* g, 
-    int component[], 
-    int numComponents
-) {
-    MatGraph* cg = mat_graph_create(numComponents);
-
-    for (int u = 0; u < g->numVertices; u++) {
-        for (int v = 0; v < g->numVertices; v++) {
-            if (g->adjMat[u][v] && component[u] != component[v])
-                mat_graph_add_directed_edge(cg, component[u], component[v]);
-        }
-    }
-
-    printf("Component Graph Adjacency Matrix:\n");
-    for (int u = 0; u < numComponents; u++) {
-        for (int v = 0; v < numComponents; v++) {
-            printf("%d ", cg->adjMat[u][v]);
-        }
-        printf("\n");
-    }
-
-    return cg;
-}
-
 int reachability(
     MatGraph* gSCC, 
     int u, 
@@ -484,16 +326,8 @@ void compute_min_labels(MatGraph* g, int* labels) {
 
 #pragma region 20.5
 
-typedef struct PlanarGraph {
-    int adjList[MAX_VERTICES][MAX_VERTICES];
-    int adjSize[MAX_VERTICES];
-    int newestNei[MAX_VERTICES];
-    int stack[MAX_VERTICES];
-    int stackTop;
-} PlanarGraph;
-
 PlanarGraph* planar_graph_create() {
-    PlanarGraph* pg = malloc(sizeof(PlanarGraph));
+    PlanarGraph* pg = safe_malloc(sizeof(PlanarGraph));
     for (int i = 0; i < MAX_VERTICES; i++) {
         pg->adjSize[i] = 0;
         pg->newestNei[i] = -1;
@@ -532,7 +366,7 @@ int main(void) {
         case 1: {
             // 20.2
             int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_undirected_edge(g, 0, 1);
 
@@ -554,7 +388,7 @@ int main(void) {
         case 2: {
             // 20.3
             int numVertices = 6;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_undirected_edge(g, 0, 1);
 
@@ -572,7 +406,7 @@ int main(void) {
         case 3: {
             // 20.4
             int numVertices = 8;
-            MatGraph* g = mat_graph_create(numVertices);
+            MatGraph* g = mat_graph_create(numVertices, INF);
 
             mat_graph_add_directed_edge(g, 0, 1);
             mat_graph_add_directed_edge(g, 1, 2);

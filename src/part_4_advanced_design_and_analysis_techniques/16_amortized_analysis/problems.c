@@ -1,21 +1,17 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include "part_4_advanced_design_and_analysis_techniques/16_amortized_analysis/amortized_analysis.h"
 
 #define TASK 3
 
 /*
     16-1: Binary Gray codes.
 */
-typedef unsigned int uint;
-
-static inline uint gray_code(uint i) {
+uint gray_code(uint i) {
     return i ^ (i >> 1);
 }
 
 void generate_gray_codes(int k) {
     uint n = 1 << k;
-    uint i, j, gray;
+    uint i, gray;
     printf("<");
 
     for (i = 0; i < n; i++) {
@@ -29,38 +25,25 @@ void generate_gray_codes(int k) {
 }
 
 /*
-    16.2: Making binary search dynamic.
+    16.2: Making binary dbs_search dynamic.
 */
-#define MAX_ARRAYS 20
-
-typedef struct {
-    int* data;
-    uint size;
-    uint capacity;
-} DynamicArray;
-
-typedef struct {
-    DynamicArray* arrays[MAX_ARRAYS];
-    uint k;
-} DynamicBinarySearch;
-
-void init_dynamic_array(DynamicArray* arr, uint capacity) {
+void dynamic_array_init(DynamicArray* arr, uint capacity) {
     arr->data = (int*)malloc(capacity * sizeof(int));
     arr->size = 0;
     arr->capacity = capacity;
 }
 
-void init_dbs(DynamicBinarySearch* dbs, uint n) {
+void dbs_init(DynamicBinarySearch* dbs, uint n) {
     uint i;
     
     dbs->k = (int)ceil(log2(n + 1));
     for (i = 0; i < dbs->k; i++) {
         dbs->arrays[i] = (DynamicArray*)malloc(sizeof(DynamicArray));
-        init_dynamic_array(dbs->arrays[i], 1 << i);
+        dynamic_array_init(dbs->arrays[i], 1 << i);
     } 
 }
 
-int binary_search(DynamicArray* arr, int target) {
+int dbs_binary_search(DynamicArray* arr, int target) {
     int low = 0, high = arr->size - 1;
 
     while (low <= high) {
@@ -73,20 +56,20 @@ int binary_search(DynamicArray* arr, int target) {
     return -1;
 }
 
-int search(DynamicBinarySearch* dbs, int target) {
-    int i, idx;
+int dbs_search(DynamicBinarySearch* dbs, int target) {
+    int idx;
 
-    for (i = 0; i < dbs->k; i++) {
-        idx = binary_search(dbs->arrays[i], target);
+    for (uint i = 0; i < dbs->k; i++) {
+        idx = dbs_binary_search(dbs->arrays[i], target);
         if (idx != -1) return idx;
     }
 
     return -1;
 }
 
-void insert(DynamicBinarySearch* dbs, int val) {
+void dbs_insert(DynamicBinarySearch* dbs, int val) {
     DynamicArray* arr = dbs->arrays[0];
-    int i, idx;
+    int idx;
 
     if (arr->size < arr->capacity) {
         idx = arr->size - 1;
@@ -97,7 +80,7 @@ void insert(DynamicBinarySearch* dbs, int val) {
         arr->data[idx + 1] = val;
         arr->size++;
     } else {
-        for (i = 1; i < dbs->k; i++) {
+        for (uint i = 1; i < dbs->k; i++) { 
             DynamicArray* curr = dbs->arrays[i];
             if (curr->size < curr->capacity) {
                 idx = curr->size - 1;
@@ -113,14 +96,14 @@ void insert(DynamicBinarySearch* dbs, int val) {
     }
 }
 
-void delete(DynamicBinarySearch* dbs, int val) {
-    int i, idx, j;
+void dbs_delete(DynamicBinarySearch* dbs, int val) {
+    int idx;
 
-    for (i = 0; i < dbs->k; i++) {
+    for (uint i = 0; i < dbs->k; i++) {  
         DynamicArray* arr = dbs->arrays[i];
-        idx = binary_search(arr, val);
+        idx = dbs_binary_search(arr, val);
         if (idx != -1) {
-            for (j = idx; j < arr->size - 1; j++) 
+            for (uint j = idx; j < arr->size - 1; j++) 
                 arr->data[j] = arr->data[j + 1];
             arr->size--;
             break;
@@ -129,11 +112,9 @@ void delete(DynamicBinarySearch* dbs, int val) {
 }
 
 void print_dbs(DynamicBinarySearch* dbs) {
-    int i, j;
-
-    for (i = 0; i < dbs->k; i++) {
-        printf("Array A%d (size %d): ", i, dbs->arrays[i]->size);
-        for (j = 0; j < dbs->arrays[i]->size; j++) {
+    for (uint i = 0; i < dbs->k; i++) {  
+        printf("Array A%u (size %u): ", i, dbs->arrays[i]->size);
+        for (uint j = 0; j < dbs->arrays[i]->size; j++) { 
             printf("%d ", dbs->arrays[i]->data[j]);  
         }
         printf("\n"); 
@@ -144,14 +125,7 @@ void print_dbs(DynamicBinarySearch* dbs) {
 /*
     16.3: Amortized weight-balanced trees.
 */
-typedef struct TreeNode {
-    int val;
-    int size;
-    struct TreeNode* left;
-    struct TreeNode* right;
-} TreeNode;
-
-TreeNode* create_node(int val) {
+TreeNode* tree_node_init(int val) {
     TreeNode* newNode = (TreeNode*)malloc(sizeof(TreeNode));
     newNode->val = val;
     newNode->size = 1;
@@ -160,7 +134,7 @@ TreeNode* create_node(int val) {
     return newNode;
 }
 
-void update_size(TreeNode* node) {
+void tree_update_size(TreeNode* node) {
     if (node) {
         node->size = 1;
         if (node->left) node->size += node->left->size;
@@ -168,11 +142,11 @@ void update_size(TreeNode* node) {
     }
 }
 
-void inorder_traversal(TreeNode* root, int* nodes, int* idx) {
+void tree_inorder_traversal(TreeNode* root, int* nodes, int* idx) {
     if (root) {
-        inorder_traversal(root->left, nodes, idx);
+        tree_inorder_traversal(root->left, nodes, idx);
         nodes[(*idx)++] = root->val;
-        inorder_traversal(root->right, nodes, idx);
+        tree_inorder_traversal(root->right, nodes, idx);
     }
 }
 
@@ -181,21 +155,21 @@ TreeNode* build_balanced_BST(int* nodes, int start, int end) {
 
     int mid = (start + end) / 2;
 
-    TreeNode* node = create_node(nodes[mid]);
+    TreeNode* node = tree_node_init(nodes[mid]);
     node->left = build_balanced_BST(nodes, start, mid - 1);
     node->right = build_balanced_BST(nodes, mid + 1, end);
-    update_size(node);
+    tree_update_size(node);
     return node;
 }
 
-TreeNode* rebuild_tree(TreeNode* root) {
+TreeNode* tree_rebuild(TreeNode* root) {
     if (root == NULL) return NULL;
 
     int size = root->size;
     int* nodes = (int*)malloc(size * sizeof(int));
     int idx = 0;
 
-    inorder_traversal(root, nodes, &idx);
+    tree_inorder_traversal(root, nodes, &idx);
     TreeNode* newRoot = build_balanced_BST(nodes, 0, size - 1);
 
     free(nodes);
@@ -217,22 +191,22 @@ int main(void) {
             // 16.2
             uint n2 = 16;
             DynamicBinarySearch dbs;
-            init_dbs(&dbs, n2);
+            dbs_init(&dbs, n2);
 
-            insert(&dbs, 10);
-            insert(&dbs, 20);
-            insert(&dbs, 30);
-            insert(&dbs, 40);
-            insert(&dbs, 50);
-            insert(&dbs, 60);
-            insert(&dbs, 70);
-            insert(&dbs, 80);
-            insert(&dbs, 90);
+            dbs_insert(&dbs, 10);
+            dbs_insert(&dbs, 20);
+            dbs_insert(&dbs, 30);
+            dbs_insert(&dbs, 40);
+            dbs_insert(&dbs, 50);
+            dbs_insert(&dbs, 60);
+            dbs_insert(&dbs, 70);
+            dbs_insert(&dbs, 80);
+            dbs_insert(&dbs, 90);
 
             print_dbs(&dbs);
 
             uint target = 30;
-            int idx = search(&dbs, target);
+            int idx = dbs_search(&dbs, target);
 
             if (idx != -1) {
                 printf("Element %d found at index %d\n", target, idx);
@@ -240,7 +214,7 @@ int main(void) {
                 printf("Element %d not found\n", target);
             }
 
-            delete(&dbs, 30);
+            dbs_delete(&dbs, 30);
             printf("After deletion:\n");
             print_dbs(&dbs);
 
@@ -249,15 +223,15 @@ int main(void) {
 
         case 3: {
             // 16.3
-            TreeNode* root = create_node(15);
-            root->left = create_node(10);
-            root->right = create_node(20);
-            root->left->left = create_node(7);
-            root->left->right = create_node(12);
-            root->right->left = create_node(17);
-            root->right->right = create_node(22);
+            TreeNode* root = tree_node_init(15);
+            root->left = tree_node_init(10);
+            root->right = tree_node_init(20);
+            root->left->left = tree_node_init(7);
+            root->left->right = tree_node_init(12);
+            root->right->left = tree_node_init(17);
+            root->right->right = tree_node_init(22);
 
-            root = rebuild_tree(root);
+            root = tree_rebuild(root);
             printf("Tree rebuild successfuly");
 
             break;

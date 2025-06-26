@@ -1,100 +1,15 @@
-#include <limits.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include "part_6_graph_algorithms/24_maximum_flow/maximum_flow.h"
 
 #define TASK 7
-#define INF INT_MAX
 
 #pragma region Graph utils
 
-#define MAX_VERTICES 200
-
-typedef struct FlowGraph {
-    int adjMat[MAX_VERTICES][MAX_VERTICES];
-    int flow[MAX_VERTICES][MAX_VERTICES];
-    int numVertices;
-} FlowGraph;
-
-FlowGraph* flow_graph_create(int numVertices) {
-    FlowGraph* g = malloc(sizeof(FlowGraph));
-    g->numVertices = numVertices;
-    for (int i = 0; i < numVertices; i++) {
-        for (int j = 0; j < numVertices; j++) {
-            g->adjMat[i][j] = 0;
-            g->flow[i][j] = 0;
-        }
-    }
-
-    return g;
-}
-
-void flow_graph_add_edge(FlowGraph* g, int u, int v, int capacity) {
-    g->adjMat[u][v] = capacity;
-}
-
-void flow_graph_free(FlowGraph* g) {
-    free(g);
-}
-
-int bfs(FlowGraph* g, int src, int sink, int parent[]) {
-    int visited[MAX_VERTICES] = {0};
-    int queue[MAX_VERTICES];
-    int front = 0;
-    int rear = 0;
-
-    queue[rear++] = src;
-    visited[src] = 1;
-    parent[src] = -1;
-
-    while (front != rear) {
-        int src = queue[front++];
-
-        for (int v = 0; v < g->numVertices; v++) {
-            if (visited[v] || (g->adjMat[src][v] - g->flow[src][v]) <= 0) continue;
-            if (v == sink) {
-                parent[v] = src;
-                return 1;
-            }
-            queue[rear++] = v;
-            visited[v] = 1;
-            parent[v] = src;
-        }
-    }
-
-    return 0;
-}
-
-int edmonds_karp(FlowGraph* g, int src, int sink) {
-    int u, v;
-    int parent[MAX_VERTICES];
-    int maxFlow = 0;
-
-    for (u = 0; u < g->numVertices; u++)
-        for (v = 0; v < g->numVertices; v++)
-            g->flow[u][v] = 0;
-
-    while (bfs(g, src, sink, parent)) {
-        int pathFlow = INT_MAX;
-        for (v = sink; v != src; v = parent[v]) {
-            u = parent[v];
-            pathFlow = fmin(pathFlow, g->adjMat[u][v] - g->flow[u][v]);
-        }
-
-        for (v = sink; v != src; v = parent[v]) {
-            u = parent[v];
-            g->flow[u][v] += pathFlow;
-            g->flow[v][u] -= pathFlow;
-        }
-
-        maxFlow += pathFlow;
-    }
-
-    return maxFlow;
-}
-
-int has_cycle(FlowGraph* g, int v, int visited[], int stack[]) {
+int flow_mat_graph_has_cycle(
+    FlowMatGraph* g, 
+    int v, 
+    int visited[], 
+    int stack[]
+) {
     if (visited[v]) return stack[v];
 
     visited[v] = 1;
@@ -102,47 +17,31 @@ int has_cycle(FlowGraph* g, int v, int visited[], int stack[]) {
 
     for (int i = 0; i < g->numVertices; ++i) {
         if (!g->adjMat[v][i]) continue;
-        if (has_cycle(g, i, visited, stack)) return 1;
+        if (flow_mat_graph_has_cycle(g, i, visited, stack)) return 1;
     }
 
     stack[v] = 0;
     return 0;
 }
 
-int is_dag(FlowGraph* g) {
-    int visited[MAX_VERTICES] = {0};
-    int stack[MAX_VERTICES] = {0};
+int flow_mat_graph_is_dag(FlowMatGraph* g) {
+    int visited[MAX_GRAPH_VERTICES] = {0};
+    int stack[MAX_GRAPH_VERTICES] = {0};
 
     for (int i = 0; i < g->numVertices; ++i) {
-        if (has_cycle(g, i, visited, stack)) return 0;
+        if (flow_mat_graph_has_cycle(g, i, visited, stack)) return 0;
     }
 
     return 1;
 }
 
-FlowGraph* flow_graph_copy(FlowGraph* original) {
-    int n = original->numVertices;
-    FlowGraph* copy = flow_graph_create(n);
 
-    for (int u = 0; u < n; u++) {
-        for (int v = 0; v < n; v++) {
-            copy->adjMat[u][v] = original->adjMat[u][v];
-            copy->flow[u][v] = original->flow[u][v];
-        }
-    }
-
-    return copy;
-}
-
-void flow_graph_reset_flow(FlowGraph* g) {
-    int n = g->numVertices;
-
-    for (int u = 0; u < n; u++)
-        for (int v = 0; v < n; v++) g->flow[u][v] = 0;
-}
-
-void flow_graph_find_reachable_vertices(FlowGraph* g, int src, int reachable[]) {
-    int queue[MAX_VERTICES];
+void flow_mat_graph_find_reachable_vertices(
+    FlowMatGraph* g, 
+    int src, 
+    int reachable[]
+) {
+    int queue[MAX_GRAPH_VERTICES];
     int front = 0;
     int rear = 0;
     int n = g->numVertices;
@@ -164,7 +63,12 @@ void flow_graph_find_reachable_vertices(FlowGraph* g, int src, int reachable[]) 
     }
 }
 
-int flow_graph_get_random_edge(FlowGraph* g, int activeEdges[], int* u, int* v) {
+int flow_mat_graph_get_random_edge(
+    FlowMatGraph* g, 
+    int activeEdges[], 
+    int* u, 
+    int* v
+) {
     int n = g->numVertices;
     int totalEdges = 0;
     for (int i = 0; i < n; i++) {
@@ -196,7 +100,12 @@ int flow_graph_get_random_edge(FlowGraph* g, int activeEdges[], int* u, int* v) 
     return 0;
 } 
 
-void flow_graph_contract_edge(FlowGraph* g, int u, int v, int activeEdges[]) {
+void flow_mat_graph_contract_edge(
+    FlowMatGraph* g, 
+    int u, 
+    int v, 
+    int activeEdges[]
+) {
     int n = g->numVertices;
     for (int i = 0; i < n; i++) {
         if (i == u || i == v || !activeEdges[i]) continue;
@@ -216,12 +125,6 @@ void flow_graph_contract_edge(FlowGraph* g, int u, int v, int activeEdges[]) {
 
 #pragma region Gomory-Hu utils
 
-typedef struct {
-    int tree[MAX_VERTICES][MAX_VERTICES];
-    int capacity[MAX_VERTICES][MAX_VERTICES];
-    int n;
-} GomoryHuTree;
-
 GomoryHuTree* gomory_hu_tree_create(int n) {
     GomoryHuTree* ghTree = malloc(sizeof(GomoryHuTree));
     ghTree->n = n;
@@ -240,11 +143,11 @@ void gomory_hu_tree_free(GomoryHuTree* ghTree) {
     free(ghTree);
 }
 
-GomoryHuTree* gomory_hu_tree_build(FlowGraph* g) {
+GomoryHuTree* gomory_hu_tree_build(FlowMatGraph* g) {
     int n = g->numVertices;
     GomoryHuTree* ghTree = gomory_hu_tree_create(n);
 
-    int components[MAX_VERTICES];
+    int components[MAX_GRAPH_VERTICES];
     for (int i = 0; i < n; i++) components[i] = 0;
 
     // |V| - 1
@@ -252,14 +155,14 @@ GomoryHuTree* gomory_hu_tree_build(FlowGraph* g) {
         int u = components[v];
         printf("Computing max flow on path %d -> %d", u, v);
 
-        FlowGraph* tempG = flow_graph_copy(g);
-        flow_graph_reset_flow(g);
+        FlowMatGraph* tempG = flow_mat_graph_copy(g);
+        flow_mat_graph_reset_flow(g);
 
         int maxFlow = edmonds_karp(tempG, u, v);
         printf("  Max flow value: %d\n", maxFlow);
 
-        int reachable[MAX_VERTICES];
-        flow_graph_find_reachable_vertices(tempG, u, reachable);
+        int reachable[MAX_GRAPH_VERTICES];
+        flow_mat_graph_find_reachable_vertices(tempG, u, reachable);
 
         ghTree->tree[u][v] = ghTree->tree[v][u] = 1;
         ghTree->capacity[u][v] = ghTree->capacity[v][u] = maxFlow;
@@ -273,7 +176,7 @@ GomoryHuTree* gomory_hu_tree_build(FlowGraph* g) {
         }
 
         printf("\n");
-        flow_graph_free(tempG);
+        flow_mat_graph_free(tempG);
     }
 
     printf("Gomory-Hu tree construction complete\n");
@@ -292,21 +195,25 @@ int is_boundary(int row, int col, int n) {
     return (row == 0 || row == n - 1 || col == 0 || col == n - 1);
 }
 
-FlowGraph* create_escape_flow_network(int n, int startingPoints[][2], int m) {
+FlowMatGraph* create_escape_flow_network(
+    int n, 
+    int startingPoints[][2], 
+    int m
+) {
     const int dirs[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
     int totalVertices = 2 * n * n + 2;
     int src = totalVertices - 2;
     int sink = totalVertices - 1;
     int i, j;
 
-    FlowGraph* g = flow_graph_create(totalVertices);
+    FlowMatGraph* g = flow_mat_graph_create(totalVertices);
 
     for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
             int vertexIdx = grid_to_vertex(i, j, n);
             int vIn = 2 * vertexIdx;
             int vOut = 2 * vertexIdx + 1;
-            flow_graph_add_edge(g, vIn, vOut, 1);
+            flow_mat_graph_add_directed_edge(g, vIn, vOut, 1);
         }
     }
 
@@ -324,7 +231,7 @@ FlowGraph* create_escape_flow_network(int n, int startingPoints[][2], int m) {
                 int neiIdx = grid_to_vertex(ni, nj, n);
                 int neiIn = 2 * neiIdx;
 
-                flow_graph_add_edge(g, vOut, neiIn, 1);
+                flow_mat_graph_add_directed_edge(g, vOut, neiIn, 1);
             }
         }
     }
@@ -335,7 +242,7 @@ FlowGraph* create_escape_flow_network(int n, int startingPoints[][2], int m) {
         int startCol = startingPoints[i][1];
         int vertexIdx = grid_to_vertex(startRow, startCol, n);
         int vIn = 2 * vertexIdx;
-        flow_graph_add_edge(g, src, vIn, 1);
+        flow_mat_graph_add_directed_edge(g, src, vIn, 1);
     }
 
     // boundary to sink
@@ -344,7 +251,7 @@ FlowGraph* create_escape_flow_network(int n, int startingPoints[][2], int m) {
             if (!is_boundary(i, j, n)) continue;
             int vertexIdx = grid_to_vertex(i, j, n);
             int vOut = 2 * vertexIdx + 1;
-            flow_graph_add_edge(g, vOut, sink, 1);
+            flow_mat_graph_add_directed_edge(g, vOut, sink, 1);
         }
     }
 
@@ -352,7 +259,7 @@ FlowGraph* create_escape_flow_network(int n, int startingPoints[][2], int m) {
 }
 
 int can_escape(int n, int startingPoints[][2], int m) {
-    FlowGraph* g = create_escape_flow_network(n, startingPoints, m);
+    FlowMatGraph* g = create_escape_flow_network(n, startingPoints, m);
     int src = g->numVertices - 2;
     int sink = g->numVertices - 1;
 
@@ -362,7 +269,7 @@ int can_escape(int n, int startingPoints[][2], int m) {
     printf("Number of starting points: %d\n", m);
 
     int canEscape = (maxFlow == m);
-    flow_graph_free(g);
+    flow_mat_graph_free(g);
 
     return canEscape;
 }
@@ -371,28 +278,28 @@ int can_escape(int n, int startingPoints[][2], int m) {
 
 #pragma region Minimum path cover
 
-int find_minimum_path_cover(FlowGraph* g) {
+int find_minimum_path_cover(FlowMatGraph* g) {
     /*
         O(VE), only works for DAGS
     */
-    if (!is_dag(g)) {
+    if (!flow_mat_graph_is_dag(g)) {
         printf("Passed graph is not a DAG");
         return -1;
     }
     int n = g->numVertices;
     int totalVertices = 2 * (n + 1);
-    FlowGraph* flowGraph = flow_graph_create(totalVertices);
+    FlowMatGraph* flowGraph = flow_mat_graph_create(totalVertices);
 
     int src = 0;
     int sink = n + 1;
 
     // to src
-    for (int i = 1; i <= n; ++i) flow_graph_add_edge(flowGraph, src, i, 1);
+    for (int i = 1; i <= n; ++i) flow_mat_graph_add_directed_edge(flowGraph, src, i, 1);
 
     // to sink
     for (int i = 1; i <= n; ++i) {
         int yi = n + 1 + i;
-        flow_graph_add_edge(flowGraph, yi, sink, 1);
+        flow_mat_graph_add_directed_edge(flowGraph, yi, sink, 1);
     }
 
     // connect both parts
@@ -401,7 +308,7 @@ int find_minimum_path_cover(FlowGraph* g) {
             if (g->adjMat[i][j] <= 0) continue;
             int xi = (i + 1);
             int yj = n + 1 + (j + 1);
-            flow_graph_add_edge(flowGraph, xi, yj, 1);
+            flow_mat_graph_add_directed_edge(flowGraph, xi, yj, 1);
         }
     }
 
@@ -459,7 +366,7 @@ int find_minimum_path_cover(FlowGraph* g) {
         printf("Path %d: %d\n", ++pathCnt, i);
     }
 
-    flow_graph_free(flowGraph);
+    flow_mat_graph_free(flowGraph);
     return minPathCoverSize;
 }
 
@@ -467,13 +374,7 @@ int find_minimum_path_cover(FlowGraph* g) {
 
 #pragma region Algorithmic consulting
 
-typedef struct {
-    int profit;
-    int numExperts;
-    int experts[MAX_VERTICES];
-} Job;
-
-FlowGraph* create_consulting_flow_network(
+FlowMatGraph* create_consulting_flow_network(
     Job jobs[], 
     int numJobs, 
     int expertCosts[], 
@@ -484,19 +385,19 @@ FlowGraph* create_consulting_flow_network(
     int src = 0;
     int sink = totalVertices - 1;
 
-    FlowGraph* g = flow_graph_create(totalVertices);
+    FlowMatGraph* g = flow_mat_graph_create(totalVertices);
 
     // src to experts
     for (int i = 0; i < numExperts; i++) {
         int expertVertex = i + 1;
-        flow_graph_add_edge(g, src, expertVertex, expertCosts[i]);
+        flow_mat_graph_add_directed_edge(g, src, expertVertex, expertCosts[i]);
         printf("Edge: source -> expert %d (capacity %d)\n", i + 1, expertCosts[i]);
     }
 
     // jobs to sink
     for (int i = 0; i < numJobs; i++) {
         int jobVertex = i + numExperts + 1;
-        flow_graph_add_edge(g, jobVertex, sink, jobs[i].profit);
+        flow_mat_graph_add_directed_edge(g, jobVertex, sink, jobs[i].profit);
         printf("Edge: job %d -> sink (capacity %d)\n", i + 1, jobs[i].profit);
     }
 
@@ -505,7 +406,7 @@ FlowGraph* create_consulting_flow_network(
         int jobVertex = i + numExperts + 1;
         for (int j = 0; j < jobs[i].numExperts; j++) {
             int expertVertex = jobs[i].experts[j];
-            flow_graph_add_edge(g, expertVertex, jobVertex, INF);
+            flow_mat_graph_add_directed_edge(g, expertVertex, jobVertex, INF);
             printf("Edge: expert %d -> job %d (capacity infinity)\n", expertVertex, i + 1);
         }
     }
@@ -522,7 +423,7 @@ void solve_consulting_problem(
     /*
         O(VE^2) with assumptions
     */
-    FlowGraph* g = create_consulting_flow_network(
+    FlowMatGraph* g = create_consulting_flow_network(
         jobs, numJobs, expertCosts, numExperts);
 
     int src = 0;
@@ -539,8 +440,8 @@ void solve_consulting_problem(
     printf("Max netto revenue: %d\n", maxNetRevenue);
 
     // reconstruct
-    int visited[MAX_VERTICES] = {0};
-    int queue[MAX_VERTICES];
+    int visited[MAX_GRAPH_VERTICES] = {0};
+    int queue[MAX_GRAPH_VERTICES];
     int front = 0;
     int rear = 0;
 
@@ -577,14 +478,20 @@ void solve_consulting_problem(
     }
     if (hiredExpertsCnt == 0) printf("none");
 
-    flow_graph_free(g);
+    flow_mat_graph_free(g);
 }
 
 #pragma endregion Algorithmic consulting
 
 #pragma region Updating maximum flow
 
-int update_capacity(FlowGraph* g, int src, int v, int u, int sink, int delta) {
+int flow_mat_graph_update_capacity(
+    FlowMatGraph* g, 
+    int src, 
+    int v, 
+    int sink, 
+    int delta
+) {
     int originalFlow = 0;
     for (int i = 0; i < g->numVertices; i++) originalFlow += g->flow[src][i];
 
@@ -600,7 +507,7 @@ int update_capacity(FlowGraph* g, int src, int v, int u, int sink, int delta) {
 #pragma region Maximum flow by scaling
 
 int dfs_with_scale(
-    FlowGraph* g,
+    FlowMatGraph* g,
     int src,
     int sink,
     int parent[],
@@ -624,18 +531,18 @@ int dfs_with_scale(
 }
 
 int dfs_augmenting_path(
-    FlowGraph* g,
+    FlowMatGraph* g,
     int src,
     int sink,
     int parent[],
     int scale
 ) {
-    int visited[MAX_VERTICES] = {0};
+    int visited[MAX_GRAPH_VERTICES] = {0};
     parent[src] = -1;
     return dfs_with_scale(g, src, sink, parent, visited, scale);
 }
 
-int max_flow_by_scaling(FlowGraph* g, int src, int sink) {
+int max_flow_by_scaling(FlowMatGraph* g, int src, int sink) {
     // init flow
     for (int u = 0; u < g->numVertices; u++)
         for (int v = 0; v < g->numVertices; v++)
@@ -658,7 +565,7 @@ int max_flow_by_scaling(FlowGraph* g, int src, int sink) {
     while (scale >= 1) {
         printf("Scale = %d\n", scale);
         int pathFound = 0;
-        int parent[MAX_VERTICES];
+        int parent[MAX_GRAPH_VERTICES];
 
         while (dfs_augmenting_path(g, src, sink, parent, scale)) {
             int pathFlow = INT_MAX;
@@ -689,9 +596,9 @@ int max_flow_by_scaling(FlowGraph* g, int src, int sink) {
 
 #pragma region The widest augmenting path
 
-int dijkstra_widest_path(FlowGraph* g, int src, int sink, int parent[]) {
-    int maxCapacity[MAX_VERTICES];
-    int visited[MAX_VERTICES] = {0};
+int dijkstra_widest_path(FlowMatGraph* g, int src, int sink, int parent[]) {
+    int maxCapacity[MAX_GRAPH_VERTICES];
+    int visited[MAX_GRAPH_VERTICES] = {0};
 
     // init
     for (int i = 0; i < g->numVertices; i++) {
@@ -732,7 +639,7 @@ int dijkstra_widest_path(FlowGraph* g, int src, int sink, int parent[]) {
     return maxCapacity[sink];
 } 
 
-int widest_augmenting_path(FlowGraph* g, int src, int sink) {
+int widest_augmenting_path(FlowMatGraph* g, int src, int sink) {
     /*
         O(EV^2 log(|f*|))
     */
@@ -743,7 +650,7 @@ int widest_augmenting_path(FlowGraph* g, int src, int sink) {
             g->flow[u][v] = 0;
 
     int totalFlow = 0;
-    int parent[MAX_VERTICES];
+    int parent[MAX_GRAPH_VERTICES];
     int iteration = 0;
 
     while (1) {
@@ -764,7 +671,7 @@ int widest_augmenting_path(FlowGraph* g, int src, int sink) {
 
         // reconstruct the path
         printf("Path: ");
-        int path[MAX_VERTICES];
+        int path[MAX_GRAPH_VERTICES];
         int pathLen = 0;
         for (int v = sink; v != src; v = parent[v]) path[pathLen++] = v;
         for (int i = pathLen - 1; i >= 0; i--) {
@@ -782,7 +689,7 @@ int widest_augmenting_path(FlowGraph* g, int src, int sink) {
 
 #pragma region Minimum global cut
 
-int find_min_global_cut_all_pairs(FlowGraph* g) {
+int find_min_global_cut_all_pairs(FlowMatGraph* g) {
     /*
         Check every pair of vertices as
         source and sink.
@@ -798,16 +705,14 @@ int find_min_global_cut_all_pairs(FlowGraph* g) {
     int bestSink = -1;
     int pairCnt = 0;
 
-    FlowGraph* tmepG = flow_graph_create(n);
-
     // all pairs
     for (int s = 0; s < n; s++) {
         for (int t = 0; t < n; t++) {
             if (s == t) continue;
             pairCnt++;
 
-            FlowGraph* tempG = flow_graph_copy(g);
-            flow_graph_reset_flow(tempG);
+            FlowMatGraph* tempG = flow_mat_graph_copy(g);
+            flow_mat_graph_reset_flow(tempG);
 
             int maxFlow = edmonds_karp(tempG, s, t);
             printf("Pair (%d, %d): max flow = %d\n",
@@ -820,7 +725,7 @@ int find_min_global_cut_all_pairs(FlowGraph* g) {
             bestSink = t;
             printf("New minimum found\n");
 
-            flow_graph_free(tempG);
+            flow_mat_graph_free(tempG);
         }
     }
 
@@ -832,7 +737,7 @@ int find_min_global_cut_all_pairs(FlowGraph* g) {
     return minGlobalCut;
 }
 
-int find_min_global_cut_fixed_src(FlowGraph* g) {
+int find_min_global_cut_fixed_src(FlowMatGraph* g) {
     /*
         Check every possible source against
         a fixed sink.
@@ -851,8 +756,8 @@ int find_min_global_cut_fixed_src(FlowGraph* g) {
     for (int t = 1; t < n; t++) {
         pairCnt++;
 
-        FlowGraph* tempG = flow_graph_copy(g);
-        flow_graph_reset_flow(tempG);
+        FlowMatGraph* tempG = flow_mat_graph_copy(g);
+        flow_mat_graph_reset_flow(tempG);
 
         int maxFlow = edmonds_karp(tempG, src, t);
         printf("Pair (%d, %d): max flow = %d\n",
@@ -864,7 +769,7 @@ int find_min_global_cut_fixed_src(FlowGraph* g) {
         bestSink = t;
         printf("New minimum found\n");
 
-        flow_graph_free(tempG);
+        flow_mat_graph_free(tempG);
 
     }
 
@@ -876,7 +781,7 @@ int find_min_global_cut_fixed_src(FlowGraph* g) {
     return minGlobalCut;
 }
 
-int find_min_global_cut_gomory_hu(FlowGraph* g) {
+int find_min_global_cut_gomory_hu(FlowMatGraph* g) {
     /*
         |V| - 1 iterations of O(VE^2)
         Overall: O(V^2*E^2)
@@ -899,22 +804,22 @@ int find_min_global_cut_gomory_hu(FlowGraph* g) {
     return minGlobalCut;
 }
 
-int karger_single_run(FlowGraph* g) {
+int karger_single_run(FlowMatGraph* g) {
     /*
         Contract random edges until
         only 2 remain.
     */
     int n = g->numVertices;
-    int activeEdges[MAX_VERTICES];
+    int activeEdges[MAX_GRAPH_VERTICES];
     int vertexCnt = n;
 
     for (int i = 0; i < n; i++) activeEdges[i] = 1;
 
     while (vertexCnt > 2) {
         int u, v;
-        if (!flow_graph_get_random_edge(g, activeEdges, &u, &v)) 
+        if (!flow_mat_graph_get_random_edge(g, activeEdges, &u, &v)) 
             return INT_MAX;
-        flow_graph_contract_edge(g, u, v, activeEdges);
+        flow_mat_graph_contract_edge(g, u, v, activeEdges);
         activeEdges[v] = 0;
         vertexCnt--;
     }
@@ -932,7 +837,7 @@ int karger_single_run(FlowGraph* g) {
     return minGlobalCut;
 }
 
-int karger_unique(FlowGraph* g) {
+int karger_unique(FlowMatGraph* g) {
     /*
         Assuming there's only one
         global minimum cut.
@@ -950,7 +855,7 @@ int karger_unique(FlowGraph* g) {
     int minGlobalCut = INT_MAX;
     
     for (int iter = 0; iter < iterations; iter++) {
-        FlowGraph* tempG = flow_graph_copy(g);
+        FlowMatGraph* tempG = flow_mat_graph_copy(g);
         int cutValue = karger_single_run(tempG);
 
         if (cutValue < minGlobalCut) {
@@ -958,13 +863,13 @@ int karger_unique(FlowGraph* g) {
             printf("Iteration %d: New minimum cut found = %d\n", iter + 1, cutValue);
         }
 
-        flow_graph_free(tempG);
+        flow_mat_graph_free(tempG);
     }
 
     return minGlobalCut;
 }
 
-int karger(FlowGraph* g) {
+int karger(FlowMatGraph* g) {
     /*
         O(V^2*log(V)) iterations of
         Karger's algorithm.
@@ -983,7 +888,7 @@ int karger(FlowGraph* g) {
     int minGlobalCut = INT_MAX;
 
     for (int iter = 0; iter < iterations; iter++) {
-        FlowGraph* tempG = flow_graph_copy(g);
+        FlowMatGraph* tempG = flow_mat_graph_copy(g);
         int cutValue = karger_single_run(tempG);
 
         if (cutValue < minGlobalCut) {
@@ -991,7 +896,7 @@ int karger(FlowGraph* g) {
             printf("Iteration %d: New minimum cut found = %d\n", iter + 1, cutValue);
         } 
 
-        flow_graph_free(tempG);
+        flow_mat_graph_free(tempG);
     }
 
     return minGlobalCut;
@@ -1055,7 +960,7 @@ int main(void) {
         case 2: {
             // Minimum path cover
             int n = 5;
-            FlowGraph* g = flow_graph_create(n);
+            FlowMatGraph* g = flow_mat_graph_create(n);
             int edges[][3] = {
                 {0, 1, 1},
                 {0, 2, 1},
@@ -1065,11 +970,11 @@ int main(void) {
             };
 
             for (int i = 0; i < 5; i++) 
-                flow_graph_add_edge(g, edges[i][0], edges[i][1], edges[i][2]);
+                flow_mat_graph_add_directed_edge(g, edges[i][0], edges[i][1], edges[i][2]);
 
             find_minimum_path_cover(g);
 
-            flow_graph_free(g);
+            flow_mat_graph_free(g);
             break;
         }
 
@@ -1094,7 +999,7 @@ int main(void) {
         case 4 : {
             // Updating maximum flow
             int n = 6;
-            FlowGraph* g = flow_graph_create(n);
+            FlowMatGraph* g = flow_mat_graph_create(n);
             int edges[][3] = {
                 {0,1,10}, 
                 {0,2,8}, 
@@ -1105,7 +1010,7 @@ int main(void) {
                 {4,5,10}
             };
             for (int i = 0; i < 7; i++) {
-                flow_graph_add_edge(g, edges[i][0], edges[i][1], edges[i][2]);
+                flow_mat_graph_add_directed_edge(g, edges[i][0], edges[i][1], edges[i][2]);
             }
 
             int src = 0;
@@ -1115,22 +1020,22 @@ int main(void) {
 
             // increase 
             printf("Testing capacity increase on edge (0,1)\n");
-            int flowIncrease = update_capacity(g, 0, 1, src, sink, 1);
+            int flowIncrease = flow_mat_graph_update_capacity(g, 0, 1, sink, 1);
             printf("Flow increased by: %d\n", flowIncrease);
 
             // decrease
             printf("Testing capacity decrease on edge (0,1)\n");
-            int flowDecrease = update_capacity(g, 0, 1, src, sink, -1);
+            int flowDecrease = flow_mat_graph_update_capacity(g, 0, 1, sink, -1);
             printf("Flow decreased by: %d\n", -flowDecrease);
 
-            flow_graph_free(g);
+            flow_mat_graph_free(g);
             break;
         }
 
         case 5: {
             // Maximum flow by scaling
             int n = 6;
-            FlowGraph* g = flow_graph_create(n);
+            FlowMatGraph* g = flow_mat_graph_create(n);
             int edges[][3] = {
                 {0,1,16}, 
                 {0,2,13}, 
@@ -1145,7 +1050,7 @@ int main(void) {
             };
 
             for (int i = 0; i < 10; i++)
-                flow_graph_add_edge(g, edges[i][0], edges[i][1], edges[i][2]);
+                flow_mat_graph_add_directed_edge(g, edges[i][0], edges[i][1], edges[i][2]);
 
             int src = 0;
             int sink = 5;
@@ -1153,14 +1058,14 @@ int main(void) {
             int maxFlow = max_flow_by_scaling(g, src, sink);
             printf("Max flow: %d\n", maxFlow);
 
-            flow_graph_free(g);
+            flow_mat_graph_free(g);
             break;
         }
 
         case 6: {
             // The widest augmenting path
             int n = 6;
-            FlowGraph* g = flow_graph_create(n);
+            FlowMatGraph* g = flow_mat_graph_create(n);
             int edges[][3] = {
                 {0,1,16}, 
                 {0,2,13}, 
@@ -1175,7 +1080,7 @@ int main(void) {
             };
 
             for (int i = 0; i < 10; i++)
-                flow_graph_add_edge(g, edges[i][0], edges[i][1], edges[i][2]);
+                flow_mat_graph_add_directed_edge(g, edges[i][0], edges[i][1], edges[i][2]);
 
             int src = 0;
             int sink = 5;
@@ -1192,14 +1097,14 @@ int main(void) {
 
             printf("Do results match? %d\n", widestFlow == edmondsFlow);
 
-            flow_graph_free(g);
+            flow_mat_graph_free(g);
             break;
         }
 
         case 7: {
             // Minimum global cut
             int n = 5;
-            FlowGraph* g = flow_graph_create(n); 
+            FlowMatGraph* g = flow_mat_graph_create(n); 
 
             int edges[][3] = {
                 {0, 1, 2}, 
@@ -1217,8 +1122,8 @@ int main(void) {
             int numEdges = sizeof(edges) / sizeof(edges[0]);
             
             for (int i = 0; i < numEdges; i += 2) {
-                flow_graph_add_edge(g, edges[i][0], edges[i][1], edges[i][2]);
-                flow_graph_add_edge(g, edges[i + 1][0], edges[i + 1][1], edges[i + 1][2]);
+                flow_mat_graph_add_directed_edge(g, edges[i][0], edges[i][1], edges[i][2]);
+                flow_mat_graph_add_directed_edge(g, edges[i + 1][0], edges[i + 1][1], edges[i + 1][2]);
                 printf("  {%d,%d} capacity %d\n", edges[i][0], edges[i][1], edges[i][2]);
             }
             printf("\n");
@@ -1226,7 +1131,7 @@ int main(void) {
             printf("ALGORITHMS COMPARISON\n");
 
             struct {
-                int (*func)(FlowGraph*);
+                int (*func)(FlowMatGraph*);
                 const char* name;
                 const char* complexity;
             } algos[] = {
@@ -1263,9 +1168,9 @@ int main(void) {
             for (int i = 0; i < algoCnt; i++) {
                 printf("%d. %s (%s):\n", 
                     i + 1, algos[i].name, algos[i].complexity);
-                FlowGraph* tempG = flow_graph_copy(g);
+                FlowMatGraph* tempG = flow_mat_graph_copy(g);
                 results[i] = algos[i].func(tempG);
-                flow_graph_free(tempG);
+                flow_mat_graph_free(tempG);
                 printf("\n");
             }
 
@@ -1286,7 +1191,7 @@ int main(void) {
             if (allMatch) 
                 printf("All algorithms produce the same result: %d\n", refRes);
 
-            flow_graph_free(g);
+            flow_mat_graph_free(g);
             break;
         }
         

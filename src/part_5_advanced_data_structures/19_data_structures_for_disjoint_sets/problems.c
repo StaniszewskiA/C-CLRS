@@ -1,29 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <string.h>
+#include "part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/data_structures_for_disjoint_sets.h"
 
 #define TASK 3
 
 #pragma region Off-line minimum
 
-#define MAX_N 1000
-
-typedef struct OfflineDisjointSet {
-    int parent;
-    int rank;
-    int minVal;
-    int nextSet;
-    int exists;
-} OfflineDisjointSet;
-
-OfflineDisjointSet sets[MAX_N];
-int extracted[MAX_N];
-
-void offline_make_set(int i);
-int offline_find_set(int i);
-void offline_union_sets(int x, int y);
-void offline_minimum(int ops[], int n);
+OfflineDisjointSet sets[MAX_DISJOINT_SET_SIZE];
+int extracted[MAX_DISJOINT_SET_SIZE];
 
 void offline_make_set(int i) {
     sets[i].parent = i;
@@ -104,17 +86,6 @@ void offline_minimum(int ops[], int n) {
 
 #pragma region Depth determination
 
-typedef struct DeterminantNode {
-    struct DeterminantNode* parent;
-    int rank;
-    int pseudoDepth;
-} DeterminantNode;
-
-DeterminantNode* determinant_make_tree();
-DeterminantNode* determinant_find_set(DeterminantNode* v, int* depth);
-int determinant_find_depth(DeterminantNode* v);
-void determinant_graft(DeterminantNode* r, DeterminantNode* v);
-
 DeterminantNode* determinant_make_tree() {
     DeterminantNode* obj = malloc(sizeof(DeterminantNode));
     obj->parent = obj;
@@ -164,36 +135,18 @@ void determinant_graft(DeterminantNode* r, DeterminantNode* v) {
 
 #pragma region Tarjans off-line least-common-ancestors algorithm
 
-typedef struct TarjanDSNode {
-    int parent;
-    int rank;
-    int ancestor;
-} TarjanDSNode;
-
-typedef struct ListNode {
-    int value;
-    struct ListNode* next;
-} ListNode;
-
-TarjanDSNode tarjanSets[MAX_N];
-ListNode* tree[MAX_N];
-ListNode* queries[MAX_N];
-ListNode* lcaResult[MAX_N];
-int color[MAX_N];
+TarjanDSNode tarjanSets[MAX_DISJOINT_SET_SIZE];
+ListNode* tree[MAX_DISJOINT_SET_SIZE];
+ListNode* queries[MAX_DISJOINT_SET_SIZE];
+ListNode* lcaResult[MAX_DISJOINT_SET_SIZE];
+int color[MAX_DISJOINT_SET_SIZE];
 int n;
 
-void tarjan_add_edge(int u, int v);
-void tarjan_add_query(int u, int v);
-void tarjan_make_set(int u);
-int tarjan_find_set(int u);
-void tarjan_union_sets(int u, int v);
-void tarjan_lca(int u);
-
 void tarjan_add_edge(int u, int v) {
-    ListNode* node = (ListNode*)malloc(sizeof(ListNode));
-    node->value = v;
-    node->next = tree[u];
-    tree[u] = node;
+    ListNode* DSNode = (ListNode*)malloc(sizeof(ListNode));
+    DSNode->value = v;
+    DSNode->next = tree[u];
+    tree[u] = DSNode;
 }
 
 void tarjan_add_query(int u, int v) {
@@ -299,8 +252,6 @@ int main(void) {
         }
         case 3: {
             // 19-3
-            int n3 = 7;
-
             tarjan_add_edge(0, 1);
             tarjan_add_edge(0, 2);
             tarjan_add_edge(1, 3);

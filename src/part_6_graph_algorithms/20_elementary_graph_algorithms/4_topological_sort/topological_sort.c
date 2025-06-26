@@ -1,71 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-#define TASK 3
-
-#pragma region Graph utils
-
-#define MAX_VERTICES 1000
-
-typedef struct MatGraph {
-    // Graph represented by adjacency matrix
-    int adjMat[MAX_VERTICES][MAX_VERTICES];
-    int numVertices;
-} MatGraph;
-
-MatGraph* mat_graph_create(int numVertices) {
-    MatGraph* g = malloc(sizeof(MatGraph));
-    g->numVertices = numVertices;
-
-    for (int i = 0; i < numVertices; i++)
-        for (int j = 0; j < numVertices; j++) g->adjMat[i][j] = 0;
-    return g;
-}
-
-void mat_graph_free(MatGraph* g) {
-    printf("Freeing graph...\n");
-    free(g);
-    printf("Graph freed\n");
-}
-
-void mat_graph_add_directed_edge(MatGraph* g, int u, int v) {
-    g->adjMat[u][v] = 1;
-}
-
-void mat_graph_add_undirected_edge(MatGraph* g, int u, int v) {
-    g->adjMat[u][v] = 1;
-    g->adjMat[v][u] = 1;
-}
-
-int has_cycle(MatGraph* g, int v, int visited[], int recursionStack[]) {
-    if (!visited[v]) {
-        visited[v] = 1;
-        recursionStack[v] = 1;
-        for (int i = 0; i < g->numVertices; i++) {
-            if (g->adjMat[v][i]) {
-                if (!visited[i] && has_cycle(g, i, visited, recursionStack)) return 1;
-                else if (recursionStack[i]) return 1;
-            }
-        }
-    }
-    recursionStack[v] = 0;
-    return 0;
-}
-
-int is_dag(MatGraph* g) {
-    int visited[MAX_VERTICES] = {0};
-    int recursionStack[MAX_VERTICES] = {0};
-
-    for (int i = 0; i < g->numVertices; i++) 
-        if (has_cycle(g, i, visited, recursionStack)) return 0;
-    return 1;
-}
-
-#pragma endregion Graph utils
+#include "part_6_graph_algorithms/20_elementary_graph_algorithms/elementary_graph_algorithms.h"
 
 #pragma region Topological sort utils
 
-void topo_sort_helper(
+void mat_graph_topo_sort_helper(
     MatGraph* g, 
     int v, 
     int visited[], 
@@ -74,17 +11,17 @@ void topo_sort_helper(
 ) {
     visited[v] = 1;
     for (int i = 0; i < g->numVertices; i++) {
-        if (g->adjMat[v][i] && !visited[i]) topo_sort_helper(g, i, visited, stack, stackIdx);
+        if (g->adjMat[v][i] && !visited[i]) mat_graph_topo_sort_helper(g, i, visited, stack, stackIdx);
     }
     stack[(*stackIdx)++] = v;
 }
 
-void topo_sort(MatGraph* g, int stack[]) {
+void mat_graph_topo_sort(MatGraph* g, int stack[]) {
     int visited[MAX_VERTICES] = {0};
     int stackIdx = 0;
 
     for (int i = 0; i < g->numVertices; i++) {
-        if (!visited[i]) topo_sort_helper(g, i, visited, stack, &stackIdx);
+        if (!visited[i]) mat_graph_topo_sort_helper(g, i, visited, stack, &stackIdx);
     }
 
     // Get the topological order
@@ -99,9 +36,9 @@ void topo_sort(MatGraph* g, int stack[]) {
 
 #pragma region 20.4-2
 
-int count_simple_paths(MatGraph* g, int s, int t) {
+int mat_graph_count_simple_paths(MatGraph* g, int s, int t) {
     int stack[MAX_VERTICES];
-    topo_sort(g, stack);
+    mat_graph_topo_sort(g, stack);
     int paths[MAX_VERTICES] = {0};
     paths[t] = 1;
 
@@ -119,23 +56,23 @@ int count_simple_paths(MatGraph* g, int s, int t) {
 
 #pragma region 20.4-3
 
-int dfs_cycle_check(MatGraph* g, int v, int visited[], int parent) {
+int mat_graph_dfs_cycle_check(MatGraph* g, int v, int visited[], int parent) {
     visited[v] = 1;
 
     for (int u = 0; u < g->numVertices; u++) {
-        if (g->adjMat[v][u] && !visited[u]) 
-            if (dfs_cycle_check(g, u, visited, v)) return 1;
-        else if (u != parent) return 1;
+        if (g->adjMat[v][u] && !visited[u]) {
+            if (mat_graph_dfs_cycle_check(g, u, visited, v)) return 1;
+        } else if (u != parent) return 1;
     }
 
     return 0;
 }
 
-int is_acyclic(MatGraph* g) {
+int mat_graph_is_acyclic(MatGraph* g) {
     int visited[MAX_VERTICES] = {0};
     for (int v = 0; v < g->numVertices; v++) {
         if (!visited[v]) {
-            if (dfs_cycle_check(g, v, visited, -1)) return 0;
+            if (mat_graph_dfs_cycle_check(g, v, visited, -1)) return 0;
         }
     }
     return 1;
@@ -145,7 +82,7 @@ int is_acyclic(MatGraph* g) {
 
 #pragma region 20.4-5
 
-int indeg_topo_sort(MatGraph* g, int result[]) {
+int mat_graph_indeg_topo_sort(MatGraph* g, int result[]) {
     int inDegs[MAX_VERTICES] = {0};
     int queue[MAX_VERTICES];
     int front = 0, rear = 0;
@@ -181,78 +118,3 @@ int indeg_topo_sort(MatGraph* g, int result[]) {
 }
 
 #pragma endregion 20.4-5
-
-int main(void) {
-    switch (TASK)
-    {
-        case 1: {
-            // 20.4-2
-            int numVertices = 5;
-            MatGraph* g = mat_graph_create(numVertices);
-
-            mat_graph_add_directed_edge(g, 0, 1);
-            mat_graph_add_directed_edge(g, 0, 2);
-            mat_graph_add_directed_edge(g, 1, 3);
-            mat_graph_add_directed_edge(g, 2, 3);
-            mat_graph_add_directed_edge(g, 3, 4);
-
-            if (is_dag(g)) {
-                int s = 0, t = 4;
-                int res = count_simple_paths(g, s, t);
-                printf("Number of simple paths from %d to %d: %d\n", s, t, res);
-            } else printf("Passed graph is not a DAG");
-
-            mat_graph_free(g);
-            break;
-        }
-
-        case 2: {
-            // 20.4-2
-            int numVertices = 5;
-            MatGraph* g = mat_graph_create(numVertices);
-
-            mat_graph_add_undirected_edge(g, 0, 1);
-            mat_graph_add_undirected_edge(g, 0, 2);
-            mat_graph_add_undirected_edge(g, 1, 3);
-            mat_graph_add_undirected_edge(g, 2, 3);
-            mat_graph_add_undirected_edge(g, 3, 4);
-
-            if (is_acyclic(g)) printf("The graph is acyclic\n");
-            else printf("The graph contains a cycle\n");
-
-            mat_graph_free(g);
-            break;
-        }
-
-        case 3: {
-            // 20.4-5
-            int numVertices = 5;
-            MatGraph* g = mat_graph_create(numVertices);
-
-            mat_graph_add_directed_edge(g, 0, 1);
-            mat_graph_add_directed_edge(g, 0, 2);
-            mat_graph_add_directed_edge(g, 1, 3);
-            mat_graph_add_directed_edge(g, 2, 3);
-            mat_graph_add_directed_edge(g, 3, 4);
-
-
-            int result[MAX_VERTICES];
-            if (!is_dag(g)) printf("Passed graph is not a DAG\n");
-            else if (!indeg_topo_sort(g, result)) printf("Graph could not be sorted\n");
-            else {
-                printf("Topological order: ");
-                for (int i = 0; i < numVertices; i++) printf("%d ", result[i]);
-                printf("\n");
-            }
-
-            mat_graph_free(g);
-            break;
-
-            break;
-        }
-        
-        default:
-            break;
-    }
-    return 0;
-}

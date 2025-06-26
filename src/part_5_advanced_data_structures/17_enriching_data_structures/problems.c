@@ -1,50 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
+#include "part_5_advanced_data_structures/17_enriching_data_structures/enriching_data_structures.h"
 
 #define TASK 3
-
-#define RED 0
-#define BLACK 1
-
-typedef unsigned int uint;
 
 #pragma region The point with the highest number of intersections
 /*
     17-1
 */
-typedef struct RBNode {
-    int endpoint;
-    int delta;
-    int intersections;
-    int maxIntersections;
-    int color;
-    struct RBNode* left;
-    struct RBNode* right;
-    struct RBNode* parent;
-} RBNode;
-
-typedef struct RBTree {
-    RBNode* root;
-    RBNode* nil; // sentinel
-} RBTree;
-
-int max(int a, int b);
-RBNode* create_rbnode(RBTree* tree, int endpoint, int delta);
-RBTree* create_rbtree();
-void left_rotate(RBTree *tree, RBNode *x);
-void right_rotate(RBTree *tree, RBNode *y);
-void rb_insert_fixup(RBTree *tree, RBNode *z);
-void insert(RBTree *tree, int endpoint, int delta);
-void update_intersections(RBTree* tree, RBNode* node);
-int find_max_intersections(RBTree *tree);
-
-int max(int a, int b) {
-    return (a > b) ? a : b;
-}
-
-RBNode* create_rbnode(RBTree* tree, int endpoint, int delta) {
-    RBNode* node = (RBNode*)malloc(sizeof(RBNode));
+IntersectionRBNode* intersection_rb_node_init(IntersectionRBTree* tree, int endpoint, int delta) {
+    IntersectionRBNode* node = (IntersectionRBNode*)malloc(sizeof(IntersectionRBNode));
     node->endpoint = endpoint;
     node->delta = delta;
     node->intersections = 0;
@@ -53,21 +16,21 @@ RBNode* create_rbnode(RBTree* tree, int endpoint, int delta) {
     node->left = tree->nil;
     node->right = tree->nil;
     node->parent = NULL;
-    printf("Succesfuly created RBNode\n");
+    printf("Succesfuly created IntersectionRBNode\n");
     return node;
 }
 
-RBTree* create_rbtree() {
-    RBTree* tree = (RBTree*)malloc(sizeof(RBTree));
-    tree->nil = (RBNode*)malloc(sizeof(RBNode));
+IntersectionRBTree* create_rbtree() {
+    IntersectionRBTree* tree = (IntersectionRBTree*)malloc(sizeof(IntersectionRBTree));
+    tree->nil = (IntersectionRBNode*)malloc(sizeof(IntersectionRBNode));
     tree->nil->color = BLACK;
     tree->root = tree->nil;
-    printf("Succesfuly created RBTree\n");
+    printf("Succesfuly created IntersectionRBTree\n");
     return tree;
 }
 
-void left_rotate(RBTree *tree, RBNode *x) {
-    RBNode *y = x->right;
+void intersection_rb_tree_left_rotate(IntersectionRBTree *tree, IntersectionRBNode *x) {
+    IntersectionRBNode *y = x->right;
     x->right = y->left;
 
     if (y->left != tree->nil) y->left->parent = x;
@@ -82,8 +45,8 @@ void left_rotate(RBTree *tree, RBNode *x) {
     x->parent = y;
 }
 
-void right_rotate(RBTree *tree, RBNode *y) {
-    RBNode *x = y->right;
+void intersection_rb_tree_right_rotate(IntersectionRBTree *tree, IntersectionRBNode *y) {
+    IntersectionRBNode *x = y->right;
     y->left = x->right;
 
     if (x->right != tree->nil) y->right->parent = y;
@@ -98,10 +61,10 @@ void right_rotate(RBTree *tree, RBNode *y) {
     y->parent = x;
 }
 
-void rb_insert_fixup(RBTree *tree, RBNode *z) {
-    while (z->parent != NULL & z->parent->color == RED) {
+void intersection_rb_tree_insert_fixup(IntersectionRBTree *tree, IntersectionRBNode *z) {
+    while (z->parent != NULL && z->parent->color == RED) {
         if (z->parent == z->parent->parent->left) {
-            RBNode *y = z->parent->parent->right;
+            IntersectionRBNode *y = z->parent->parent->right;
             if (y->color == RED) {
                 z->parent->color = BLACK;
                 y->color = BLACK;
@@ -110,14 +73,14 @@ void rb_insert_fixup(RBTree *tree, RBNode *z) {
             } else {
                 if (z == z->parent->right) {
                     z = z->parent;
-                    left_rotate(tree, z);
+                    intersection_rb_tree_left_rotate(tree, z);
                 }
                 z->parent->color = BLACK;
                 z->parent->parent->color = RED;
-                right_rotate(tree, z->parent->parent);
+                intersection_rb_tree_right_rotate(tree, z->parent->parent);
             }
         } else {
-            RBNode *y = z->parent->parent->left;
+            IntersectionRBNode *y = z->parent->parent->left;
             if (y->color == RED) {
                 z->parent->color = BLACK;
                 y->color = BLACK;
@@ -126,21 +89,21 @@ void rb_insert_fixup(RBTree *tree, RBNode *z) {
             } else {
                 if (z == z->parent->left) {
                     z = z->parent;
-                    right_rotate(tree, z);
+                    intersection_rb_tree_right_rotate(tree, z);
                 }
                 z->parent->color = BLACK;
                 z->parent->parent->color = RED;
-                left_rotate(tree, z->parent->parent);
+                intersection_rb_tree_left_rotate(tree, z->parent->parent);
             }
         }
     }
     tree->root->color = BLACK;
 }
 
-void insert(RBTree *tree, int endpoint, int delta) {
-    RBNode *z = create_rbnode(tree, endpoint, delta);
-    RBNode *x = tree->root;
-    RBNode *y = tree->nil;
+void intersection_rb_tree_insert(IntersectionRBTree *tree, int endpoint, int delta) {
+    IntersectionRBNode *z = intersection_rb_node_init(tree, endpoint, delta);
+    IntersectionRBNode *x = tree->root;
+    IntersectionRBNode *y = tree->nil;
 
     while (x != tree->nil) {
         y = x;
@@ -158,12 +121,12 @@ void insert(RBTree *tree, int endpoint, int delta) {
     z->right = tree->nil;
     z->color = RED;
 
-    rb_insert_fixup(tree, z);
-    printf("Succesfuly inserted RBNode into RBTree\n");
-    update_intersections(tree,z);
+    intersection_rb_tree_insert_fixup(tree, z);
+    printf("Succesfuly inserted IntersectionRBNode into IntersectionRBTree\n");
+    intersection_rb_tree_update_intersections(tree,z);
 }
 
-void update_intersections(RBTree* tree, RBNode* node) {
+void intersection_rb_tree_update_intersections(IntersectionRBTree* tree, IntersectionRBNode* node) {
     node->intersections = node->delta;
 
     if (node->left != NULL && node->left != tree->nil) node->intersections += node->left->intersections;
@@ -172,15 +135,15 @@ void update_intersections(RBTree* tree, RBNode* node) {
     node->maxIntersections = node->intersections;
 
     if (node->left != NULL && node->left != tree->nil)
-        node->maxIntersections = max(node->left->maxIntersections, node->maxIntersections);
+        node->maxIntersections = MAX(node->left->maxIntersections, node->maxIntersections);
 
     if (node->right != node->parent) 
-        node->maxIntersections = max(node->right->maxIntersections, node->maxIntersections);
+        node->maxIntersections = MAX(node->right->maxIntersections, node->maxIntersections);
     
 }
 
-int find_max_intersections(RBTree *tree) {
-    RBNode* maxNode = tree->root;
+int intersection_rb_tree_find_max_intersections(IntersectionRBTree *tree) {
+    IntersectionRBNode* maxNode = tree->root;
 
     while (maxNode != tree->nil) {
         if (maxNode->maxIntersections == maxNode->intersections) break;
@@ -196,47 +159,16 @@ int find_max_intersections(RBTree *tree) {
 /*
     17-2
 */
-typedef struct JRBNode {
-    int key;
-    int size;
-    int color;
-    struct JRBNode* left;
-    struct JRBNode* right;
-    struct JRBNode* parent;
-    struct JRBNode* successor;
-    struct JRBNode* predecessor;
-} JRBNode;
-
-typedef struct JRBTree {
-    JRBNode* root;
-    JRBNode* nil; // sentinel
-} JRBTree;
-
-size_t size(JRBTree* tree, JRBNode* node);
-void j_update_size(JRBTree* tree, JRBNode* node);
-JRBNode* create_jrbnode(JRBTree* tree, int key);
-JRBTree* create_jrbtree();
-void j_left_rotate(JRBTree* tree, JRBNode* x);
-void j_right_rotate(JRBTree* tree, JRBNode* y);
-void jrb_insert_fixup(JRBTree* tree, JRBNode* z);
-void j_insert(JRBTree* tree, int key);
-void j_transplant(JRBTree* tree, JRBNode* u, JRBNode* v);
-void j_delete_fixup(JRBTree* tree, JRBNode* x);
-void j_delete_node(JRBTree* tree, JRBNode* z);
-JRBNode* find_successor(JRBNode* x);
-JRBNode* find_predecessor(JRBNode* x);
-void josephus(uint n, uint m);
-
-size_t size(JRBTree* tree, JRBNode* node) {
+size_t jrb_tree_get_size(JRBTree* tree, JRBNode* node) {
     return node == tree->nil ? 0 : node->size;
 }
 
-void j_update_size(JRBTree* tree, JRBNode* node) {
+void jrb_tree_update_size(JRBTree* tree, JRBNode* node) {
     if (node != tree->nil) 
-        node->size = size(tree, node->left) + size(tree, node->right) + 1;
+        node->size = jrb_tree_get_size(tree, node->left) + jrb_tree_get_size(tree, node->right) + 1;
 }
 
-JRBNode* create_jrbnode(JRBTree* tree, int key) {
+JRBNode* jrb_node_init(JRBTree* tree, int key) {
     JRBNode* node = (JRBNode*)malloc(sizeof(JRBNode));
     node->key = key;
     node->size = 1;
@@ -250,7 +182,7 @@ JRBNode* create_jrbnode(JRBTree* tree, int key) {
     return node;
 }
 
-JRBTree* create_jrbtree() {
+JRBTree* jrb_tree_init() {
     JRBTree* tree = (JRBTree*)malloc(sizeof(JRBTree));
     tree->nil = (JRBNode*)malloc(sizeof(JRBNode));
     tree->nil->color = BLACK;
@@ -259,7 +191,7 @@ JRBTree* create_jrbtree() {
     return tree;
 }
 
-void j_left_rotate(JRBTree* tree, JRBNode* x) {
+void jrb_tree_left_rotate(JRBTree* tree, JRBNode* x) {
     JRBNode *y = x->right;
     x->right = y->left;
 
@@ -274,11 +206,11 @@ void j_left_rotate(JRBTree* tree, JRBNode* x) {
     y->left = x;
     x->parent = y;
 
-    j_update_size(tree, x);
-    j_update_size(tree, y);
+    jrb_tree_update_size(tree, x);
+    jrb_tree_update_size(tree, y);
 }
 
-void j_right_rotate(JRBTree* tree, JRBNode* y) {
+void jrb_tree_right_rotate(JRBTree* tree, JRBNode* y) {
     JRBNode *x = y->left;
     y->left = x->right;
 
@@ -293,12 +225,12 @@ void j_right_rotate(JRBTree* tree, JRBNode* y) {
     x->right = y;
     y->parent = x;
 
-    j_update_size(tree, y);
-    j_update_size(tree, x);
+    jrb_tree_update_size(tree, y);
+    jrb_tree_update_size(tree, x);
 }
 
-void jrb_insert_fixup(JRBTree* tree, JRBNode* z) {
-    while (z->parent != NULL & z->parent->color == RED) {
+void jrb_tree_insert_fixup(JRBTree* tree, JRBNode* z) {
+    while (z->parent != NULL && z->parent->color == RED) {
         if (z->parent == z->parent->parent->left) {
             JRBNode *y = z->parent->parent->right;
             if (y->color == RED) {
@@ -309,11 +241,11 @@ void jrb_insert_fixup(JRBTree* tree, JRBNode* z) {
             } else {
                 if (z == z->parent->right) {
                     z = z->parent;
-                    j_left_rotate(tree, z);
+                    jrb_tree_left_rotate(tree, z);
                 }
                 z->parent->color = BLACK;
                 z->parent->parent->color = RED;
-                j_right_rotate(tree, z->parent->parent);
+                jrb_tree_right_rotate(tree, z->parent->parent);
             }
         } else {
             JRBNode *y = z->parent->parent->left;
@@ -325,19 +257,19 @@ void jrb_insert_fixup(JRBTree* tree, JRBNode* z) {
             } else {
                 if (z == z->parent->left) {
                     z = z->parent;
-                    j_right_rotate(tree, z);
+                    jrb_tree_right_rotate(tree, z);
                 }
                 z->parent->color = BLACK;
                 z->parent->parent->color = RED;
-                j_left_rotate(tree, z->parent->parent);
+                jrb_tree_left_rotate(tree, z->parent->parent);
             }
         }
     }
     tree->root->color = BLACK;
 }
 
-void j_insert(JRBTree* tree, int key) {
-    JRBNode *z = create_jrbnode(tree, key);
+void jrb_tree_insert(JRBTree* tree, int key) {
+    JRBNode *z = jrb_node_init(tree, key);
     JRBNode *x = tree->root;
     JRBNode *y = tree->nil;
 
@@ -369,19 +301,18 @@ void j_insert(JRBTree* tree, int key) {
     z->predecessor = temp;
     printf("Predecessor set to: %d\n", z->predecessor->key);
 
-    jrb_insert_fixup(tree, z);
-    printf("Succesfuly inserted RBNode into RBTree\n");
+    jrb_tree_insert_fixup(tree, z);
+    printf("Succesfuly inserted IntersectionRBNode into IntersectionRBTree\n");
 }
 
-void j_transplant(JRBTree* tree, JRBNode* u, JRBNode* v) {
-    JRBNode* root = tree->root;
-    if (u->parent == tree->nil) root = v;
+void jrb_tree_transplant(JRBTree* tree, JRBNode* u, JRBNode* v) {
+    if (u->parent == tree->nil) tree->root = v;
     else if (u == u->parent->left) u->parent->left = v;
     else u->parent->right = v;
     v->parent = u->parent;
 }
 
-void j_delete_fixup(JRBTree* tree, JRBNode* x) {
+void jrb_tree_delete_fixup(JRBTree* tree, JRBNode* x) {
     JRBNode* root = tree->root;
     while (x != root && x->color == BLACK) {
         if (x == x->parent->left) {
@@ -389,7 +320,7 @@ void j_delete_fixup(JRBTree* tree, JRBNode* x) {
             if (w->color == RED) {
                 w->color = BLACK;
                 x->parent->color = RED;
-                j_left_rotate(tree, x->parent);
+                jrb_tree_left_rotate(tree, x->parent);
                 w = x->parent->right;
             }
             if (w->left->color == BLACK && w->right->color == BLACK) {
@@ -399,13 +330,13 @@ void j_delete_fixup(JRBTree* tree, JRBNode* x) {
                 if (w->right->color == BLACK) {
                     w->left->color = BLACK;
                     w->color = RED;
-                    j_right_rotate(tree, w);
+                    jrb_tree_right_rotate(tree, w);
                     w = x->parent->right;
                 }
                 w->color = x->parent->color;
                 x->parent->color = BLACK;
                 w->right->color = BLACK;
-                j_left_rotate(tree, x->parent);
+                jrb_tree_left_rotate(tree, x->parent);
                 x = root;
             }
         } else {
@@ -413,7 +344,7 @@ void j_delete_fixup(JRBTree* tree, JRBNode* x) {
             if (w->color == RED) {
                 w->color = BLACK;
                 x->parent->color = RED;
-                j_right_rotate(tree, x->parent);
+                jrb_tree_right_rotate(tree, x->parent);
                 w = x->parent->left;
             }
             if (w->right->color == BLACK && w->left->color == BLACK) {
@@ -423,13 +354,13 @@ void j_delete_fixup(JRBTree* tree, JRBNode* x) {
                 if (w->left->color == BLACK) {
                     w->right->color = BLACK;
                     w->color = RED;
-                    j_left_rotate(tree, w);
+                    jrb_tree_left_rotate(tree, w);
                     w = x->parent->left;
                 }
                 w->color = x->parent->color;
                 x->parent->color = BLACK;
                 w->left->color = BLACK;
-                j_right_rotate(tree, x->parent);
+                jrb_tree_right_rotate(tree, x->parent);
                 x = root;
             }
         }
@@ -437,18 +368,17 @@ void j_delete_fixup(JRBTree* tree, JRBNode* x) {
     x->color = BLACK;
 }
 
-void j_delete_node(JRBTree* tree, JRBNode* z) {
-    JRBNode* root = tree->root;
+void jrb_tree_delete_node(JRBTree* tree, JRBNode* z) {
     JRBNode* y = z;
     JRBNode* x;
     int y_original_color = y->color;
 
     if (z->left == tree->nil) {
         x = z->right;
-        j_transplant(tree, z, z->right);
+        jrb_tree_transplant(tree, z, z->right);
     } else if (z->right == tree->nil) {
         x = z->left;
-        j_transplant(tree, z, z->left);
+        jrb_tree_transplant(tree, z, z->left);
     } else {
         y = z->right;
         while (y->left != tree->nil) y = y->left;
@@ -456,55 +386,55 @@ void j_delete_node(JRBTree* tree, JRBNode* z) {
         x = y->right;
         if (y->parent == z) x->parent = y;
         else {
-            j_transplant(tree, y, y->right);
+            jrb_tree_transplant(tree, y, y->right);
             y->right = z->right;
             y->right->parent = y;
         }
-        j_transplant(tree, z, y);
+        jrb_tree_transplant(tree, z, y);
         y->left = z->left;
         y->left->parent = y;
         y->color = z->color;
 
-        j_update_size(tree, y);
+        jrb_tree_update_size(tree, y);
     }
 
     JRBNode* p = z->parent;
     while (p != tree->nil) {
-        j_update_size(tree, p);
+        jrb_tree_update_size(tree, p);
         p = p->parent;
     }
 
-    if (y_original_color == BLACK) j_delete_fixup(tree, x);
+    if (y_original_color == BLACK) jrb_tree_delete_fixup(tree, x);
 
     free(z);
 }
 
-JRBNode* find_successor(JRBNode* x) {
+JRBNode* jrb_node_find_successor(JRBNode* x) {
     return x->successor;
 }
 
-JRBNode* find_predecessor(JRBNode* x) {
+JRBNode* jrb_node_find_predecessor(JRBNode* x) {
     return x->predecessor;
 }
 
 
-void josephus(uint n, uint m) {
-    JRBTree* tree = create_jrbtree();
-    uint i;
-    uint count = n;
+void josephus(int n, int m) {
+    JRBTree* tree = jrb_tree_init();
+    int i;
+    int count = n;
     JRBNode* curr = tree->root;
 
-    for (i = 1; i <= n; i++) j_insert(tree, i); 
+    for (i = 1; i <= n; i++) jrb_tree_insert(tree, i); 
 
-    curr = find_predecessor(tree->root);
+    curr = jrb_node_find_predecessor(tree->root);
 
     printf("%d\n", curr->key);
 
     while (count > 0) {
-        for (i = 1; i < m; i++) curr = find_predecessor(curr);  
+        for (i = 1; i < m; i++) curr = jrb_node_find_predecessor(curr);  
         printf("%d ", curr->key);
-        j_delete_node(tree, curr); 
-        curr = find_predecessor(curr);  
+        jrb_tree_delete_node(tree, curr); 
+        curr = jrb_node_find_predecessor(curr);  
         count--;
     }
     printf("\n");
@@ -515,13 +445,13 @@ void josephus(uint n, uint m) {
 #pragma region Array based Josephus problem
 
 void print_victims(int n, int k) {
-    uint survivors = n;
-    uint circle[n];
-    uint i;
+    int survivors = n;
+    int circle[n];
+    int i;
 
     for (i = 0; i < n; i++) circle[i] = i + 1;
     
-    uint idx = 0;
+    int idx = 0;
 
     while (survivors > 1) {
         idx = (idx + k - 1) % survivors;
@@ -540,28 +470,28 @@ int main(void) {
     {
         case 1: {
             // 17-1
-            RBTree* tree = create_rbtree();
+            IntersectionRBTree* tree = create_rbtree();
 
-            insert(tree, 5, 1);
-            insert(tree, 10, -1);
-            insert(tree, 15, 1);
+            intersection_rb_tree_insert(tree, 5, 1);
+            intersection_rb_tree_insert(tree, 10, -1);
+            intersection_rb_tree_insert(tree, 15, 1);
 
-            printf("Endpoint of node with max intersections: %d\n", 
-                find_max_intersections(tree));
+            printf("Endpoint of node with MAX intersections: %d\n", 
+                intersection_rb_tree_find_max_intersections(tree));
 
             break;
         }
 
         case 2: {
             // 17-2
-            uint n2 = 7, m2 = 3;
+            int n2 = 7, m2 = 3;
             josephus(n2, m2);
 
             break;
         }
 
         case 3: {
-            uint n3 = 7, m3 = 3;
+            int n3 = 7, m3 = 3;
             print_victims(n3, m3);
             break;
         }

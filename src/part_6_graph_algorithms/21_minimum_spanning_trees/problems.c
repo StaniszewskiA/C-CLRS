@@ -1,71 +1,17 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "part_6_graph_algorithms/21_minimum_spanning_trees/minimum_spanning_trees.h"
 
 #define TASK 4
-
-#pragma region Graph utils
-
-#define MAX_VERTICES 10
-#define MAX_EDGES 100
-
-typedef struct MatGraph {
-    // Graph represented by adjacency matrix
-    int adjMat[MAX_VERTICES][MAX_VERTICES];
-    int numVertices;
-} MatGraph;
-
-typedef struct Edge {
-    int u, v, weight;
-} Edge;
-
-
-MatGraph* mat_graph_create(int numVertices) {
-    MatGraph* g = malloc(sizeof(MatGraph));
-    g->numVertices = numVertices;
-
-    for (int i = 0; i < numVertices; i++) 
-        for (int j = 0; j < numVertices; j++) g->adjMat[i][j] = 0;
-
-    return g;
-}
-
-void mat_graph_free(MatGraph* g) {
-    free(g);
-}
-
-void mat_graph_add_undirected_edge(MatGraph* g, int u, int v, int weight) {
-    g->adjMat[u][v] = weight;
-    g->adjMat[v][u] = weight;
-}
-
-void mat_graph_remove_undirected_edge(MatGraph* g, int u, int v) {
-    g->adjMat[u][v] = 0;
-    g->adjMat[v][u] = 0;
-}
-
-void mat_graph_print(MatGraph* g) {
-    printf("Graph with %d vertices:\n", g->numVertices);
-    for (int i = 0; i < g->numVertices; i++) {
-        printf("Vertex %d is connected to: ", i);
-        for (int j = 0; j < g->numVertices; j++) {
-            if (g->adjMat[i][j] > 0) printf("%d(w:%d) ", j, g->adjMat[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-#pragma endregion Graph utils
 
 #pragma region 21-1 Second best MST
 
 int parent[MAX_VERTICES], depth[MAX_VERTICES];
 int maxEdge[MAX_VERTICES][MAX_VERTICES];
 
-void dfs(MatGraph* g, int u, int p, int d) {
+void mat_graph_dfs_set_p_d(MatGraph* g, int u, int p, int d) {
     parent[u] = p;
     depth[u] = d;
     for (int v = 0; v < g->numVertices; v++) {
-        if (g->adjMat[u][v] && v != p) dfs(g, v, u, d + 1);
+        if (g->adjMat[u][v] && v != p) mat_graph_dfs_set_p_d(g, v, u, d + 1);
     }
 }
 
@@ -98,42 +44,12 @@ int max_on_path(MatGraph* g, int u, int v) {
 }
 
 void compute_max_edges(MatGraph* g) {
-    dfs(g, 0, -1, 0);
+    mat_graph_dfs_set_p_d(g, 0, -1, 0);
     for (int u = 0; u < g->numVertices; u++) {
         for (int v = 0; v < g->numVertices; v++) {
             if (u == v) maxEdge[u][v] = 0;
             else maxEdge[u][v] = max_on_path(g, u, v);
         }
-    }
-}
-
-int parents[MAX_VERTICES], ranks[MAX_VERTICES];
-
-void make_set(int n) {
-    for (int i = 0; i < n; i++) {
-        parents[i] = i;
-        ranks[i] = 1;
-    }
-}
-
-int find_set(int u) {
-    if (u != parents[u]) parents[u] = find_set(parents[u]);
-    return parents[u];
-}
-
-int same_component(int u, int v) {
-    return find_set(u) == find_set(v);
-}
-
-void union_sets(int u, int v) {
-    int uRoot = find_set(u);
-    int vRoot = find_set(v);
-
-    if (ranks[uRoot] < ranks[vRoot]) parents[uRoot] = vRoot;
-    else if (ranks[uRoot] > ranks[vRoot]) parents[vRoot] = uRoot;
-    else {
-        parents[vRoot] = uRoot;
-        ranks[uRoot]++;
     }
 }
 
@@ -143,8 +59,8 @@ int compare_edges(const void* a, const void* b) {
     return ea->weight - eb->weight;
 }
 
-int kruskal(MatGraph* g, Edge* edges, int edgeCnt, MatGraph* mst) {
-    make_set(g->numVertices);
+int mst_kruskal(MatGraph* g, Edge* edges, int edgeCnt, MatGraph* mst) {
+    make_set(g->numVertices, 1);
     qsort(edges, edgeCnt, sizeof(Edge), compare_edges);
 
     int mstWeight = 0;
@@ -154,9 +70,9 @@ int kruskal(MatGraph* g, Edge* edges, int edgeCnt, MatGraph* mst) {
         int u = edges[i].u;
         int v = edges[i].v;
         int w = edges[i].weight;
-        if (!same_component(u, v)) {
+        if (!is_same_component(u, v)) {
             union_sets(u, v);
-            mat_graph_add_undirected_edge(mst, u, v, w);
+            mat_graph_add_undirected_weighted_edge(mst, u, v, w);
             mstWeight += w;
             mstEdges++;
             printf("MST edge: %d - %d (weight %d)\n", u, v, w);
@@ -168,7 +84,6 @@ int kruskal(MatGraph* g, Edge* edges, int edgeCnt, MatGraph* mst) {
 }
 
 int find_second_best_mst_weight(
-    MatGraph* g, 
     MatGraph* mst, 
     Edge* edges, 
     int edgeCnt, 
@@ -194,17 +109,11 @@ int find_second_best_mst_weight(
 
 #pragma region 21-2 Minimum spanning tree in sparse graphs
 
-typedef struct {
-    int u;
-    int v;
-    int weight;
-} OrigEdge;
-
 void mst_reduce(MatGraph* g, MatGraph** gPrimePtr, Edge* t, int* tSize) {
     int n = g->numVertices;
     int marked[MAX_VERTICES] = {0};
 
-    make_set(n);
+    make_set(n, 1);
 
     *tSize = 0;
     for (int u = 0; u < n; u++) {
@@ -235,7 +144,7 @@ void mst_reduce(MatGraph* g, MatGraph** gPrimePtr, Edge* t, int* tSize) {
     int rep2idx[MAX_VERTICES];
 
     for (int v = 0; v < n; v++) {
-        int rep = find_set(v);
+        int rep = find(v);
         int i;
 
         for (i = 0; i <repCnt; i++) if (repMap[i] == rep) break;
@@ -248,14 +157,14 @@ void mst_reduce(MatGraph* g, MatGraph** gPrimePtr, Edge* t, int* tSize) {
     }
 
     // Create reduced graph
-    MatGraph* gPrime = mat_graph_create(repCnt);
+    MatGraph* gPrime = mat_graph_create(repCnt, INF);
     *gPrimePtr = gPrime;
 
     for (int u = 0; u < n; u++) {
         for (int v = u + 1; v < n; v++) {
             if (g->adjMat[u][v] > 0) {
-                int repU = find_set(u);
-                int repV = find_set(v);
+                int repU = find(u);
+                int repV = find(v);
 
                 if (repU != repV) {
                     int uIdx = rep2idx[repU];
@@ -263,7 +172,7 @@ void mst_reduce(MatGraph* g, MatGraph** gPrimePtr, Edge* t, int* tSize) {
 
                     if (gPrime->adjMat[uIdx][vIdx] == 0 ||
                         g->adjMat[u][v] == gPrime->adjMat[uIdx][vIdx]) 
-                        mat_graph_add_undirected_edge(
+                        mat_graph_add_undirected_weighted_edge(
                                 gPrime, 
                                 uIdx, 
                                 vIdx, 
@@ -337,7 +246,7 @@ void mst_reduce_optimized(MatGraph* g, MatGraph** gPrimePtr, Edge* t, int* tSize
         }
     }
 
-    MatGraph* gPrime = mat_graph_create(compCnt);
+    MatGraph* gPrime = mat_graph_create(compCnt, INF);
     *gPrimePtr = gPrime;
 
     for (int u = 0; u < n; u++) {
@@ -352,7 +261,7 @@ void mst_reduce_optimized(MatGraph* g, MatGraph** gPrimePtr, Edge* t, int* tSize
 
                     if (gPrime->adjMat[uIdx][vIdx] != 0 ||
                         g->adjMat[u][v] < gPrime->adjMat[uIdx][vIdx]) {
-                            mat_graph_add_undirected_edge(
+                            mat_graph_add_undirected_weighted_edge(
                                 gPrime,
                                 uIdx,
                                 vIdx,
@@ -373,31 +282,6 @@ int compare_edges_descending(const void* a, const void* b) {
     Edge* ea = (Edge*)a;
     Edge* eb = (Edge*)b;
     return eb->weight - ea->weight;
-}
-
-int is_connected(MatGraph* g) {
-    int visited[MAX_VERTICES] = {0};
-    int stack[MAX_VERTICES];
-    int stackTop = -1;
-    int startVertex = 0;
-    int visitedCnt = 0;
-
-    stack[++stackTop] = startVertex;
-    visited[startVertex] = 1;
-    visitedCnt++;
-
-    while (stackTop >= 0) {
-        int u = stack[stackTop--];
-        for (int v = 0; v < g->numVertices; v++) {
-            if (g->adjMat[u][v] > 0 && !visited[v]) {
-                stack[++stackTop] = v;
-                visited[v] = 1;
-                visitedCnt++;
-            }
-        }
-    }
-
-    return (visitedCnt == g->numVertices);
 }
 
 void print_maybe_mst_edges(Edge* edges, int size) {
@@ -431,9 +315,9 @@ void maybe_mst_a(MatGraph* g, Edge* resultEdges, int* resultSize) {
 
     qsort(edges, edgeCnt, sizeof(Edge), compare_edges_descending);
 
-    MatGraph* T = mat_graph_create(g->numVertices);
+    MatGraph* T = mat_graph_create(g->numVertices, INF);
     for (int i = 0; i < edgeCnt; i++) {
-        mat_graph_add_undirected_edge(T, edges[i].u, edges[i].v, edges[i].weight);
+        mat_graph_add_undirected_weighted_edge(T, edges[i].u, edges[i].v, edges[i].weight);
     }
 
     printf("Starting with all %d edges\n", edgeCnt);
@@ -445,10 +329,10 @@ void maybe_mst_a(MatGraph* g, Edge* resultEdges, int* resultSize) {
 
         mat_graph_remove_undirected_edge(T, u, v);
 
-        if (is_connected(T)) 
+        if (mat_graph_is_connected(T)) 
             printf("Removed edge (%d, %d) with weight %d\n", u, v, w);
         else {
-            mat_graph_add_undirected_edge(T, u, v, w);
+            mat_graph_add_undirected_weighted_edge(T, u, v, w);
             printf("Kept edge (%d, %d) with weight %d\n", u, v, w);
         }
     }
@@ -475,7 +359,7 @@ void maybe_mst_b(MatGraph* g, Edge* resultEdges, int* resultSize) {
         where α is the inverse Ackermann function.
     */
     int n = g->numVertices;
-    make_set(n);
+    make_set(n, 1);
 
     *resultSize = 0;
     Edge edges[MAX_EDGES];
@@ -499,7 +383,7 @@ void maybe_mst_b(MatGraph* g, Edge* resultEdges, int* resultSize) {
         int v = edges[i].v;
         int w = edges[i].weight;
 
-        if (!same_component(u, v)) {
+        if (!is_same_component(u, v)) {
             union_sets(u, v);
             resultEdges[*resultSize] = edges[i];
             (*resultSize)++;
@@ -507,28 +391,6 @@ void maybe_mst_b(MatGraph* g, Edge* resultEdges, int* resultSize) {
         } else printf("Skipped edge (%d, %d) with weight %d\n", u, v, w);
     }
 } 
-
-int check_path_exists(MatGraph* g, int source, int target) {
-    int visited[MAX_VERTICES] = {0};
-    int stack[MAX_VERTICES];
-    int stackTop = -1;
-
-    stack[++stackTop] = source;
-    visited[source] = 1;
-
-    while (stackTop >= 0) {
-        int u = stack[stackTop--];
-        if (u == target) return 1;
-        for (int v = 0; v < g->numVertices; v++) {
-            if (g->adjMat[u][v] >0 && !visited[v]) {
-                stack[++stackTop] = v;
-                visited[v] = 1;
-            }
-        }
-    }
-
-    return 0;
-}
 
 void find_cycle_and_max_edge(
     MatGraph* g, 
@@ -542,7 +404,6 @@ void find_cycle_and_max_edge(
     g->adjMat[u][v] = 0;
     g->adjMat[v][u] = 0;
 
-    int parent[MAX_VERTICES];
     int visited[MAX_VERTICES] = {0};
 
     for (int i = 0; i < g->numVertices; i++) parent[i] = -1;
@@ -592,7 +453,7 @@ void maybe_mst_c(MatGraph* g, Edge* resultEdges, int* resultSize) {
     int n = g->numVertices;
     *resultSize = 0;
 
-    MatGraph* T = mat_graph_create(n);
+    MatGraph* T = mat_graph_create(n, INF);
 
     Edge edges[MAX_EDGES];
     int edgeCnt = 0;
@@ -615,12 +476,12 @@ void maybe_mst_c(MatGraph* g, Edge* resultEdges, int* resultSize) {
         
         printf("Considering edge (%d, %d) with weight %d\n", u, v, w);
 
-        int hasPath = check_path_exists(T, u, v);
+        int hasPath = mat_graph_check_if_path_exists(T, u, v);
         if (!hasPath) {
-            mat_graph_add_undirected_edge(T, u, v, w);
+            mat_graph_add_undirected_weighted_edge(T, u, v, w);
             printf("Added edge (%d, %d) with weight %d\n", u, v, w);
         } else {
-            mat_graph_add_undirected_edge(T, u, v, w);
+            mat_graph_add_undirected_weighted_edge(T, u, v, w);
             int uMax = -1, vMax = -1, weightMax = -1;
             find_cycle_and_max_edge(T, u, v, &uMax, &vMax, &weightMax);
             mat_graph_remove_undirected_edge(T, uMax, vMax);
@@ -652,108 +513,26 @@ void maybe_mst_c(MatGraph* g, Edge* resultEdges, int* resultSize) {
 
 #pragma region 21-4 Bottleneck spanning tree
 
-int has_bottleneck_spanning_tree(MatGraph* g, int b) {
-    MatGraph* filtered = mat_graph_create(g->numVertices);
+int mat_graph_has_bottleneck_spanning_tree(MatGraph* g, int b) {
+    MatGraph* filtered = mat_graph_create(g->numVertices, INF);
 
     for (int u = 0; u < g->numVertices; u++) {
         for (int v = u + 1; v < g->numVertices; v++) {
             if (g->adjMat[u][v] > 0 && g->adjMat[u][v] <= b)
-                mat_graph_add_undirected_edge(filtered, u, v, g->adjMat[u][v]);
+                mat_graph_add_undirected_weighted_edge(filtered, u, v, g->adjMat[u][v]);
         }
     } 
 
-    int isConnected = is_connected(filtered);
+    int isConnected = mat_graph_is_connected(filtered);
     mat_graph_free(filtered);
     return isConnected;
 }
 
-int median_of_five(int arr[], int n) {
-    for (int i = 1; i < n; i++) {
-        int key = arr[i];
-        int j = i - 1;
-        while (j >= 0 && arr[j] > key) {
-            arr[j + 1] = arr[j];
-            j--;
-        }
-        arr[j + 1] = key;
-    }
-    return arr[n / 2];
-}
-
-int select_kth(int arr[], int left, int right, int k) {
-    if (right - left <= 5) {
-        for (int i = left + 1; i <= right; i++) {
-            int key = arr[i];
-            int j = i - 1;
-            while (j >= left && arr[j] > key) {
-                arr[j + 1] = arr[j];
-                j--;
-            }
-            arr[j + 1] = key;
-        }
-        return arr[left + k];
-    }
-
-    int groupCnt = (right - left + 5) / 4;
-    int medians[groupCnt];
-
-    for (int i = 0; i < groupCnt; i++) {
-        int groupLeft = left + i * 5;
-        int groupRight = (groupLeft + 4 < right) ? groupLeft + 4 : right;
-        
-        for (int j = groupLeft + 1; j <= groupRight; j++) {
-            int key = arr[j];
-            int m = j - 1;
-            while (m >= groupLeft && arr[m] > key) {
-                arr[m + 1] = arr[m];
-                m--;
-            }
-            arr[m + 1] = key;
-        }
-        
-        medians[i] = arr[groupLeft + (groupRight - groupLeft) / 2];
-    }
-
-    int pivot;
-    if (groupCnt == 1) pivot = medians[0];
-    else pivot = select_kth(medians, 0, groupCnt - 1, groupCnt / 2);
-
-    int pivotIdx = left;
-    for (int i = left; i <= right; i++) {
-        if (arr[i] == pivot) {
-            int temp = arr[i];
-            arr[i] = arr[left];
-            arr[left] = temp;
-            pivotIdx = left;
-            break;
-        }
-    }
-
-    int storeIdx = left + 1;
-    for (int i = left + 1; i <= right; i++) {
-        if (arr[i] < pivot) {
-            int tmp = arr[i];
-            arr[i] = arr[storeIdx];
-            arr[storeIdx] = tmp;
-            storeIdx++;
-        }
-    }
-
-    int tmp = arr[pivotIdx];
-    arr[pivotIdx] = arr[storeIdx - 1];
-    arr[storeIdx - 1] = tmp;
-    
-    pivotIdx = storeIdx - 1;
-
-    int pivotRank = pivotIdx - left;
-    if (k == pivotRank) return arr[pivotIdx];
-    else if (k < pivotRank) return select_kth(arr, left, pivotIdx - 1, k);
-    else return select_kth(arr, pivotIdx + 1, right, k - pivotRank - 1);
-}
-
-
-
-void contract_edges(MatGraph* g, int threshold, MatGraph** contractedGraph) {
+void mat_graph_contract_edges(
+    MatGraph* g, 
+    int threshold, 
+    MatGraph** contractedGraph
+) {
     int n = g->numVertices;
     int components[MAX_VERTICES];
     for (int i = 0; i < n; i++) components[i] = i;
@@ -788,7 +567,7 @@ void contract_edges(MatGraph* g, int threshold, MatGraph** contractedGraph) {
         }
     }
 
-    MatGraph* gPrime = mat_graph_create(compCnt);
+    MatGraph* gPrime = mat_graph_create(compCnt, INF);
     *contractedGraph = gPrime;
 
     for (int u = 0; u < n; u++) {
@@ -801,7 +580,7 @@ void contract_edges(MatGraph* g, int threshold, MatGraph** contractedGraph) {
                     int vIdx = comp2idx[vComp];
                     if (gPrime->adjMat[uIdx][vIdx] == 0 ||
                         g->adjMat[u][v] < gPrime->adjMat[uIdx][vIdx])
-                            mat_graph_add_undirected_edge(
+                            mat_graph_add_undirected_weighted_edge(
                                 gPrime, 
                                 uIdx, 
                                 vIdx, 
@@ -832,13 +611,13 @@ int find_bottleneck_spanning_tree(MatGraph* g) {
 
     printf("Median edge weight: %d\n", median);
 
-    if (has_bottleneck_spanning_tree(g, median)) {
+    if (mat_graph_has_bottleneck_spanning_tree(g, median)) {
         printf("Found botteleneck spanning tree weight weight <= %d\n", median);
-        MatGraph* filtered = mat_graph_create(n);
+        MatGraph* filtered = mat_graph_create(n, INF);
         for (int u = 0; u < n; u++) {
             for (int v = u + 1; v < n; v++) {
                 if (g->adjMat[u][v] > 0 && g->adjMat[u][v] <= median)
-                    mat_graph_add_undirected_edge(filtered, u, v, g->adjMat[u][v]);
+                    mat_graph_add_undirected_weighted_edge(filtered, u, v, g->adjMat[u][v]);
             }
         }
         int result = find_bottleneck_spanning_tree(filtered);
@@ -848,7 +627,7 @@ int find_bottleneck_spanning_tree(MatGraph* g) {
         printf("No bottleneck spanning tree with weight <= %d\n", median);
 
         MatGraph* contracted;
-        contract_edges(g, median, &contracted);
+        mat_graph_contract_edges(g, median, &contracted);
 
         printf("Contracted graph has %d vertices\n", contracted->numVertices);
         
@@ -865,13 +644,13 @@ int main(void) {
     {
         case 1: {
             // 21-1
-            MatGraph* g = mat_graph_create(5);
+            MatGraph* g = mat_graph_create(5, INF);
 
-            mat_graph_add_undirected_edge(g, 0, 1, 4);
-            mat_graph_add_undirected_edge(g, 1, 2, 3);
-            mat_graph_add_undirected_edge(g, 2, 3, 5);
-            mat_graph_add_undirected_edge(g, 3, 4, 6);
-            mat_graph_add_undirected_edge(g, 1, 4, 7);
+            mat_graph_add_undirected_weighted_edge(g, 0, 1, 4);
+            mat_graph_add_undirected_weighted_edge(g, 1, 2, 3);
+            mat_graph_add_undirected_weighted_edge(g, 2, 3, 5);
+            mat_graph_add_undirected_weighted_edge(g, 3, 4, 6);
+            mat_graph_add_undirected_weighted_edge(g, 1, 4, 7);
 
             // compute_max_edges(g);
 
@@ -894,12 +673,12 @@ int main(void) {
                 }
             }
 
-            MatGraph* mst = mat_graph_create(g->numVertices);
-            int mst_weight = kruskal(g, edges, edgeCnt, mst);
+            MatGraph* mst = mat_graph_create(g->numVertices, INF);
+            int mst_weight = mst_kruskal(g, edges, edgeCnt, mst);
 
             printf("MST weight: %d\n", mst_weight);
 
-            int second_best = find_second_best_mst_weight(g, mst, edges, edgeCnt, mst_weight);
+            int second_best = find_second_best_mst_weight(mst, edges, edgeCnt, mst_weight);
             if (second_best != -1) printf("Second-best MST weight: %d\n", second_best);
             else printf("No second-best MST exists.\n");
 
@@ -910,17 +689,17 @@ int main(void) {
 
         case 2: {
             // 21.2
-            MatGraph* g = mat_graph_create(6);
+            MatGraph* g = mat_graph_create(6, INF);
 
-            mat_graph_add_undirected_edge(g, 0, 1, 4);
-            mat_graph_add_undirected_edge(g, 0, 2, 3);
-            mat_graph_add_undirected_edge(g, 1, 2, 5);
-            mat_graph_add_undirected_edge(g, 1, 3, 2);
-            mat_graph_add_undirected_edge(g, 2, 3, 6);
-            mat_graph_add_undirected_edge(g, 2, 4, 2);
-            mat_graph_add_undirected_edge(g, 3, 4, 3);
-            mat_graph_add_undirected_edge(g, 3, 5, 4);
-            mat_graph_add_undirected_edge(g, 4, 5, 5);
+            mat_graph_add_undirected_weighted_edge(g, 0, 1, 4);
+            mat_graph_add_undirected_weighted_edge(g, 0, 2, 3);
+            mat_graph_add_undirected_weighted_edge(g, 1, 2, 5);
+            mat_graph_add_undirected_weighted_edge(g, 1, 3, 2);
+            mat_graph_add_undirected_weighted_edge(g, 2, 3, 6);
+            mat_graph_add_undirected_weighted_edge(g, 2, 4, 2);
+            mat_graph_add_undirected_weighted_edge(g, 3, 4, 3);
+            mat_graph_add_undirected_weighted_edge(g, 3, 5, 4);
+            mat_graph_add_undirected_weighted_edge(g, 4, 5, 5);
 
             printf("Original graph:\n");
             mat_graph_print(g);
@@ -946,17 +725,17 @@ int main(void) {
         case 3: {
             // 21-3 
             printf("Testing alternative MST algorithms:\n");
-            MatGraph* g = mat_graph_create(6);
+            MatGraph* g = mat_graph_create(6, INF);
             
-            mat_graph_add_undirected_edge(g, 0, 1, 4);
-            mat_graph_add_undirected_edge(g, 0, 2, 3);
-            mat_graph_add_undirected_edge(g, 1, 2, 5);
-            mat_graph_add_undirected_edge(g, 1, 3, 2);
-            mat_graph_add_undirected_edge(g, 2, 3, 6);
-            mat_graph_add_undirected_edge(g, 2, 4, 2);
-            mat_graph_add_undirected_edge(g, 3, 4, 3);
-            mat_graph_add_undirected_edge(g, 3, 5, 4);
-            mat_graph_add_undirected_edge(g, 4, 5, 5);
+            mat_graph_add_undirected_weighted_edge(g, 0, 1, 4);
+            mat_graph_add_undirected_weighted_edge(g, 0, 2, 3);
+            mat_graph_add_undirected_weighted_edge(g, 1, 2, 5);
+            mat_graph_add_undirected_weighted_edge(g, 1, 3, 2);
+            mat_graph_add_undirected_weighted_edge(g, 2, 3, 6);
+            mat_graph_add_undirected_weighted_edge(g, 2, 4, 2);
+            mat_graph_add_undirected_weighted_edge(g, 3, 4, 3);
+            mat_graph_add_undirected_weighted_edge(g, 3, 5, 4);
+            mat_graph_add_undirected_weighted_edge(g, 4, 5, 5);
 
             printf("Original graph: \n");
             mat_graph_print(g);
@@ -990,17 +769,17 @@ int main(void) {
 
         case 4: {
             // 21-4
-            MatGraph* g = mat_graph_create(6);
+            MatGraph* g = mat_graph_create(6, INF);
         
-            mat_graph_add_undirected_edge(g, 0, 1, 4);
-            mat_graph_add_undirected_edge(g, 0, 2, 3);
-            mat_graph_add_undirected_edge(g, 1, 2, 5);
-            mat_graph_add_undirected_edge(g, 1, 3, 2);
-            mat_graph_add_undirected_edge(g, 2, 3, 6);
-            mat_graph_add_undirected_edge(g, 2, 4, 2);
-            mat_graph_add_undirected_edge(g, 3, 4, 3);
-            mat_graph_add_undirected_edge(g, 3, 5, 4);
-            mat_graph_add_undirected_edge(g, 4, 5, 5);
+            mat_graph_add_undirected_weighted_edge(g, 0, 1, 4);
+            mat_graph_add_undirected_weighted_edge(g, 0, 2, 3);
+            mat_graph_add_undirected_weighted_edge(g, 1, 2, 5);
+            mat_graph_add_undirected_weighted_edge(g, 1, 3, 2);
+            mat_graph_add_undirected_weighted_edge(g, 2, 3, 6);
+            mat_graph_add_undirected_weighted_edge(g, 2, 4, 2);
+            mat_graph_add_undirected_weighted_edge(g, 3, 4, 3);
+            mat_graph_add_undirected_weighted_edge(g, 3, 5, 4);
+            mat_graph_add_undirected_weighted_edge(g, 4, 5, 5);
 
             printf("Original graph:\n");
             mat_graph_print(g);

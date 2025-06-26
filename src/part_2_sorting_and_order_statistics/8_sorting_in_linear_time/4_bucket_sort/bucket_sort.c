@@ -1,23 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "part_2_sorting_and_order_statistics/8_sorting_in_linear_time/sorting_in_linear_time.h"
 
-#define NARRAY 10
-#define NBUCKET 6
-struct Node {
-    float data;
-    struct Node *next;
-};
-
-void BucketSort(float A[]);
-struct Node *InsertionSort(struct Node *list);
-void printArr(float A[]);
-void printBuckets(struct Node *list);
-int getBucketIdx(float value);
-void freeBuckets(struct Node **buckets);
-
-void BucketSort(
-    float A[]
-) {
+void bucket_sort(float A[]) {
     int i, j;
     struct Node **buckets;
 
@@ -27,7 +10,7 @@ void BucketSort(
         buckets[i] = NULL;
 
     for (i = 0; i < NARRAY; ++i) {
-        int idx = getBucketIdx(A[i]);
+        int idx = get_bucket_idx(A[i]);
         struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
         newNode->data = A[i];
         newNode->next = buckets[idx];
@@ -36,19 +19,19 @@ void BucketSort(
 
     for (i = 0; i < NBUCKET; i++) {
         printf("Bucket[%d]: ", i);
-        printBuckets(buckets[i]);
+        print_buckets(buckets[i]);
         printf("\n");
     }
 
     for (i = 0; i < NBUCKET; i++) {
-        buckets[i] = InsertionSort(buckets[i]);
+        buckets[i] = insertion_sort(buckets[i]);
     }
 
     printf("-------------\n");
     printf("Buckets after sorting\n");
     for (i = 0; i < NBUCKET; i++) {
         printf("Bucket[%d]: ", i);
-        printBuckets(buckets[i]);
+        print_buckets(buckets[i]);
         printf("\n");
     }
 
@@ -60,12 +43,10 @@ void BucketSort(
         }
     }
 
-    freeBuckets(buckets);
+    free_buckets(buckets);
 }
 
-struct Node *InsertionSort(
-    struct Node *list 
-) {
+struct Node* insertion_sort(struct Node *list ) {
     if (list == NULL || list->next == NULL)
         return list;
 
@@ -93,21 +74,11 @@ struct Node *InsertionSort(
     return sorted;
 }
 
-int getBucketIdx(
-    float value
-) {
+int get_bucket_idx(float value) {
     return (int)(value * NBUCKET);
 }
 
-
-void printArr(float A[]) {
-    for (int i = 0; i < NARRAY; ++i) {
-        printf("%.2f ", A[i]);
-    }
-    printf("\n");
-}
-
-void printBuckets(struct Node *list) {
+void print_buckets(struct Node *list) {
     struct Node *curr = list;
     while (curr) {
         printf("%.2f ", curr->data);
@@ -115,9 +86,7 @@ void printBuckets(struct Node *list) {
     }
 }
 
-void freeBuckets(
-    struct Node **buckets 
-) {
+void free_buckets(struct Node **buckets ) {
     for (int i = 0; i < NBUCKET; i++) {
         struct Node *node = buckets[i];
         while (node) {
@@ -127,29 +96,4 @@ void freeBuckets(
         }
     }
     free(buckets);
-}
-
-int main(void) {
-    float A[NARRAY] = {
-        0.79, 
-        0.13, 
-        0.16, 
-        0.64, 
-        0.30, 
-        0.20, 
-        0.89, 
-        0.53, 
-        0.71, 
-        0.42
-    };
-
-    printf("Initial array: ");
-    printArr(A);
-    printf("-------------\n");
-
-    BucketSort(A);
-    printf("-------------\n");
-    printf("Sorted array: ");
-    printArr(A);
-    return 0;
 }
