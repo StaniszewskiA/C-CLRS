@@ -267,4 +267,11 @@ void test_hungarian_non_full(void);
 void hungarian_vertex_cycle_cover(MatGraph* g);
 void test_hungarian_vertex_cycle_cover(void);
 
+void fractional_to_matching(
+    BipartiteGraph* g,
+    float x[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES],
+    int matching[MAX_GRAPH_VERTICES]
+);
+void test_fractional_to_matching(void);
+
 #endif // BIPARTITE_MATCHING_H

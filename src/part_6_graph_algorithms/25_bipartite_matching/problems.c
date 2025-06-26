@@ -1,6 +1,6 @@
 #include "part_6_graph_algorithms/25_bipartite_matching/bipartite_matching.h"
 
-#define TASK 5
+#define TASK 6
 
 #pragma region Perfect matching in regular bipartite graphs
 
@@ -507,6 +507,80 @@ void test_hungarian_vertex_cycle_cover(void) {
 
 #pragma region Fractional matching
 
+void fractional_to_matching(
+    BipartiteGraph* g,
+    float costs[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES],
+    int matching[MAX_GRAPH_VERTICES]
+) {
+    char usedU[MAX_GRAPH_VERTICES] = {0};
+    char usedV[MAX_GRAPH_VERTICES] = {0};
+    for (int u = 1; u <= g->leftSize; ++u) matching[u] = -1;
+
+    while (1) {
+        float maxVal = 0.0f;
+        int maxU = -1;
+        int maxV = -1;
+        
+        for (int u = 1; u <= g->leftSize; ++u) {
+            if (usedU[u]) continue;
+            for (int i = 0; i < g->adjSize[u]; ++i) {
+                int v = g->adj[u][i];
+                if (usedV[v]) continue;
+                if (costs[u][v] <= maxVal) continue;
+                maxVal = costs[u][v];
+                maxU = u;
+                maxV = v;
+            }
+        } 
+
+        if (maxVal < 1e-6) break;
+        matching[maxU] = maxV;
+        usedU[maxU] = 1;
+        usedV[maxV] = 1;
+    }
+}
+
+void test_fractional_to_matching(void) {
+    int n = 3;
+    BipartiteGraph* g = bipartite_graph_init(n, n);
+
+    int edges[][2] = {
+        {1, 1},
+        {1, 2},
+        {2, 2},
+        {2, 3},
+        {3, 1},
+        {3, 3}
+    };
+    int numEdges = ARRAY_SIZE(edges);
+
+    for (int i = 0; i < numEdges; ++i) 
+        bipartite_graph_add_edge(g, edges[i][0], edges[i][1]);
+    
+    float costs[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES] = {{0}};
+    costs[1][1] = 0.5; costs[1][2] = 0.5;
+    costs[2][2] = 1.0; costs[2][3] = 0.5;
+    costs[3][1] = 0.5; costs[3][3] = 0.5;
+
+    printf("Initial fractional matching:\n");
+    for (int u = 1; u <= n; ++u) {
+        for (int v = 1; v <= n; ++v) {
+            if (costs[u][v] < 1e-6) continue; 
+            printf("  U%d -- V%d : %.2f\n", u, v, costs[u][v]);
+        }
+    }
+
+    int matching[MAX_GRAPH_VERTICES];
+    fractional_to_matching(g, costs, matching);
+    printf("Casting fractional matching to a {0, 1} matching:\n");
+    for (int u = 1; u <= n; ++u) {
+        if (matching[u] != -1) printf("  U%d -- V%d\n", u, matching[u]);
+        else printf("  U%d -- None\n", u);
+    }
+
+    safe_free(g);
+}
+
 #pragma endregion Fractional matching
 
 #pragma region Computing vertex labels
@@ -545,6 +619,15 @@ int main(void) {
                 reduced to perfect matching.
             */
             test_hungarian_vertex_cycle_cover();
+            break;
+        }
+
+        case 6: {
+            /*
+                Cast fractional matching into
+                {0, 1} values.
+            */
+            test_fractional_to_matching();
             break;
         }
     }
