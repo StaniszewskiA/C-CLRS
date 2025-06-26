@@ -1,6 +1,6 @@
 #include "part_6_graph_algorithms/25_bipartite_matching/bipartite_matching.h"
 
-#define TASK 6
+#define TASK 7
 
 #pragma region Perfect matching in regular bipartite graphs
 
@@ -329,8 +329,6 @@ void test_hungarian_algorithm_n3(void) {
         for (j = 0; j < n; ++j)
             hungarian_set_cost(instance, i, j, -costMat[i][j]);
 
-        
-
     int matching[4];
     int minCost = hungarian_solve(instance, matching);
 
@@ -585,6 +583,58 @@ void test_fractional_to_matching(void) {
 
 #pragma region Computing vertex labels
 
+void compute_vertex_labels(
+    int n,
+    float weights[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES],
+    int matching[MAX_GRAPH_VERTICES],
+    float l_h[MAX_GRAPH_VERTICES],
+    float r_h[MAX_GRAPH_VERTICES]
+) {
+    int l, r;
+
+    for (l = 0; l <= n; ++l) {
+        float maxW = weights[l][0];
+        for (r = 0; r <= n; ++r)
+            maxW = fmax(weights[l][r], maxW);
+        l_h[l] = maxW;
+    }
+
+    for (l = 0; l <= n; ++l) {
+        r = matching[l];
+        r_h[r] = weights[l][r] - l_h[l];
+    }
+}
+
+void test_compute_vertex_labels(void) {
+    int n = 3;
+    float weights[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES] = {
+        {0}, 
+        {0, 3, 2, 1},
+        {0, 2, 4, 6},
+        {0, 1, 5, 2}
+    };
+    int matching[MAX_GRAPH_VERTICES] = {0, 1, 3, 2}; // Arbitrary
+    float l_h[MAX_GRAPH_VERTICES] = {0};
+    float r_h[MAX_GRAPH_VERTICES] = {0};
+    compute_vertex_labels(n, weights, matching, l_h, r_h);
+    
+    printf("Assigned left labels (l_h):\n");
+    for (int l = 1; l <= n; ++l) printf(  "l_h[%d] = %.2f\n", l, l_h[l]);
+
+    printf("Assigned right labels (r_h):\n");
+    for (int r = 1; r <= n; ++r) printf(  "r_h[%d] = %.2f\n", r, r_h[r]);
+
+    printf("Checking correctness of the labeling:\n");
+    for (int l = 1; l <= n; ++l) {
+        for (int r = 1; r <= n; ++r) {
+            printf("  (l=%d, r=%d): l_h + r_h = %.2f >= w(l, r) = %.2f, %s\n",
+                l, r, l_h[l]+r_h[r], weights[l][r], 
+                (l_h[l]+r_h[r] >= weights[l][r]) ? "CORRECT" : "INCORRECT"
+            );
+        }
+    }
+}
+
 #pragma endregion Computing vertex labels
 
 int main(void) {
@@ -628,6 +678,16 @@ int main(void) {
                 {0, 1} values.
             */
             test_fractional_to_matching();
+            break;
+        }
+
+        case 7: {
+            /*
+                Given a perfect matching with maximum weight,
+                find a labeling, such that M* is a perfect
+                matching in the equality subgraph. 
+            */
+            test_compute_vertex_labels();
             break;
         }
     }

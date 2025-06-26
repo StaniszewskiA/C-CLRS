@@ -274,4 +274,13 @@ void fractional_to_matching(
 );
 void test_fractional_to_matching(void);
 
+void compute_vertex_labels(
+    int n,
+    float weights[MAX_GRAPH_VERTICES][MAX_GRAPH_VERTICES],
+    int matching[MAX_GRAPH_VERTICES],
+    float l_h[MAX_GRAPH_VERTICES],
+    float r_h[MAX_GRAPH_VERTICES]
+);
+void test_compute_vertex_labels(void);
+
 #endif // BIPARTITE_MATCHING_H
