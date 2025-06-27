@@ -16,6 +16,7 @@ PART_3_COMMONS_SRC = $(SRCDIR)/part_3_data_structures/part_3_commons.c
 PART_4_COMMONS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/part_4_commons.c
 PART_5_COMMONS_SRC = $(SRCDIR)/part_5_advanced_data_structures/part_5_commons.c
 PART_6_COMMONS_SRC = $(SRCDIR)/part_6_graph_algorithms/part_6_commons.c
+PART_7_COMMONS_SRC = $(SRCDIR)/part_7_selected_topics/part_7_commons.c
 
 
 # ============================================================================
@@ -295,6 +296,15 @@ CHAPTER_25_PROBLEMS_SRC = \
 	$(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/1_maximum_bipartite_matching/maximum_bipartite_matching.c
 
 # ============================================================================
+# PART 7: SELECTED TOPICS
+# ============================================================================
+
+# Chapter 26
+THE_BASICS_OF_FORK_JOIN_MAIN = src/part_7_selected_topics/26_multithreaded_algorithms/1_the_basics_of_fork-join_multithreading/main.c
+THE_BASICS_OF_FORK_JOIN_SRC = src/part_7_selected_topics/26_multithreaded_algorithms/1_the_basics_of_fork-join_multithreading/the_basics_of_fork-join_multithreading.c
+
+
+# ============================================================================
 # PHONY TARGETS
 # ============================================================================
 
@@ -384,7 +394,8 @@ CHAPTER_25_PROBLEMS_SRC = \
 		maximum-bipartite-matching-2 run-maximum-bipartite-matching-2 \
 		stable-marriage run-stable-marriage \
 		hungarian-algorithm run-hungarian-algorithm \
-		chapter-25-problems run-chapter-25-problems
+		chapter-25-problems run-chapter-25-problems \
+		the-basics-of-fork-join run-the-basics-of-fork-join
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -960,6 +971,17 @@ chapter-25-problems: $(BINDIR)
 
 run-chapter-25-problems: chapter-25-problems
 	$(BINDIR)/chapter_25_problems
+
+# ============================================================================
+# PART 7: SELECTED TOPICS
+# ============================================================================
+
+# Chapter 26
+the-basics-of-fork-join: $(BINDIR)
+	$(CC) $(CFLAGS) -fopenmp $(COMMON_SRC) $(THE_BASICS_OF_FORK_JOIN_SRC) $(THE_BASICS_OF_FORK_JOIN_MAIN) -o $(BINDIR)/the_basics_of_fork_join -lpthread
+
+run-the-basics-of-fork-join: the-basics-of-fork-join
+	$(BINDIR)/the_basics_of_fork_join
 
 # ============================================================================
 # UTILITY TARGETS
