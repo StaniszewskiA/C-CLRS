@@ -303,6 +303,8 @@ CHAPTER_25_PROBLEMS_SRC = \
 THE_BASICS_OF_FORK_JOIN_MAIN = src/part_7_selected_topics/26_multithreaded_algorithms/1_the_basics_of_fork-join_multithreading/main.c
 THE_BASICS_OF_FORK_JOIN_SRC = src/part_7_selected_topics/26_multithreaded_algorithms/1_the_basics_of_fork-join_multithreading/the_basics_of_fork-join_multithreading.c
 
+MULTITHREADED_MATRIX_MULTIPLICATION_MAIN = src/part_7_selected_topics/26_multithreaded_algorithms/2_multithreaded_matrix_multiplication/main.c
+MULTITHREADED_MATRIX_MULTIPLICATION_SRC = src/part_7_selected_topics/26_multithreaded_algorithms/2_multithreaded_matrix_multiplication/multithreaded_matrix_multiplication.c
 
 # ============================================================================
 # PHONY TARGETS
@@ -395,7 +397,8 @@ THE_BASICS_OF_FORK_JOIN_SRC = src/part_7_selected_topics/26_multithreaded_algori
 		stable-marriage run-stable-marriage \
 		hungarian-algorithm run-hungarian-algorithm \
 		chapter-25-problems run-chapter-25-problems \
-		the-basics-of-fork-join run-the-basics-of-fork-join
+		the-basics-of-fork-join run-the-basics-of-fork-join \
+		multithread-matrix-multiplication run-multithread-matrix-multiplication
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -978,10 +981,16 @@ run-chapter-25-problems: chapter-25-problems
 
 # Chapter 26
 the-basics-of-fork-join: $(BINDIR)
-	$(CC) $(CFLAGS) -fopenmp $(COMMON_SRC) $(THE_BASICS_OF_FORK_JOIN_SRC) $(THE_BASICS_OF_FORK_JOIN_MAIN) -o $(BINDIR)/the_basics_of_fork_join -lpthread
+	$(CC) $(CFLAGS) -fopenmp -lpthread $(COMMON_SRC) $(THE_BASICS_OF_FORK_JOIN_SRC) $(THE_BASICS_OF_FORK_JOIN_MAIN) -o $(BINDIR)/the_basics_of_fork_join 
 
 run-the-basics-of-fork-join: the-basics-of-fork-join
 	$(BINDIR)/the_basics_of_fork_join
+
+multithread-matrix-multiplication: $(BINDIR)
+	$(CC) $(CFLAGS) -fopenmp -lpthread $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(MULTITHREADED_MATRIX_MULTIPLICATION_SRC) $(MULTITHREADED_MATRIX_MULTIPLICATION_MAIN) -o $(BINDIR)/multithread_matrix_multiplication
+
+run-multithread-matrix-multiplication: multithread-matrix-multiplication
+	$(BINDIR)/multithread_matrix_multiplication
 
 # ============================================================================
 # UTILITY TARGETS

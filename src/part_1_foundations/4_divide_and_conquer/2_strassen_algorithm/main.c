@@ -3,9 +3,9 @@
 int main() {
     int n = 2;
     
-    int** A = allocate_matrix(n);
-    int** B = allocate_matrix(n);
-    int** C = allocate_matrix(n);
+    int** A = allocate_matrix(n, n);
+    int** B = allocate_matrix(n, n);
+    int** C = allocate_matrix(n, n);
 
     
     A[0][0] = 1; A[0][1] = 2;

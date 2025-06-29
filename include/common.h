@@ -82,7 +82,7 @@ void print_named_bool_mat(
 #define MAX_MATRIX_SIZE 100
 
 void print_matrix(int matrix[MAX_MATRIX_SIZE][MAX_MATRIX_SIZE], int n);
-int** allocate_matrix(int size);
+int** allocate_matrix(int dim1, int dim2);
 void input_matrix(int** matrix, int size, const char* name);
 void free_matrix(int** matrix, int size);
 void add_matrices(

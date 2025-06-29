@@ -196,10 +196,10 @@ void print_named_bool_mat(
     printf("\n");
 };
 
-int** allocate_matrix(int size) {
-    int** matrix = (int**)malloc(size * sizeof(int*));
-    for (int i = 0; i < size; i++) {
-        matrix[i] = (int*)malloc(size * sizeof(int));
+int** allocate_matrix(int dim1, int dim2) {
+    int** matrix = (int**)malloc(dim1 * sizeof(int*));
+    for (int i = 0; i < dim1; i++) {
+        matrix[i] = (int*)malloc(dim2 * sizeof(int));
     }
     return matrix;
 }

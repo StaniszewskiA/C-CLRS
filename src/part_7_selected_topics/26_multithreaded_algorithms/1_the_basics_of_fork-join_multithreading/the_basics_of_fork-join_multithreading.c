@@ -105,7 +105,7 @@ void p_mat_vec(int** A, int* x, int* y, int n) {
 
 void test_p_mat_vec(void) {
     int n = 10000;
-    int** A = allocate_matrix(n);
+    int** A = allocate_matrix(n, n);
     int* x = safe_malloc(n * sizeof(int));
     int* y = safe_malloc(n * sizeof(int));
 
@@ -144,7 +144,7 @@ void p_mat_vec_recursive(int** A, int* x, int* y, int n, int i, int iPrime) {
 
 void test_p_mat_vec_recursive(void) {
     int n = 10000;
-    int** A = allocate_matrix(n);
+    int** A = allocate_matrix(n, n);
     int* x = safe_malloc(n * sizeof(int));
     int* y = safe_malloc(n * sizeof(int));
 
@@ -194,7 +194,7 @@ void p_mat_vec_wrong(int** A, int* x, int* y, int n) {
 
 void test_p_mat_vec_wrong(void) {
     int n = 8;
-    int** A = allocate_matrix(n);
+    int** A = allocate_matrix(n, n);
     int* x = safe_malloc(n * sizeof(int));
     int* yWrong = safe_calloc(n, sizeof(int));
     int* yCorrect = safe_calloc(n, sizeof(int));
@@ -246,18 +246,9 @@ void p_mat_vec_dc(int** A, int* x, int* y, int n) {
     }
 }
 
-static void pretty_print_matrix(const char* name, int** A, int n) {
-    printf("%s:\n", name);
-    for (int i = 0; i < n; ++i) {
-        printf("[");
-        for (int j = 0; j < n; ++j) printf("%3d", A[i][j]);
-        printf("]\n");
-    }
-}
-
 void test_p_mat_vec_dc(void) {
     int n = 4;
-    int** A = allocate_matrix(n);
+    int** A = allocate_matrix(n, n);
     int* x = safe_malloc(n * sizeof(int));
     int* yPar = safe_calloc(n, sizeof(int));
     int* ySeq = safe_calloc(n, sizeof(int));
@@ -322,8 +313,8 @@ void p_transpose(int** A, int n) {
 
 void test_p_transpose(void) {
     int n = 4;
-    int** A = allocate_matrix(n);
-    int** refA = allocate_matrix(n);
+    int** A = allocate_matrix(n, n);
+    int** refA = allocate_matrix(n, n);
 
     for (int i = 0; i < n; ++i)
         for (int j = 0; j < n; ++j) A[i][j] = refA[i][j] = i * n + j + 1;

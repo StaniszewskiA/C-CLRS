@@ -54,6 +54,31 @@ void test_p_transpose(void);
 // CHAPTER 26.2: MULTITHREADED MATRIX MULTIPLICATION
 // ============================================================================
 
+void p_matrix_multiply(int** A, int** B, int** C, int n);
+void s_matrix_multiply(int** A, int** B, int** C, int n);
+int verify_matrix_multiplication(int** A, int** B, int n);
+void test_p_matrix_multiply(void);
+
+void p_matrix_multiply_recursive(int** A, int** B, int** C, int n);
+void test_p_matrix_multiply_recursive(void);
+
+void p_strassen_algorithm(int** A, int** B, int** C, int n);
+void test_p_strassen_algorithm(void);
+
+void test_all_matrix_multiplication_methods(void);
+
+void p_fast_matrix_multiply(int** A, int** B, int** C, int n);
+void test_p_fast_matrix_multiply(void);
+
+void p_fast_matrix_multiply_optimized(int** A, int** B, int** C, int n);
+void test_p_fast_matrix_multiply_optimized(void);
+
+void p_gen_matrix_multiply(int** A, int** B, int** C, int p, int q, int r);
+void test_p_get_matrix_multiply(void);
+
+void p_floyd_warshall(int** w, int** D, int n);
+void test_p_floyd_warshall(void);
+
 // ============================================================================
 // CHAPTER 26.3: MULTITHREADED MERGE SORT
 // ============================================================================
