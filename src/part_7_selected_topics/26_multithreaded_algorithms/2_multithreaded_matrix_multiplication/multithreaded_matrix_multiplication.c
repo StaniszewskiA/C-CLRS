@@ -883,7 +883,7 @@ void p_floyd_warshall(int** W, int** D, int n) {
 }
 
 void test_p_floyd_warshall(void) {
-    int n = 1 << 12;
+    int n = 1 << 13;
     printf("Number of vertices: %d\n", n);
 
     int** W = allocate_matrix(n, n);

@@ -126,10 +126,12 @@ int random_int(int min, int max) {
 }
 
 void print_arr(int arr[], int N) {
+    printf("[");
     for (int i = 0; i < N; i++) {
-        printf("%d ", arr[i]);
+        printf("%d", arr[i]);
+        if (i < N - 1) printf(" ");
     }
-    printf("\n");
+    printf("]\n");
 }
 
 void print_arr_slice(int arr[], int left, int right)
@@ -379,4 +381,27 @@ int select_kth(int arr[], int left, int right, int k) {
 void generate_random_binary_string(char *str, size_t length) {
     for (size_t i = 0; i < length; i++) str[i] = (rand() % 2)  ? '1' : '0';
     str[length] = '\0';
+}
+
+complex_t complex_add(complex_t a, complex_t b) {
+    complex_t res = {a.real + b.real, a.imag + b.imag};
+    return res;
+}
+
+complex_t complex_sub(complex_t a, complex_t b) {
+    complex_t res = {a.real - b.real, a.imag - b.imag};
+    return res;
+}
+
+complex_t complex_mul(complex_t a, complex_t b) {
+    complex_t res = {
+        a.real * b.real - a.imag * b.imag,
+        a.real * b.imag + a.imag * b.real
+    };
+    return res;
+}
+
+complex_t complex_exp(double theta) {
+    complex_t res = {cos(theta), sin(theta)};
+    return res;
 }

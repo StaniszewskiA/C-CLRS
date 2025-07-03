@@ -3,6 +3,8 @@
 
 #include "../../common.h"
 #include "../part_7_commons.h"
+#include "part_1_foundations/part_1_commons.h" // Sorting utils
+#include "part_2_sorting_and_order_statistics/7_quicksort/quicksort.h" // Quicksort
 
 #include <pthread.h>
 #include <omp.h>
@@ -82,6 +84,43 @@ void test_p_floyd_warshall(void);
 // ============================================================================
 // CHAPTER 26.3: MULTITHREADED MERGE SORT
 // ============================================================================
+
+void p_naive_merge_sort(int* A, int p, int r);
+void p_merge_sort(int* A, int p, int q, int r);
+void test_p_merge_sort(void);
+
+typedef struct {
+    int pos;
+    int arr;
+} median_res_t;
+
+void p_median_merge(int* T,
+    int p1,
+    int r1,
+    int p2,
+    int r2,
+    int* A,
+    int p3
+);
+void test_p_median_merge(void);
+
+typedef struct {
+    int lessCnt;
+    int greaterCnt;
+    int equalCnt;
+} partition_cnts_t;
+
+typedef struct {
+    int lessStart;
+    int equalStart;
+    int greaterStart;
+} partition_positions_t;
+
+void p_partition(int* A, int n, int* res, int pivot, int* pivotIdx);
+void test_p_partition(void);
+
+void p_recursive_fft(complex_t* a, int n, complex_t* res);
+void test_p_recursive_fft(void);
 
 // ============================================================================
 // PROBLEMS

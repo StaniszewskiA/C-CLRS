@@ -11,6 +11,7 @@
 #include <time.h>
 #include <limits.h>
 #include <float.h>
+#include <complex.h>
 
 // Constants
 #define MAX_SIZE 1000
@@ -37,6 +38,10 @@
 #define SWAP_INT(a, b) SWAPS(a, b, int);
 #define SWAP_DOUBLE(a, b) SWAPS(a, b, double);
 #define SWAP_INTERVAL(a, b) SWAPS(a, b, Interval);
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 // Color flags
 // #define RED 0
@@ -129,6 +134,17 @@ int select_kth(int arr[], int left, int right, int k);
 
 // Random
 void generate_random_binary_string(char *str, size_t length);
+
+// Complex numbers
+typedef struct {
+    double real;
+    double imag;
+} complex_t;
+
+complex_t complex_add(complex_t a, complex_t b);
+complex_t complex_sub(complex_t a, complex_t b);
+complex_t complex_mul(complex_t a, complex_t b);
+complex_t complex_exp(double theta);
 
 // Debug
 #ifdef DEBUG

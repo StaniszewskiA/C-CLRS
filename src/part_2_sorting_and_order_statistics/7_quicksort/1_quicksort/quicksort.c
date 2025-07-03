@@ -12,7 +12,7 @@ int partition(int A[], int p, int r) {
     SWAP_INT(A[i + 1], A[r]);;
     }
 
-    printf("Value at pivot idx: %d\n", x);
+    // printf("Value at pivot idx: %d\n", x);
     return (i + 1);
 }
 

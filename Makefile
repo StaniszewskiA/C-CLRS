@@ -306,6 +306,9 @@ THE_BASICS_OF_FORK_JOIN_SRC = src/part_7_selected_topics/26_multithreaded_algori
 MULTITHREADED_MATRIX_MULTIPLICATION_MAIN = src/part_7_selected_topics/26_multithreaded_algorithms/2_multithreaded_matrix_multiplication/main.c
 MULTITHREADED_MATRIX_MULTIPLICATION_SRC = src/part_7_selected_topics/26_multithreaded_algorithms/2_multithreaded_matrix_multiplication/multithreaded_matrix_multiplication.c
 
+MULTITHREADED_MERGE_SORT_MAIN = src/part_7_selected_topics/26_multithreaded_algorithms/3_multithreaded_merge_sort/main.c
+MULTITHREADED_MERGE_SORT_SRC = src/part_7_selected_topics/26_multithreaded_algorithms/3_multithreaded_merge_sort/multithreaded_merge_sort.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -398,7 +401,8 @@ MULTITHREADED_MATRIX_MULTIPLICATION_SRC = src/part_7_selected_topics/26_multithr
 		hungarian-algorithm run-hungarian-algorithm \
 		chapter-25-problems run-chapter-25-problems \
 		the-basics-of-fork-join run-the-basics-of-fork-join \
-		multithread-matrix-multiplication run-multithread-matrix-multiplication
+		multithreaded-matrix-multiplication run-multithreaded-matrix-multiplication \
+		multithreaded-merge-sort run-multithreaded-merge-sort
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -986,11 +990,17 @@ the-basics-of-fork-join: $(BINDIR)
 run-the-basics-of-fork-join: the-basics-of-fork-join
 	$(BINDIR)/the_basics_of_fork_join
 
-multithread-matrix-multiplication: $(BINDIR)
+multithreaded-matrix-multiplication: $(BINDIR)
 	$(CC) $(CFLAGS) -fopenmp -lpthread $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(MULTITHREADED_MATRIX_MULTIPLICATION_SRC) $(MULTITHREADED_MATRIX_MULTIPLICATION_MAIN) -o $(BINDIR)/multithread_matrix_multiplication
 
-run-multithread-matrix-multiplication: multithread-matrix-multiplication
+run-multithreaded-matrix-multiplication: multithreaded-matrix-multiplication
 	$(BINDIR)/multithread_matrix_multiplication
+
+multithreaded-merge-sort: $(BINDIR)
+	$(CC) $(CFLAGS) -fopenmp -lpthread $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(PART_1_COMMONS_SRC) $(QUICKSORT_SRC) $(MULTITHREADED_MERGE_SORT_SRC) $(MULTITHREADED_MERGE_SORT_MAIN) -o $(BINDIR)/multithread_merge_sort
+
+run-multithreaded-merge-sort: multithreaded-merge-sort
+	$(BINDIR)/multithread_merge_sort
 
 # ============================================================================
 # UTILITY TARGETS
