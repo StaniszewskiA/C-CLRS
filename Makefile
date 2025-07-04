@@ -309,6 +309,9 @@ MULTITHREADED_MATRIX_MULTIPLICATION_SRC = src/part_7_selected_topics/26_multithr
 MULTITHREADED_MERGE_SORT_MAIN = src/part_7_selected_topics/26_multithreaded_algorithms/3_multithreaded_merge_sort/main.c
 MULTITHREADED_MERGE_SORT_SRC = src/part_7_selected_topics/26_multithreaded_algorithms/3_multithreaded_merge_sort/multithreaded_merge_sort.c
 
+CHAPTER_26_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/26_multithreaded_algorithms/problems.c
+
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -402,7 +405,8 @@ MULTITHREADED_MERGE_SORT_SRC = src/part_7_selected_topics/26_multithreaded_algor
 		chapter-25-problems run-chapter-25-problems \
 		the-basics-of-fork-join run-the-basics-of-fork-join \
 		multithreaded-matrix-multiplication run-multithreaded-matrix-multiplication \
-		multithreaded-merge-sort run-multithreaded-merge-sort
+		multithreaded-merge-sort run-multithreaded-merge-sort \
+		chapter-26-problems run-chapter-26-problems
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1001,6 +1005,19 @@ multithreaded-merge-sort: $(BINDIR)
 
 run-multithreaded-merge-sort: multithreaded-merge-sort
 	$(BINDIR)/multithread_merge_sort
+
+chapter-26-problems: $(BINDIR)
+	$(CC) $(CFLAGS) -fopenmp -lpthread \
+	$(COMMON_SRC) \
+	$(PART_7_COMMONS_SRC) \
+	$(PART_1_COMMONS_SRC) \
+	$(QUICKSORT_SRC) \
+	$(MULTITHREADED_MERGE_SORT_SRC) \
+	$(CHAPTER_26_PROBLEMS_SRC) \
+	-o $(BINDIR)/chapter_26_problems
+
+run-chapter-26-problems: chapter-26-problems
+	$(BINDIR)/chapter_26_problems
 
 # ============================================================================
 # UTILITY TARGETS

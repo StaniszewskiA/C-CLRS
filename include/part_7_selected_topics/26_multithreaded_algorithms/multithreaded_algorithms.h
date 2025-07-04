@@ -126,4 +126,7 @@ void test_p_recursive_fft(void);
 // PROBLEMS
 // ============================================================================
 
+void p_sum_arrays(int* A, int* B, int* C, int n);
+void test_p_sum_arrays(void);
+
 #endif 
