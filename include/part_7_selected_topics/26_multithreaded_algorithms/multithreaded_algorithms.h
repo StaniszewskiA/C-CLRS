@@ -129,4 +129,8 @@ void test_p_recursive_fft(void);
 void p_sum_arrays(int* A, int* B, int* C, int n);
 void test_p_sum_arrays(void);
 
+void p_matrix_multiply_recursive_no_temp(int** A, int** B, int** C, int n);
+void print_dynamic_matrix(int** matrix, int n);
+void test_p_matrix_multiply_no_temp(void);
+
 #endif 
