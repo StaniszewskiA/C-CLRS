@@ -133,4 +133,20 @@ void p_matrix_multiply_recursive_no_temp(int** A, int** B, int** C, int n);
 void print_dynamic_matrix(int** matrix, int n);
 void test_p_matrix_multiply_no_temp(void);
 
+void p_lu_decomposition(double** A, double** L, double** U, int n);
+void test_p_lu_decomposition(void);
+void p_lup_decomposition(double** A, double** L, double** U, int* P, int n);
+void test_p_lup_decomposition(void);
+void p_lup_solve(
+    double** L,
+    double** U, 
+    int* P, 
+    double* b, 
+    double* x, 
+    int n
+);
+void p_cholesky_decomposition(double** A, double** L, int n);
+void p_matrix_inverse_spd(double** A, double** invA, int n);
+void test_p_cholesky_decomposition(void);
+
 #endif 

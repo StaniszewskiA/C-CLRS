@@ -98,6 +98,10 @@ void add_matrices(
     int multiplier
 );
 
+double** allocate_matrix_double(int dim1, int dim2);
+void free_matrix_double(double** matrix, int size);
+void print_matrix_double(double** matrix, int size);
+
 // Intervals
 typedef struct {
     int low;
