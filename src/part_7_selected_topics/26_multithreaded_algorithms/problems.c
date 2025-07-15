@@ -1,6 +1,6 @@
 #include "part_7_selected_topics/26_multithreaded_algorithms/multithreaded_algorithms.h"
 
-#define TASK 9
+#define TASK 10
 
 #pragma region Implementing parallel loops using nested parallelism
 
@@ -1172,6 +1172,326 @@ void test_p_are_parentheses_balanced(void) {
 
 #pragma endregion Multithreading reductions and prefix computations
 
+#pragma region Multithreading a simple stencil calculation
+
+void simple_stencil(int** A, int** staticInfo, int n) {
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            int up = (i > 0) ? A[i - 1][j] : 0;
+            int left = (j > 0) ? A[i][j - 1] : 0;
+            A[i][j] = up + left + staticInfo[i][j];
+        }
+    }
+}
+
+void p_simple_stencil_recursive_2_by_2(
+    int** A,
+    int** staticInfo,
+    int i1,
+    int i2,
+    int j1,
+    int j2
+) {
+    /*
+        Work: T_1 = Θ(n^2)
+        Span: T_{inf} = Θ(n)
+        Parallelism: Θ(n)  
+    */
+    int cutoff = 1 << 4;
+    if ((i2 - i1 + 1) <= cutoff || (j2 - j1 + 1) <= cutoff) {
+        for (int i = i1; i <= i2; ++i)
+            for (int j = j1; j <= j2; ++j) {
+                int up = (i > 0) ? A[i - 1][j] : 0;
+                int left = (j > 0) ? A[i][j - 1] : 0;
+                A[i][j] = up + left + staticInfo[i][j];
+            }
+        return;
+    }
+
+    int mi = (i1 + i2) / 2;
+    int mj = (j1 + j2) / 2;
+
+    // Fill A11
+    p_simple_stencil_recursive_2_by_2(A, staticInfo, i1, mi, j1, mj);
+
+    // Fill A12 and A21
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        p_simple_stencil_recursive_2_by_2(A, staticInfo, i1, mi, mj + 1, j2);
+
+        #pragma omp section
+        p_simple_stencil_recursive_2_by_2(A, staticInfo, mi + 1, i2, j1, mj);
+    }
+
+    // Fill A22
+    p_simple_stencil_recursive_2_by_2(A, staticInfo, mi + 1, i2, mj + 1, j2);
+}
+
+void p_simple_stencil_recursive_3_by_3(
+    int** A, 
+    int** staticInfo,
+    int i1,
+    int i2,
+    int j1,
+    int j2
+) {
+    /*
+        Work: T_1 = Θ(n^2)
+        Span: T_{inf} = Θ(n)
+        Parallelism: Θ(n)  
+    */
+    int cutoff = 1 << 4;
+    if ((i2 - i1 + 1) <= cutoff || (j2 - j1 + 1) <= cutoff) {
+        for (int i = i1; i <= i2; ++i)
+            for (int j = j1; j <= j2; ++j) {
+                int up = (i > 0) ? A[i - 1][j] : 0;
+                int left = (j > 0) ? A[i][j - 1] : 0;
+                A[i][j] = up + left + staticInfo[i][j];
+            }
+        return;
+    }
+
+    int di = (i2 - i1 + 1) / 3;
+    int dj = (j2 - j1 + 1) / 3;
+
+    int iA = i1 + di - 1;
+    int iB = i1 + 2 * di - 1;
+    int jA = j1 + dj - 1;
+    int jB = j1 + 2 * dj - 1;
+
+    // Fill A11
+    p_simple_stencil_recursive_3_by_3(A, staticInfo, i1, iA, j1, jA);
+
+    // Fill A12 and A21
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        p_simple_stencil_recursive_3_by_3(A, staticInfo, i1, iA, jA + 1, jB);
+        
+        #pragma omp section
+        p_simple_stencil_recursive_3_by_3(A, staticInfo, iA + 1, iB, j1, jA);
+    }
+
+    // Fill A13, A22 and A31
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        p_simple_stencil_recursive_3_by_3(A, staticInfo, i1, iA, jB + 1, j2);
+
+        #pragma omp section
+        p_simple_stencil_recursive_3_by_3(A, staticInfo, iA + 1, iB, jA + 1, jB);
+        
+        #pragma omp section
+        p_simple_stencil_recursive_3_by_3(A, staticInfo, iB + 1, i2, j1, jA);
+    }
+
+    // Fill A23 and A32
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        p_simple_stencil_recursive_3_by_3(A, staticInfo, iA + 1, iB, jB + 1, j2);
+        
+        #pragma omp section
+        p_simple_stencil_recursive_3_by_3(A, staticInfo, iB + 1, i2, jA + 1, jB);
+    }
+
+    // Fill A33
+    p_simple_stencil_recursive_3_by_3(A, staticInfo, iB + 1, i2, jB + 1, j2);
+}
+
+void p_simple_stencil_recursive_b_by_b(
+    int** A, 
+    int** staticInfo,
+    int i1,
+    int i2,
+    int j1,
+    int j2,
+    int b
+) {
+    /*
+        Work: T_1 = Θ(n^2)
+        Span: T_{inf} = Θ(n)
+        Parallelism: Θ(n)  
+    */
+    int cutoff = 1 << 4;
+    if ((i2 - i1 + 1) <= cutoff || (j2 - j1 + 1) <= cutoff) {
+        for (int i = i1; i <= i2; ++i)
+            for (int j = j1; j <= j2; ++j) {
+                int up = (i > 0) ? A[i - 1][j] : 0;
+                int left = (j > 0) ? A[i][j - 1] : 0;
+                A[i][j] = up + left + staticInfo[i][j];
+            }
+        return;
+    }
+
+    int ni = i2 - i1 + 1;
+    int nj = j2 - j1 + 1;
+    int bi = ni / b;
+    int bj = nj / b;
+
+    // Set block limits
+    int iStart[b + 1];
+    iStart[0] = i1;
+    
+    int jStart[b + 1];
+    jStart[0] = j1;
+
+    for (int k = 1; k <= b; ++k) {
+        iStart[k] = iStart[k - 1] + bi;
+        jStart[k] = jStart[k - 1] + bj;
+    }
+
+    iStart[b] = i2 + 1;
+    jStart[b] = j2 + 1;
+
+    for (int biIdx = 0; biIdx < b; ++biIdx) {
+        for (int bjIdx = 0; bjIdx < b; ++bjIdx) {
+            #pragma omp task firstprivate(biIdx, bjIdx)
+            p_simple_stencil_recursive_b_by_b(
+                A, staticInfo, 
+                iStart[biIdx], iStart[biIdx + 1] - 1,
+                jStart[bjIdx], jStart[bjIdx + 1] - 1,
+                b
+            );
+        }
+        #pragma omp taskwait
+    }
+}
+
+void p_simple_stencil_log(int** A, int** staticInfo, int n) {
+    int blockSize = (int)(log2(n));
+    if (blockSize < 1) blockSize = 1;
+    int numBlocks = (n + blockSize - 1) / blockSize;
+
+    for (int d = 0; d <= ((numBlocks - 1) << 1); ++d) {
+        #pragma omp parallel for
+        for (int bi = 0; bi < numBlocks; ++bi) {
+            int bj = d - bi;
+            if (bj < 0 || bj >= numBlocks) continue;
+
+            int i1 = bi * blockSize;
+            int i2 = (i1 + blockSize - 1 < n) ? (i1 + blockSize - 1) : (n - 1);
+
+            int j1 = bj * blockSize;
+            int j2 = (j1 + blockSize - 1 < n) ? (j1 + blockSize - 1) : (n - 1);
+
+            for (int i = i1; i <= i2; ++i) {
+                for (int j = j1; j <= j2; ++j) {
+                    int up = (i > 0) ? A[i - 1][j] : 0;
+                    int left = (j > 0) ? A[i][j - 1] : 0;
+                    A[i][j] = up + left + staticInfo[i][j];
+                }
+            }
+        }
+    }
+}
+
+void test_p_simple_stencil(void) {
+    int n = 1 << 2;
+    printf("Matrix size: %dx%d\n", n, n);
+    int** seqA = allocate_matrix(n, n);
+    int** parA2 = allocate_matrix(n, n);
+    int** parA3 = allocate_matrix(n, n);
+    int** parAb = allocate_matrix(n, n);
+    int** parAlog = allocate_matrix(n, n);
+    int** staticInfo = allocate_matrix(n, n);
+    int b = 4;
+
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; j++) staticInfo[i][j] = (i + j) % 10;
+
+    if (n <= 8) {
+        printf("Static info matrix:\n");
+        print_dynamic_matrix(staticInfo, n);
+    }
+
+    // Sequential
+    double seqStart = omp_get_wtime();
+    simple_stencil(seqA, staticInfo, n);
+    double seqElapsed = omp_get_wtime() - seqStart;
+
+    // Parallel 2x2
+    double par2Elapsed;
+    #pragma omp parallel
+    {
+        #pragma omp single
+        {
+            double t0 = omp_get_wtime();
+            p_simple_stencil_recursive_2_by_2(parA2, staticInfo, 0, n - 1, 0, n - 1);
+            par2Elapsed = omp_get_wtime() - t0;
+        }
+    }
+
+    // Parallel 3x3
+    double par3Elapsed;
+    #pragma omp parallel
+    {
+        #pragma omp single
+        {
+            double t0 = omp_get_wtime();
+            p_simple_stencil_recursive_3_by_3(parA3, staticInfo, 0, n - 1, 0, n - 1);
+            par3Elapsed = omp_get_wtime() - t0;
+        }
+    }
+
+    // Parallel bxb
+    double parbElapsed;
+    #pragma omp parallel
+    {
+        #pragma omp single
+        {
+            double t0 = omp_get_wtime();
+            p_simple_stencil_recursive_b_by_b(parAb, staticInfo, 0, n - 1, 0, n - 1, b);
+            parbElapsed = omp_get_wtime() - t0;
+        }
+    }
+
+    // Parallel log-block wavefront
+    double parlogElapsed = 0.0;
+    double t0 = omp_get_wtime();
+    p_simple_stencil_log(parAlog, staticInfo, n);
+    parlogElapsed = omp_get_wtime() - t0;
+
+
+    printf("Elapsed time (seq): %.6f seconds\n", seqElapsed);
+    printf("Elapsed time (par 2 by 2): %.6f seconds\n", par2Elapsed);
+    printf("Speedup (par2/seq): %.2fx\n", seqElapsed / par2Elapsed);
+    printf("Elapsed time (par 3 by 3): %.6f seconds\n", par3Elapsed);
+    printf("Speedup (par3/seq): %.2fx\n", seqElapsed / par3Elapsed);
+    printf("Elapsed time (par b by b): %.6f seconds\n", parbElapsed);
+    printf("Speedup (parb/seq): %.2fx\n", seqElapsed / parbElapsed);
+    printf("Elapsed time (par log): %.6f seconds\n", parlogElapsed);
+    printf("Speedup (parb/seq): %.2fx\n", seqElapsed / parlogElapsed);
+
+    if (n <= 8) {
+        printf("Result (seq):\n"); print_dynamic_matrix(seqA, n);
+        printf("Result (par 2 by 2):\n"); print_dynamic_matrix(parA2, n);
+        printf("Result (par 3 by 3):\n"); print_dynamic_matrix(parA3, n);
+        printf("Result (par b by b):\n"); print_dynamic_matrix(parAb, n);
+        printf("Result (par log ):\n"); print_dynamic_matrix(parAlog, n);
+    }
+
+    int correct = 1;
+    for (int i = 0; i < n && correct; ++i)
+        for (int j = 0; j < n; ++j)
+            if (seqA[i][j] != parA2[i][j] || seqA[i][j] != parA3[i][j] 
+                || seqA[i][j] != parAb[i][j] || seqA[i][j] != parAlog[i][j]) {
+                correct = 0;
+                break;
+            }
+    printf("Results match? %s\n", correct ? "Yes" : "No");
+
+    free_matrix(seqA, n);
+    free_matrix(parA2, n);
+    free_matrix(parA3, n);
+    free_matrix(parAb, n);
+    free_matrix(parAlog, n);
+    free_matrix(staticInfo, n);
+}
+
+#pragma endregion Multithreading a simple stencil calculation
+
 int main(void) {
     switch (TASK)
     {
@@ -1226,6 +1546,12 @@ int main(void) {
         case 9: {
             // 26-4h
             test_p_are_parentheses_balanced();
+            break;
+        }
+
+        case 10: {
+            // 26-5
+            test_p_simple_stencil();
             break;
         }
         

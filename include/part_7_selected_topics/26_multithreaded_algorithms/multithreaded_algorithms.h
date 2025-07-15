@@ -161,4 +161,33 @@ void test_p_scan(void);
 int p_are_parenthese_balanced(const char* str, int n);
 void test_p_are_parentheses_balanced(void);
 
+void simple_stencil(int** A, int** staticInfo, int n);
+void p_simple_d2_stencil_recursive(
+    int** A,
+    int** staticInfo,
+    int i1,
+    int i2,
+    int j1,
+    int j2
+);
+void p_simple_stencil_recursive_3_by_3(
+    int** A, 
+    int** staticInfo,
+    int i1,
+    int i2,
+    int j1,
+    int j2
+);
+void p_simple_stencil_recursive_b_by_b(
+    int** A, 
+    int** staticInfo,
+    int i1,
+    int i2,
+    int j1,
+    int j2,
+    int b
+);
+void p_simple_stencil_log(int** A, int** staticInfo, int n);
+void test_p_simple_stencil(void);
+
 #endif 
