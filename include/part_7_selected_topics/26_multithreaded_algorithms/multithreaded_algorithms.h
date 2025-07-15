@@ -149,4 +149,16 @@ void p_cholesky_decomposition(double** A, double** L, int n);
 void p_matrix_inverse_spd(double** A, double** invA, int n);
 void test_p_cholesky_decomposition(void);
 
+int p_reduce(int* x, int n);
+void test_p_reduce(void);
+void scan(int* x, int* y, int n);
+void p_scan1(int* x, int* y, int n);
+void p_scan2(int* x, int* y, int n);
+void p_scan3(int* x, int* y, int n);
+void p_scan3_no_t(int* x, int* y, int n);
+void p_scan4(int* x, int n);
+void test_p_scan(void);
+int p_are_parenthese_balanced(const char* str, int n);
+void test_p_are_parentheses_balanced(void);
+
 #endif 

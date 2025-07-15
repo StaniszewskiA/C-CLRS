@@ -1,6 +1,6 @@
 #include "part_7_selected_topics/26_multithreaded_algorithms/multithreaded_algorithms.h"
 
-#define TASK 6
+#define TASK 9
 
 #pragma region Implementing parallel loops using nested parallelism
 
@@ -662,11 +662,10 @@ void p_cholesky_decomposition(double** A, double** L, int n) {
 
 void p_matrix_inverse_spd(double** A, double** invA, int n) {
     /*
-        Work: T_1 = Θ()
-        Span: T_∞ = Θ()
-        Parallelism: Θ()
+        Work: T_1 = Θ(n^3)
+        Span: T_∞ = Θ(n)
+        Parallelism: Θ(n^2)
     */
-
     double** L = allocate_matrix_double(n, n);
     double** Y = allocate_matrix_double(n, n);
 
@@ -789,42 +788,444 @@ void test_p_cholesky_decomposition(void) {
 
 #pragma endregion Multithreaded matrix algorithms
 
+#pragma region Multithreading reductions and prefix computations
+
+static int p_reduce_helper(int* x, int n, int i, int j) {
+    /*
+        Work: T_1 = Θ(n) (cutoff is Θ(sqrt(n)))
+        Span: T_{inf} = Θ(lg(n)) 
+        Parallelism: Θ(n) / Θ(n/lg(n)) 
+    */
+    if (i == j) return x[i];
+
+    if (j - i < sqrt(n)) {
+        int sum = 0;
+        for (int k = i; k <= j; k++) sum += x[k];
+        return sum;
+    }
+
+    int mid = (i + j) / 2;
+    int left = 0; 
+    int right = 0;
+
+    #pragma omp taskgroup
+    {
+        #pragma omp task shared(left)
+        left = p_reduce_helper(x, n, i, mid);
+
+        #pragma omp task shared(right) 
+        right = p_reduce_helper(x, n, mid + 1, j);
+    }
+
+    return left + right;
+}
+
+int p_reduce(int* x, int n) {
+    int res = 0;
+
+    #pragma omp parallel
+    {
+        #pragma omp single nowait
+        {
+            res = p_reduce_helper(x, n, 0, n - 1);
+        }
+    }
+
+    return res;
+}
+
+void test_p_reduce(void) {
+    int n = 1 << 25;
+    int* x = (int*)safe_malloc(n * sizeof(int));
+
+    for (int i = 0; i < n; i++) x[i] = random_int(1, 100);
+
+    printf("Input array size: %d\n", n);
+    if (n <= 50) {
+        printf("Array:\n");
+        print_arr(x, n);
+    }
+
+    int seqSum = 0;
+
+    double seqStart = omp_get_wtime();
+    for (int i = 0; i < n; i++) seqSum += x[i];
+    double seqEnd = omp_get_wtime();
+    double seqTime = seqEnd - seqStart;
+
+    printf("seq reduction time: %.6f\n", seqTime);
+    printf("seq sum: %d\n", seqSum);
+
+    double par1Start = omp_get_wtime();
+    int parSum = p_reduce(x, n);
+    double par1End = omp_get_wtime();
+    double par1Time = par1End - par1Start;
+
+    printf("Parallel reduction time: %.6f\n", par1Time);
+    printf("Parallel reduction sum: %d\n", parSum);
+
+    printf("Speedup: %.2fx\n", seqTime / par1Time);
+    printf("Results match? %s\n", (seqSum == parSum) ? "Yes" : "No");
+
+    safe_free(x);
+}
+
+void scan(int* x, int* y, int n) {
+    if (n <= 0) return;
+    y[0] = x[0];
+    for (int i = 1; i < n; ++i) y[i] = y[i - 1] + x[i];
+}
+
+static void p_scan1_aux(int* x, int* y, int i, int j) {
+    #pragma omp parallel for
+    for (int l = i; l <= j; l++) y[l] = p_reduce(x, l + 1);
+}
+
+void p_scan1(int* x, int* y, int n) {
+    /*
+        Work: T_1 = Θ(n^2)
+        Span: T_∞ = Θ(lg(n))
+        Parallelism: Θ(n^2/lg(n))
+    */
+    p_scan1_aux(x, y, 0, n - 1);
+}
+
+static void p_scan2_aux(int* x, int* y, int i, int j) {
+    if (i == j) {
+        y[i] = x[i];
+        return;
+    }
+    int k = (i + j) / 2;
+
+    #pragma omp task shared(x, y)
+    p_scan2_aux(x, y, i, k);
+    p_scan2_aux(x, y, k + 1, j);
+    #pragma omp taskwait
+
+    int leftSum = y[k];
+    #pragma omp parallel for
+    for (int l = k + 1; l <= j; l++) y[l] = leftSum + y[l];
+}
+
+void p_scan2(int* x, int* y, int n) {
+    /*
+        Work: T_1 = Θ(n)
+        Span: T_∞ = Θ(lg(n))
+        Parallelism: Θ(n/lg(n))
+    */
+    #pragma omp parallel
+    {
+        #pragma omp single nowait
+        {
+            p_scan2_aux(x, y, 0, n - 1);
+        }
+    }
+}
+
+static int p_scan3_up(int* x, int* t, int i, int j) {
+    /*
+        Compute subarrays and store in t
+    */
+    if (i == j) return x[i];
+    int k = (i + j) / 2;
+    int left, right;
+
+    #pragma omp task shared(left)
+    left = p_scan3_up(x, t, i, k);
+    right = p_scan3_up(x, t, k + 1, j);
+    #pragma omp taskwait
+
+    t[k] = left;
+    return left + right;
+}
+
+static int p_scan3_down(int v, int* x, int* t, int* y, int i, int j) {
+    /*
+        Compute the final scan using t
+    */
+    if (i == j) {
+        y[i] = v + x[i];
+        return 0;
+    }
+    int k = (i + j) / 2;
+
+    #pragma omp task
+    p_scan3_down(v, x, t, y, i, k);
+    p_scan3_down(v + t[k], x, t, y, k + 1, j);
+    #pragma omp taskwait
+
+    return 0;
+}
+
+void p_scan3(int* x, int* y, int n) {
+    /*
+        Work: T_1 = Θ(n)
+        Span: T_∞ = Θ(lg(n))
+        Parallelism: Θ(n/lg(n))
+    */
+    if (n <= 0) return;
+    int* t = (int*)safe_malloc(n * sizeof(int));
+    y[0] = x[0];
+    if (n > 1) {
+        #pragma omp parallel
+        {
+            #pragma omp single nowait
+            {
+                p_scan3_up(x, t, 1, n - 1);
+                p_scan3_down(x[0], x, t, y, 1, n - 1);
+            }
+        }
+    }
+
+    safe_free(t);
+}
+
+static void p_scan3_aux_no_t(int v, int* x, int* y, int i, int j) {
+    if (i == j) {
+        y[i] = v + x[i];
+        return;
+    }
+
+    int k = (i + j) / 2;
+    int leftSum;
+
+    #pragma omp task shared(leftSum)
+    {
+        p_scan3_aux_no_t(v, x, y, i, k);
+    }
+    #pragma omp taskwait
+
+    leftSum = y[k];
+
+    #pragma omp task
+    {
+        p_scan3_aux_no_t(leftSum, x, y, k + 1, j);
+    }
+    #pragma omp taskwait
+}
+
+void p_scan3_no_t(int* x, int* y, int n) {
+    if (n <= 0) return;
+    y[0] = x[0];
+
+    if (n > 1) {
+        #pragma omp parallel
+        {
+            #pragma omp single nowait
+            {
+                p_scan3_aux_no_t(x[0], x, y, 1, n - 1);
+            }
+        }
+    }
+}
+
+void p_scan4(int* x, int n) {
+    // Blelloch scan
+    if (n <= 1) return;
+
+    int last = x[n - 1]; // Θ(1) space
+
+    // Up
+    for (int d = 1; d < n; d <<= 1) {
+        #pragma omp parallel for
+        for (int i = 0; i < n; i += (d << 1))
+            if (i + (d << 1) - 1 < n) x[i + (d << 1) - 1] += x[i + d - 1];
+    }
+
+    // Set to neutral element
+    x[n - 1] = 0;
+
+    // Down
+    for (int d = n >> 1; d >= 1; d >>= 1) {
+        #pragma omp parallel for
+        for (int i = 0; i < n; i += (d << 1)) {
+            if (i + (d << 1) - 1 >= n) continue;
+            int temp = x[i + d - 1];
+            x[i + d - 1] = x[i + (d << 1) - 1];
+            x[i + (d << 1) - 1] += temp;
+        }
+    }
+
+    // Convert exclusive to inclusive
+    for (int i = 0; i < n - 1; ++i) x[i] = x[i + 1];
+    x[n - 1] += last;
+}
+
+void test_p_scan(void) {
+    int n = 1 << 2;
+    printf("Input size: %d\n", n);
+
+    int* x = (int*)safe_malloc(n * sizeof(int));
+    int* seqY = (int*)safe_malloc(n * sizeof(int));
+    int* parY1 = (int*)safe_malloc(n * sizeof(int));
+    int* parY2 = (int*)safe_malloc(n * sizeof(int));
+    int* parY3a = (int*)safe_malloc(n * sizeof(int));
+    int* parY3b = (int*)safe_malloc(n * sizeof(int));
+
+    for (int i = 0; i < n; ++i) x[i] = random_int(1, 100);
+
+    if (n <= 32) {
+        printf("Input array:\n");
+        print_arr(x, n);
+    }
+
+    #define TIME_SCAN(func, out, ...) ({         \
+        double start = omp_get_wtime();     \
+        func(__VA_ARGS__);                  \
+        double end = omp_get_wtime();       \
+        (end - start);                      \
+    })
+
+    double seqTime = TIME_SCAN(scan, seqY, x, seqY, n);
+    double par1Time = TIME_SCAN(p_scan1, parY1, x, parY1, n);
+    double par2Time = TIME_SCAN(p_scan2, parY2, x, parY2, n);
+    double par3aTime = TIME_SCAN(p_scan3, parY3a, x, parY3a, n);
+    double par3bTime = TIME_SCAN(p_scan3_no_t, parY3b, x, parY3b, n);
+
+    double par4Start = omp_get_wtime();
+    p_scan4(x, n);
+    double par4End = omp_get_wtime();
+    double par4Time = par4End - par4Start;
+
+    if (n <= 32) {
+        printf("Sequential scan result:\n"); print_arr(seqY, n);
+        printf("Parallel scan1 result:\n"); print_arr(parY1, n);
+        printf("Parallel scan2 result:\n"); print_arr(parY2, n);
+        printf("Parallel scan3a result:\n"); print_arr(parY3a, n);
+        printf("Parallel scan3b result:\n"); print_arr(parY3b, n);
+        printf("Parallel scan4 result:\n"); print_arr(x, n);
+    }
+
+    int correct = 1;
+    for (int i = 0; i < n; ++i) {
+        int val = seqY[i];
+        if (val != parY1[i] || val != parY2[i] || val != parY3a[i] || val != parY3b[i] || val != x[i]) {
+            correct = 0;
+            break;
+        }
+    }
+
+    printf("Sequential scan time: %.6f\n", seqTime);
+    printf("Parallel scan1 time: %.6f\n", par1Time);
+    printf("Parallel scan2 time: %.6f\n", par2Time);
+    printf("Parallel scan3a time: %.6f\n", par3aTime);
+    printf("Parallel scan3b time: %.6f\n", par3bTime);
+    printf("Parallel scan4 time: %.6f\n", par4Time);
+    printf("Speedup (scan1): %.2fx\n", seqTime / par1Time);
+    printf("Speedup (scan2): %.2fx\n", seqTime / par2Time);
+    printf("Speedup (scan3a): %.2fx\n", seqTime / par3aTime);
+    printf("Speedup (scan3b): %.2fx\n", seqTime / par3bTime);
+    printf("Speedup (scan4): %.2fx\n", seqTime / par4Time);
+    printf("Results match? %s\n", correct ? "Yes" : "No");
+
+    safe_free(x);
+    safe_free(seqY);
+    safe_free(parY1);
+    safe_free(parY2);
+    safe_free(parY3a);
+    safe_free(parY3b);
+}
+
+int p_are_parenthese_balanced(const char* str, int n) {
+    int* tmp = (int*)safe_malloc(n * sizeof(int));
+    int* scanArr = (int*)safe_malloc(n * sizeof(int));
+
+    #pragma omp parallel for
+    for (int i = 0; i < n; ++i) tmp[i] = (str[i] == '(') ? 1 : -1;
+
+    p_scan2(tmp, scanArr, n);
+
+    int isValid = 1;
+    #pragma omp parallel for reduction(&&:isValid)
+    for (int i = 0; i < n; ++i) if (scanArr[i] < 0) isValid = 0;
+
+    int sum = 0;
+    #pragma omp parallel for reduction(+:sum)
+    for (int i = 0; i < n; ++i) sum += (str[i] == '(') ? 1 : -1;
+
+    safe_free(tmp);
+    safe_free(scanArr);
+    return isValid && (sum == 0);
+}
+
+void test_p_are_parentheses_balanced(void) {
+    const char* testCase1 = "((()))";
+    const char* testCase2 = ")))()";
+    const char* testCase3 = "(())))";
+
+    printf("Test1: %s -> %s\n", testCase1, 
+        p_are_parenthese_balanced(testCase1, strlen(testCase1)) 
+            ? "PASSED" 
+            : "NOT PASSED"
+        );
+    printf("Test2: %s -> %s\n", testCase2, 
+        p_are_parenthese_balanced(testCase2, strlen(testCase2)) 
+            ? "PASSED" 
+            : "NOT PASSED"
+        );
+    printf("Test3: %s -> %s\n", testCase3, 
+        p_are_parenthese_balanced(testCase3, strlen(testCase3)) 
+            ? "PASSED" 
+            : "NOT PASSED"
+        );
+}
+
+#pragma endregion Multithreading reductions and prefix computations
+
 int main(void) {
     switch (TASK)
     {
         case 1: {
-            // 26.1
+            // 26-1
             test_p_sum_arrays();
             break;
         }
 
         case 2: {
-            // 26.2
+            // 26-2
             test_p_matrix_multiply_no_temp();
             break;
         }
 
         case 3: {
-            // 26.3a
+            // 26-3a
             test_p_lu_decomposition();
             break;
         }
 
         case 4: {
-            // 26.3b
+            // 26-3b
             test_p_lup_decomposition();
             break;
         }
 
         case 5: {
-            // 26.3c
+            // 26-3c
             test_p_lup_solve();
             break;
         }
 
         case 6: {
-            // 26.3d
+            // 26-3d
             test_p_cholesky_decomposition();
+            break;
+        }
+
+        case 7: {
+            // 26-4a
+            test_p_reduce();
+            break;
+        }
+
+        case 8: {
+            // 26-4b-g
+            test_p_scan();
+            break;
+        }
+
+        case 9: {
+            // 26-4h
+            test_p_are_parentheses_balanced();
             break;
         }
         
