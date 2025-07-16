@@ -11,6 +11,7 @@
 #include <time.h>
 #include <limits.h>
 #include <float.h>
+#include <complex.h>
 
 // Constants
 #define MAX_SIZE 1000
@@ -37,6 +38,10 @@
 #define SWAP_INT(a, b) SWAPS(a, b, int);
 #define SWAP_DOUBLE(a, b) SWAPS(a, b, double);
 #define SWAP_INTERVAL(a, b) SWAPS(a, b, Interval);
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 // Color flags
 // #define RED 0
@@ -82,7 +87,7 @@ void print_named_bool_mat(
 #define MAX_MATRIX_SIZE 100
 
 void print_matrix(int matrix[MAX_MATRIX_SIZE][MAX_MATRIX_SIZE], int n);
-int** allocate_matrix(int size);
+int** allocate_matrix(int dim1, int dim2);
 void input_matrix(int** matrix, int size, const char* name);
 void free_matrix(int** matrix, int size);
 void add_matrices(
@@ -92,6 +97,10 @@ void add_matrices(
     int size, 
     int multiplier
 );
+
+double** allocate_matrix_double(int dim1, int dim2);
+void free_matrix_double(double** matrix, int size);
+void print_matrix_double(double** matrix, int size);
 
 // Intervals
 typedef struct {
@@ -129,6 +138,17 @@ int select_kth(int arr[], int left, int right, int k);
 
 // Random
 void generate_random_binary_string(char *str, size_t length);
+
+// Complex numbers
+typedef struct {
+    double real;
+    double imag;
+} complex_t;
+
+complex_t complex_add(complex_t a, complex_t b);
+complex_t complex_sub(complex_t a, complex_t b);
+complex_t complex_mul(complex_t a, complex_t b);
+complex_t complex_exp(double theta);
 
 // Debug
 #ifdef DEBUG

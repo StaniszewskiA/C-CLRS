@@ -126,10 +126,12 @@ int random_int(int min, int max) {
 }
 
 void print_arr(int arr[], int N) {
+    printf("[");
     for (int i = 0; i < N; i++) {
-        printf("%d ", arr[i]);
+        printf("%d", arr[i]);
+        if (i < N - 1) printf(" ");
     }
-    printf("\n");
+    printf("]\n");
 }
 
 void print_arr_slice(int arr[], int left, int right)
@@ -196,10 +198,10 @@ void print_named_bool_mat(
     printf("\n");
 };
 
-int** allocate_matrix(int size) {
-    int** matrix = (int**)malloc(size * sizeof(int*));
-    for (int i = 0; i < size; i++) {
-        matrix[i] = (int*)malloc(size * sizeof(int));
+int** allocate_matrix(int dim1, int dim2) {
+    int** matrix = (int**)safe_malloc(dim1 * sizeof(int*));
+    for (int i = 0; i < dim1; i++) {
+        matrix[i] = (int*)safe_malloc(dim2 * sizeof(int));
     }
     return matrix;
 }
@@ -215,9 +217,9 @@ void input_matrix(int** matrix, int size, const char* name) {
 
 void free_matrix(int** matrix, int size) {
     for (int i = 0; i < size; i++) {
-        free(matrix[i]);
+        safe_free(matrix[i]);
     }
-    free(matrix);
+    safe_free(matrix);
 }
 
 void add_matrices(
@@ -231,6 +233,26 @@ void add_matrices(
         for (int j = 0; j < size; j++) {
             C[i][j] = A[i][j] + multiplier* B[i][j];
         }
+    }
+}
+
+double** allocate_matrix_double(int dim1, int dim2) {
+    double** matrix = (double**)safe_malloc(dim1 * sizeof(double*));
+    for (int i = 0; i < dim1; i++) matrix[i] = (double*)safe_malloc(dim2 * sizeof(double));
+    return matrix;
+}
+
+void free_matrix_double(double** matrix, int size) {
+    for (int i = 0; i < size; i++) free(matrix[i]);
+    free(matrix);
+}
+
+void print_matrix_double(double** matrix, int size) {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            printf("%8.4f ", matrix[i][j]);
+        }
+        printf("\n");
     }
 }
 
@@ -379,4 +401,27 @@ int select_kth(int arr[], int left, int right, int k) {
 void generate_random_binary_string(char *str, size_t length) {
     for (size_t i = 0; i < length; i++) str[i] = (rand() % 2)  ? '1' : '0';
     str[length] = '\0';
+}
+
+complex_t complex_add(complex_t a, complex_t b) {
+    complex_t res = {a.real + b.real, a.imag + b.imag};
+    return res;
+}
+
+complex_t complex_sub(complex_t a, complex_t b) {
+    complex_t res = {a.real - b.real, a.imag - b.imag};
+    return res;
+}
+
+complex_t complex_mul(complex_t a, complex_t b) {
+    complex_t res = {
+        a.real * b.real - a.imag * b.imag,
+        a.real * b.imag + a.imag * b.real
+    };
+    return res;
+}
+
+complex_t complex_exp(double theta) {
+    complex_t res = {cos(theta), sin(theta)};
+    return res;
 }

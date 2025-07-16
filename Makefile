@@ -16,6 +16,7 @@ PART_3_COMMONS_SRC = $(SRCDIR)/part_3_data_structures/part_3_commons.c
 PART_4_COMMONS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/part_4_commons.c
 PART_5_COMMONS_SRC = $(SRCDIR)/part_5_advanced_data_structures/part_5_commons.c
 PART_6_COMMONS_SRC = $(SRCDIR)/part_6_graph_algorithms/part_6_commons.c
+PART_7_COMMONS_SRC = $(SRCDIR)/part_7_selected_topics/part_7_commons.c
 
 
 # ============================================================================
@@ -295,6 +296,23 @@ CHAPTER_25_PROBLEMS_SRC = \
 	$(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/1_maximum_bipartite_matching/maximum_bipartite_matching.c
 
 # ============================================================================
+# PART 7: SELECTED TOPICS
+# ============================================================================
+
+# Chapter 26
+THE_BASICS_OF_FORK_JOIN_MAIN = src/part_7_selected_topics/26_multithreaded_algorithms/1_the_basics_of_fork-join_multithreading/main.c
+THE_BASICS_OF_FORK_JOIN_SRC = src/part_7_selected_topics/26_multithreaded_algorithms/1_the_basics_of_fork-join_multithreading/the_basics_of_fork-join_multithreading.c
+
+MULTITHREADED_MATRIX_MULTIPLICATION_MAIN = src/part_7_selected_topics/26_multithreaded_algorithms/2_multithreaded_matrix_multiplication/main.c
+MULTITHREADED_MATRIX_MULTIPLICATION_SRC = src/part_7_selected_topics/26_multithreaded_algorithms/2_multithreaded_matrix_multiplication/multithreaded_matrix_multiplication.c
+
+MULTITHREADED_MERGE_SORT_MAIN = src/part_7_selected_topics/26_multithreaded_algorithms/3_multithreaded_merge_sort/main.c
+MULTITHREADED_MERGE_SORT_SRC = src/part_7_selected_topics/26_multithreaded_algorithms/3_multithreaded_merge_sort/multithreaded_merge_sort.c
+
+CHAPTER_26_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/26_multithreaded_algorithms/problems.c
+
+
+# ============================================================================
 # PHONY TARGETS
 # ============================================================================
 
@@ -384,7 +402,11 @@ CHAPTER_25_PROBLEMS_SRC = \
 		maximum-bipartite-matching-2 run-maximum-bipartite-matching-2 \
 		stable-marriage run-stable-marriage \
 		hungarian-algorithm run-hungarian-algorithm \
-		chapter-25-problems run-chapter-25-problems
+		chapter-25-problems run-chapter-25-problems \
+		the-basics-of-fork-join run-the-basics-of-fork-join \
+		multithreaded-matrix-multiplication run-multithreaded-matrix-multiplication \
+		multithreaded-merge-sort run-multithreaded-merge-sort \
+		chapter-26-problems run-chapter-26-problems
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -960,6 +982,42 @@ chapter-25-problems: $(BINDIR)
 
 run-chapter-25-problems: chapter-25-problems
 	$(BINDIR)/chapter_25_problems
+
+# ============================================================================
+# PART 7: SELECTED TOPICS
+# ============================================================================
+
+# Chapter 26
+the-basics-of-fork-join: $(BINDIR)
+	$(CC) $(CFLAGS) -fopenmp -lpthread $(COMMON_SRC) $(THE_BASICS_OF_FORK_JOIN_SRC) $(THE_BASICS_OF_FORK_JOIN_MAIN) -o $(BINDIR)/the_basics_of_fork_join 
+
+run-the-basics-of-fork-join: the-basics-of-fork-join
+	$(BINDIR)/the_basics_of_fork_join
+
+multithreaded-matrix-multiplication: $(BINDIR)
+	$(CC) $(CFLAGS) -fopenmp -lpthread $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(MULTITHREADED_MATRIX_MULTIPLICATION_SRC) $(MULTITHREADED_MATRIX_MULTIPLICATION_MAIN) -o $(BINDIR)/multithread_matrix_multiplication
+
+run-multithreaded-matrix-multiplication: multithreaded-matrix-multiplication
+	$(BINDIR)/multithread_matrix_multiplication
+
+multithreaded-merge-sort: $(BINDIR)
+	$(CC) $(CFLAGS) -fopenmp -lpthread $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(PART_1_COMMONS_SRC) $(QUICKSORT_SRC) $(MULTITHREADED_MERGE_SORT_SRC) $(MULTITHREADED_MERGE_SORT_MAIN) -o $(BINDIR)/multithread_merge_sort
+
+run-multithreaded-merge-sort: multithreaded-merge-sort
+	$(BINDIR)/multithread_merge_sort
+
+chapter-26-problems: $(BINDIR)
+	$(CC) $(CFLAGS) -fopenmp -lpthread \
+	$(COMMON_SRC) \
+	$(PART_7_COMMONS_SRC) \
+	$(PART_1_COMMONS_SRC) \
+	$(QUICKSORT_SRC) \
+	$(MULTITHREADED_MERGE_SORT_SRC) \
+	$(CHAPTER_26_PROBLEMS_SRC) \
+	-o $(BINDIR)/chapter_26_problems
+
+run-chapter-26-problems: chapter-26-problems
+	$(BINDIR)/chapter_26_problems
 
 # ============================================================================
 # UTILITY TARGETS

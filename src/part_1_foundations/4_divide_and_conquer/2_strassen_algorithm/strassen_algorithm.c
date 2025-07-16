@@ -33,14 +33,14 @@ void strassen_algorithm(int** A, int** B, int** C, int size) {
 
     int newSize = size / 2;
     
-    int** A11 = allocate_matrix(newSize);
-    int** A12 = allocate_matrix(newSize);
-    int** A21 = allocate_matrix(newSize);
-    int** A22 = allocate_matrix(newSize);
-    int** B11 = allocate_matrix(newSize);
-    int** B12 = allocate_matrix(newSize);
-    int** B21 = allocate_matrix(newSize);
-    int** B22 = allocate_matrix(newSize);
+    int** A11 = allocate_matrix(newSize, newSize);
+    int** A12 = allocate_matrix(newSize, newSize);
+    int** A21 = allocate_matrix(newSize, newSize);
+    int** A22 = allocate_matrix(newSize, newSize);
+    int** B11 = allocate_matrix(newSize, newSize);
+    int** B12 = allocate_matrix(newSize, newSize);
+    int** B21 = allocate_matrix(newSize, newSize);
+    int** B22 = allocate_matrix(newSize, newSize);
 
     for (int i = 0; i < newSize; i++) {
         for (int j = 0; j < newSize; j++) {
@@ -55,23 +55,23 @@ void strassen_algorithm(int** A, int** B, int** C, int size) {
         }
     }
 
-    int** S1 = allocate_matrix(newSize);
-    int** S2 = allocate_matrix(newSize);
-    int** S3 = allocate_matrix(newSize);
-    int** S4 = allocate_matrix(newSize);
-    int** S5 = allocate_matrix(newSize);
-    int** S6 = allocate_matrix(newSize);
-    int** S7 = allocate_matrix(newSize);
-    int** S8 = allocate_matrix(newSize);
-    int** S9 = allocate_matrix(newSize);
-    int** S10 = allocate_matrix(newSize);
-    int** P1 = allocate_matrix(newSize);
-    int** P2 = allocate_matrix(newSize);
-    int** P3 = allocate_matrix(newSize);
-    int** P4 = allocate_matrix(newSize);
-    int** P5 = allocate_matrix(newSize);
-    int** P6 = allocate_matrix(newSize);
-    int** P7 = allocate_matrix(newSize);
+    int** S1 = allocate_matrix(newSize, newSize);
+    int** S2 = allocate_matrix(newSize, newSize);
+    int** S3 = allocate_matrix(newSize, newSize);
+    int** S4 = allocate_matrix(newSize, newSize);
+    int** S5 = allocate_matrix(newSize, newSize);
+    int** S6 = allocate_matrix(newSize, newSize);
+    int** S7 = allocate_matrix(newSize, newSize);
+    int** S8 = allocate_matrix(newSize, newSize);
+    int** S9 = allocate_matrix(newSize, newSize);
+    int** S10 = allocate_matrix(newSize, newSize);
+    int** P1 = allocate_matrix(newSize, newSize);
+    int** P2 = allocate_matrix(newSize, newSize);
+    int** P3 = allocate_matrix(newSize, newSize);
+    int** P4 = allocate_matrix(newSize, newSize);
+    int** P5 = allocate_matrix(newSize, newSize);
+    int** P6 = allocate_matrix(newSize, newSize);
+    int** P7 = allocate_matrix(newSize, newSize);
 
     add_matrices(B12, B22, S1, newSize, -1);   // S1 = B12 - B22
     add_matrices(A11, A12, S2, newSize, 1);    // S2 = A11 + A12
