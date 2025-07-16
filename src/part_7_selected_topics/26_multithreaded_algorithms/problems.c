@@ -1,6 +1,6 @@
 #include "part_7_selected_topics/26_multithreaded_algorithms/multithreaded_algorithms.h"
 
-#define TASK 10
+#define TASK 11
 
 #pragma region Implementing parallel loops using nested parallelism
 
@@ -1492,6 +1492,100 @@ void test_p_simple_stencil(void) {
 
 #pragma endregion Multithreading a simple stencil calculation
 
+#pragma region Randomized multithreaded algorithms
+
+void p_randomized_quicksort(int* A, int p, int r) {
+    /*
+        Work: E[T_1] = O(n*lg(n))
+        Span: E[T_{inf}] = O(lg(n))
+        Parallelism: E[T_1] / E[T_{inf}] = O(n)
+    */
+    int cutoff = 1 << 7;
+    if (r - p + 1 <= cutoff) {
+        qsort(A + p, r - p + 1, sizeof(int), compare_ints);
+        return;
+    }
+
+    if (p > r) return;
+    int q = p_randomized_partition(A, p, r);
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        p_randomized_quicksort(A, p, q - 1);
+
+        #pragma omp section
+        p_randomized_quicksort(A, q + 1, r);
+    }
+}
+
+int p_randomized_partition(int* A, int p, int r) {
+    int i = random_int(p, r);
+    int tmp = A[r];
+    A[r] = A[i];
+    A[i] = tmp;
+    int x = A[r];
+    int j = p - 1;
+
+    for (int k = p; k < r; ++k) {
+        if (A[k] > x) continue;
+        ++j;
+        tmp = A[j];
+        A[j] = A[k];
+        A[k] = tmp;
+    }
+
+    tmp = A[j + 1];
+    A[j + 1] = A[r];
+    A[r] = tmp;
+
+    return j + 1;
+}
+
+void test_p_randomized_quicksort(void) {
+    int n = 1 << 14;
+    int* seqA = (int*)safe_malloc(n * sizeof(int));
+    int* parA = (int*)safe_malloc(n * sizeof(int));
+
+    for (int i = 0; i < n; ++i) {
+        seqA[i] = random_int(1, 10000);
+        parA[i] = seqA[i];
+    }
+
+    double seqStart = omp_get_wtime();
+    qsort(seqA, n, sizeof(int), compare_ints);
+    double seqEnd = omp_get_wtime();
+    double seqTime = seqEnd - seqStart;
+
+    double parStart = omp_get_wtime();
+    #pragma omp parallel 
+    {
+        #pragma omp single
+        {
+            p_randomized_quicksort(parA, 0, n - 1);
+        }
+    }
+    double parEnd = omp_get_wtime();
+    double parTime = parEnd - parStart; 
+
+    int correct = 1;
+    for (int i = 0; i < n; ++i) {
+        if (seqA[i] != parA[i]) {
+            correct = 0;
+            break;
+        }
+    }
+
+    printf("Parallel randomized quicksort time: %.6f\n", parTime);
+    printf("qsort time: %.6f\n", seqTime);
+    printf("Speedup: %.2fx\n", seqTime / parTime);
+    printf("Results match? %s\n", correct ? "Yes" : "No");
+
+    safe_free(seqA);
+    safe_free(parA);
+}
+
+#pragma endregion Randomized multithreaded algorithms
+
 int main(void) {
     switch (TASK)
     {
@@ -1552,6 +1646,12 @@ int main(void) {
         case 10: {
             // 26-5
             test_p_simple_stencil();
+            break;
+        }
+
+        case 11: {
+            // 26-6
+            test_p_randomized_quicksort();
             break;
         }
         

@@ -190,4 +190,8 @@ void p_simple_stencil_recursive_b_by_b(
 void p_simple_stencil_log(int** A, int** staticInfo, int n);
 void test_p_simple_stencil(void);
 
+void p_randomized_quicksort(int* A, int p, int r);
+int p_randomized_partition(int* A, int p, int r);
+void test_p_randomized_quicksort(void);
+
 #endif 
