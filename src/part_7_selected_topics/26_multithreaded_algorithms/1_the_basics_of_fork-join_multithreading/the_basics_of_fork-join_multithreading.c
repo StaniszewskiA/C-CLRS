@@ -258,7 +258,7 @@ void test_p_mat_vec_dc(void) {
         for (int j = 0; j < n; ++j) A[i][j] = (i + 1) * (j + 1);
     }
 
-    pretty_print_matrix("Input matrix", A, n);
+    pretty_print_matrix("Input matrix", A, n, n);
 
     printf("Input vector: [");
     for (int i = 0; i < n; ++i) printf("%3d", x[i]);
@@ -319,12 +319,12 @@ void test_p_transpose(void) {
     for (int i = 0; i < n; ++i)
         for (int j = 0; j < n; ++j) A[i][j] = refA[i][j] = i * n + j + 1;
     
-    pretty_print_matrix("Input matrix", A, n);
-    pretty_print_matrix("Reference matrix", refA, n);
+    pretty_print_matrix("Input matrix", A, n, n);
+    pretty_print_matrix("Reference matrix", refA, n, n);
 
     p_transpose(A, n);
 
-    pretty_print_matrix("Transposed matrix", A, n);
+    pretty_print_matrix("Transposed matrix", A, n, n);
 
     int ok = verify_transposition(A, refA, n);
     if (ok) printf("Transposition is correct.\n");

@@ -311,6 +311,9 @@ MULTITHREADED_MERGE_SORT_SRC = src/part_7_selected_topics/26_multithreaded_algor
 
 CHAPTER_26_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/26_multithreaded_algorithms/problems.c
 
+# Chapter 27
+WAITING_FOR_AN_ELEVATOR_MAIN = src/part_7_selected_topics/27_online_algorithms/1_waiting_for_an_elevator/main.c
+WAITING_FOR_AN_ELEVATOR_SRC = src/part_7_selected_topics/27_online_algorithms/1_waiting_for_an_elevator/1_waiting_for_an_elevator.c
 
 # ============================================================================
 # PHONY TARGETS
@@ -406,7 +409,8 @@ CHAPTER_26_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/26_multithreaded_algo
 		the-basics-of-fork-join run-the-basics-of-fork-join \
 		multithreaded-matrix-multiplication run-multithreaded-matrix-multiplication \
 		multithreaded-merge-sort run-multithreaded-merge-sort \
-		chapter-26-problems run-chapter-26-problems
+		chapter-26-problems run-chapter-26-problems \
+		waiting-for-an-elevator run-waiting-for-an-elevator \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -692,13 +696,13 @@ run-matrix-chain-mult: matrix-chain-mult
 	$(BINDIR)/matrix_chain_mult
 
 elements-dp: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART4_COMMONS_SRC) $(ELEMENTS_DP_SRC) $(ELEMENTS_DP_MAIN) -o $(BINDIR)/elements_dp
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(ELEMENTS_DP_SRC) $(ELEMENTS_DP_MAIN) -o $(BINDIR)/elements_dp
 
 run-elements-dp: elements-dp
 	$(BINDIR)/elements_dp
 
 lcs: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART4_COMMONS_SRC) $(LCS_SRC) $(LCS_MAIN) -o $(BINDIR)/lcs
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(LCS_SRC) $(LCS_MAIN) -o $(BINDIR)/lcs
 
 run-lcs: lcs
 	$(BINDIR)/lcs
@@ -1018,6 +1022,14 @@ chapter-26-problems: $(BINDIR)
 
 run-chapter-26-problems: chapter-26-problems
 	$(BINDIR)/chapter_26_problems
+
+# Chapter 27
+waiting-for-an-elevator: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(WAITING_FOR_AN_ELEVATOR_SRC) \
+	$(WAITING_FOR_AN_ELEVATOR_MAIN) -o $(BINDIR)/waiting-for-an-elevator
+
+run-waiting-for-an-elevator: waiting-for-an-elevator
+	$(BINDIR)/waiting-for-an-elevator
 
 # ============================================================================
 # UTILITY TARGETS
