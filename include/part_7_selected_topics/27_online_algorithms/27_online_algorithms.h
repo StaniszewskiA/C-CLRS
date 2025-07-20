@@ -39,7 +39,21 @@ void test_memory_game(void);
 // CHAPTER 27.2: MAINTAINING A SEARCH LIST
 // ============================================================================
 
+#define ALPHABET_SIZE 256
+#define uchar unsigned char
 
+void mft_list_init(uchar* list);
+int move_to_front(uchar* list, uchar ch);
+void test_move_to_front(void);
+
+typedef struct {
+    uchar ch;
+    int cnt;
+} FCEntry;
+
+void fc_list_init(FCEntry* list);
+int frequency_count(FCEntry* list, uchar ch);
+void test_frequency_count(void);
 
 // ============================================================================
 // CHAPTER 27.3: ONLINE CACHE MANAGEMENT

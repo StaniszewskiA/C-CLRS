@@ -315,6 +315,9 @@ CHAPTER_26_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/26_multithreaded_algo
 WAITING_FOR_AN_ELEVATOR_MAIN = src/part_7_selected_topics/27_online_algorithms/1_waiting_for_an_elevator/main.c
 WAITING_FOR_AN_ELEVATOR_SRC = src/part_7_selected_topics/27_online_algorithms/1_waiting_for_an_elevator/1_waiting_for_an_elevator.c
 
+MAINTAINING_A_SEARCH_LIST_MAIN = src/part_7_selected_topics/27_online_algorithms/2_maintaining_a_search_list/main.c
+MAINTAINING_A_SEARCH_LIST_SRC = src/part_7_selected_topics/27_online_algorithms/2_maintaining_a_search_list/maintaining_a_search_list.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -411,6 +414,7 @@ WAITING_FOR_AN_ELEVATOR_SRC = src/part_7_selected_topics/27_online_algorithms/1_
 		multithreaded-merge-sort run-multithreaded-merge-sort \
 		chapter-26-problems run-chapter-26-problems \
 		waiting-for-an-elevator run-waiting-for-an-elevator \
+		maintaining-a-search-list run-maintaining-a-search-list \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1030,6 +1034,13 @@ waiting-for-an-elevator: $(BINDIR)
 
 run-waiting-for-an-elevator: waiting-for-an-elevator
 	$(BINDIR)/waiting-for-an-elevator
+
+maintaining-a-search-list: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(MAINTAINING_A_SEARCH_LIST_SRC) \
+	$(MAINTAINING_A_SEARCH_LIST_MAIN) -o $(BINDIR)/maintaining-a-search-list
+
+run-maintaining-a-search-list: maintaining-a-search-list
+	$(BINDIR)/maintaining-a-search-list
 
 # ============================================================================
 # UTILITY TARGETS
