@@ -318,6 +318,9 @@ WAITING_FOR_AN_ELEVATOR_SRC = src/part_7_selected_topics/27_online_algorithms/1_
 MAINTAINING_A_SEARCH_LIST_MAIN = src/part_7_selected_topics/27_online_algorithms/2_maintaining_a_search_list/main.c
 MAINTAINING_A_SEARCH_LIST_SRC = src/part_7_selected_topics/27_online_algorithms/2_maintaining_a_search_list/maintaining_a_search_list.c
 
+ONLINE_CACHE_MANAGEMENT_MAIN = src/part_7_selected_topics/27_online_algorithms/3_online_cache_management/main.c
+ONLINE_CACHE_MANAGEMENT_SRC = src/part_7_selected_topics/27_online_algorithms/3_online_cache_management/online_cache_management.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -415,6 +418,7 @@ MAINTAINING_A_SEARCH_LIST_SRC = src/part_7_selected_topics/27_online_algorithms/
 		chapter-26-problems run-chapter-26-problems \
 		waiting-for-an-elevator run-waiting-for-an-elevator \
 		maintaining-a-search-list run-maintaining-a-search-list \
+		online-cache-management run-online-cache-management \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1041,6 +1045,12 @@ maintaining-a-search-list: $(BINDIR)
 
 run-maintaining-a-search-list: maintaining-a-search-list
 	$(BINDIR)/maintaining-a-search-list
+
+online-cache-management: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(ONLINE_CACHE_MANAGEMENT_SRC) $(ONLINE_CACHE_MANAGEMENT_MAIN) -o $(BINDIR)/online_cache_management
+
+run-online-cache-management: online-cache-management
+	$(BINDIR)/online_cache_management
 
 # ============================================================================
 # UTILITY TARGETS

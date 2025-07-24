@@ -59,7 +59,32 @@ void test_frequency_count(void);
 // CHAPTER 27.3: ONLINE CACHE MANAGEMENT
 // ============================================================================
 
+#define CACHE_SIZE 4
+#define MAX_REQUESTS 1024
 
+typedef struct {
+    int page;
+    int time; 
+    int freq;
+    int valid;
+} CacheEntry;
+
+typedef int (*CacheSimFn)(const int*, int, int);
+
+int fifo_cache(const int* requests, int numRequests, int cacheSize);
+int lifo_cache(const int* requests, int numRequests, int cacheSize);
+int lru_cache(const int* requests, int numRequests, int cacheSize);
+int lfu_cache(const int* requests, int numRequests, int cacheSize);
+void test_deterministic_caches(void);
+
+typedef struct {
+    int page;
+    int marked;
+    int valid;
+} MarkedCacheEntry;
+
+int randomized_marking_cache(const int* requests, int numRequests, int cacheSize);
+void test_non_deterministic_caches(void);
 
 // ============================================================================
 // PROBLEMS
