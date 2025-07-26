@@ -1049,6 +1049,9 @@ run-maintaining-a-search-list: maintaining-a-search-list
 online-cache-management: $(BINDIR)
 	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(ONLINE_CACHE_MANAGEMENT_SRC) $(ONLINE_CACHE_MANAGEMENT_MAIN) -o $(BINDIR)/online_cache_management
 
+assembly-online-cache-management: $(SRCDIR)/part_7_selected_topics/27_online_algorithms/3_online_cache_management/online_cache_management.c
+	$(CC) $(CFLAGS) -S $< -o $(SRCDIR)/part_7_selected_topics/27_online_algorithms/3_online_cache_management/online_cache_management.s
+
 run-online-cache-management: online-cache-management
 	$(BINDIR)/online_cache_management
 
