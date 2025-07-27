@@ -18,7 +18,6 @@ PART_5_COMMONS_SRC = $(SRCDIR)/part_5_advanced_data_structures/part_5_commons.c
 PART_6_COMMONS_SRC = $(SRCDIR)/part_6_graph_algorithms/part_6_commons.c
 PART_7_COMMONS_SRC = $(SRCDIR)/part_7_selected_topics/part_7_commons.c
 
-
 # ============================================================================
 # PART 1: FOUNDATIONS
 # ============================================================================
@@ -321,6 +320,8 @@ MAINTAINING_A_SEARCH_LIST_SRC = src/part_7_selected_topics/27_online_algorithms/
 ONLINE_CACHE_MANAGEMENT_MAIN = src/part_7_selected_topics/27_online_algorithms/3_online_cache_management/main.c
 ONLINE_CACHE_MANAGEMENT_SRC = src/part_7_selected_topics/27_online_algorithms/3_online_cache_management/online_cache_management.c
 
+CHAPTER_27_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/27_online_algorithms/problems.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -419,6 +420,7 @@ ONLINE_CACHE_MANAGEMENT_SRC = src/part_7_selected_topics/27_online_algorithms/3_
 		waiting-for-an-elevator run-waiting-for-an-elevator \
 		maintaining-a-search-list run-maintaining-a-search-list \
 		online-cache-management run-online-cache-management \
+		chapter-27-problems run-chapter-27-problems \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1054,6 +1056,12 @@ assembly-online-cache-management: $(SRCDIR)/part_7_selected_topics/27_online_alg
 
 run-online-cache-management: online-cache-management
 	$(BINDIR)/online_cache_management
+
+chapter-27-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(CHAPTER_27_PROBLEMS_SRC) -o $(BINDIR)/chapter_27_problems
+
+run-chapter-27-problems: chapter-27-problems
+	$(BINDIR)/chapter_27_problems
 
 # ============================================================================
 # UTILITY TARGETS

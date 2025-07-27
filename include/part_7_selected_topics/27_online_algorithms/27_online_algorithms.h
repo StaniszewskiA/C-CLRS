@@ -90,5 +90,6 @@ void test_non_deterministic_caches(void);
 // PROBLEMS
 // ============================================================================
 
+void find_pasture(double pasturePoss);
 
 #endif 
