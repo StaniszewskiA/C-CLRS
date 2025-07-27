@@ -92,4 +92,21 @@ void test_non_deterministic_caches(void);
 
 void find_pasture(double pasturePoss);
 
+typedef struct {
+    int id;
+    int releaseTime;
+    int processingTime;
+    int remainingTime;
+    int startTime;
+    int finishTime;
+    int completed;
+} Task;
+
+int compare_by_processing_time(const void* a, const void* b);
+int compare_by_remaining_time(const void* a, const void* b);
+int compare_by_finish_time(const void* a, const void* b);
+void spt_schedule(Task* tasks, int n);
+void srpt_schedule(Task* tasks, int n);
+void completion_time_schedule(Task* tasks, int n);
+
 #endif 
