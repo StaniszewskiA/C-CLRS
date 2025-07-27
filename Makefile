@@ -18,7 +18,6 @@ PART_5_COMMONS_SRC = $(SRCDIR)/part_5_advanced_data_structures/part_5_commons.c
 PART_6_COMMONS_SRC = $(SRCDIR)/part_6_graph_algorithms/part_6_commons.c
 PART_7_COMMONS_SRC = $(SRCDIR)/part_7_selected_topics/part_7_commons.c
 
-
 # ============================================================================
 # PART 1: FOUNDATIONS
 # ============================================================================
@@ -311,6 +310,17 @@ MULTITHREADED_MERGE_SORT_SRC = src/part_7_selected_topics/26_multithreaded_algor
 
 CHAPTER_26_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/26_multithreaded_algorithms/problems.c
 
+# Chapter 27
+WAITING_FOR_AN_ELEVATOR_MAIN = src/part_7_selected_topics/27_online_algorithms/1_waiting_for_an_elevator/main.c
+WAITING_FOR_AN_ELEVATOR_SRC = src/part_7_selected_topics/27_online_algorithms/1_waiting_for_an_elevator/1_waiting_for_an_elevator.c
+
+MAINTAINING_A_SEARCH_LIST_MAIN = src/part_7_selected_topics/27_online_algorithms/2_maintaining_a_search_list/main.c
+MAINTAINING_A_SEARCH_LIST_SRC = src/part_7_selected_topics/27_online_algorithms/2_maintaining_a_search_list/maintaining_a_search_list.c
+
+ONLINE_CACHE_MANAGEMENT_MAIN = src/part_7_selected_topics/27_online_algorithms/3_online_cache_management/main.c
+ONLINE_CACHE_MANAGEMENT_SRC = src/part_7_selected_topics/27_online_algorithms/3_online_cache_management/online_cache_management.c
+
+CHAPTER_27_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/27_online_algorithms/problems.c
 
 # ============================================================================
 # PHONY TARGETS
@@ -406,7 +416,11 @@ CHAPTER_26_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/26_multithreaded_algo
 		the-basics-of-fork-join run-the-basics-of-fork-join \
 		multithreaded-matrix-multiplication run-multithreaded-matrix-multiplication \
 		multithreaded-merge-sort run-multithreaded-merge-sort \
-		chapter-26-problems run-chapter-26-problems
+		chapter-26-problems run-chapter-26-problems \
+		waiting-for-an-elevator run-waiting-for-an-elevator \
+		maintaining-a-search-list run-maintaining-a-search-list \
+		online-cache-management run-online-cache-management \
+		chapter-27-problems run-chapter-27-problems \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -692,13 +706,13 @@ run-matrix-chain-mult: matrix-chain-mult
 	$(BINDIR)/matrix_chain_mult
 
 elements-dp: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART4_COMMONS_SRC) $(ELEMENTS_DP_SRC) $(ELEMENTS_DP_MAIN) -o $(BINDIR)/elements_dp
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(ELEMENTS_DP_SRC) $(ELEMENTS_DP_MAIN) -o $(BINDIR)/elements_dp
 
 run-elements-dp: elements-dp
 	$(BINDIR)/elements_dp
 
 lcs: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART4_COMMONS_SRC) $(LCS_SRC) $(LCS_MAIN) -o $(BINDIR)/lcs
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(LCS_SRC) $(LCS_MAIN) -o $(BINDIR)/lcs
 
 run-lcs: lcs
 	$(BINDIR)/lcs
@@ -1018,6 +1032,36 @@ chapter-26-problems: $(BINDIR)
 
 run-chapter-26-problems: chapter-26-problems
 	$(BINDIR)/chapter_26_problems
+
+# Chapter 27
+waiting-for-an-elevator: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(WAITING_FOR_AN_ELEVATOR_SRC) \
+	$(WAITING_FOR_AN_ELEVATOR_MAIN) -o $(BINDIR)/waiting-for-an-elevator
+
+run-waiting-for-an-elevator: waiting-for-an-elevator
+	$(BINDIR)/waiting-for-an-elevator
+
+maintaining-a-search-list: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(MAINTAINING_A_SEARCH_LIST_SRC) \
+	$(MAINTAINING_A_SEARCH_LIST_MAIN) -o $(BINDIR)/maintaining-a-search-list
+
+run-maintaining-a-search-list: maintaining-a-search-list
+	$(BINDIR)/maintaining-a-search-list
+
+online-cache-management: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(ONLINE_CACHE_MANAGEMENT_SRC) $(ONLINE_CACHE_MANAGEMENT_MAIN) -o $(BINDIR)/online_cache_management
+
+assembly-online-cache-management: $(SRCDIR)/part_7_selected_topics/27_online_algorithms/3_online_cache_management/online_cache_management.c
+	$(CC) $(CFLAGS) -S $< -o $(SRCDIR)/part_7_selected_topics/27_online_algorithms/3_online_cache_management/online_cache_management.s
+
+run-online-cache-management: online-cache-management
+	$(BINDIR)/online_cache_management
+
+chapter-27-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(CHAPTER_27_PROBLEMS_SRC) -o $(BINDIR)/chapter_27_problems
+
+run-chapter-27-problems: chapter-27-problems
+	$(BINDIR)/chapter_27_problems
 
 # ============================================================================
 # UTILITY TARGETS
