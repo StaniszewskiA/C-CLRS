@@ -322,6 +322,10 @@ ONLINE_CACHE_MANAGEMENT_SRC = src/part_7_selected_topics/27_online_algorithms/3_
 
 CHAPTER_27_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/27_online_algorithms/problems.c
 
+# Chapter 28
+SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_MAIN = src/part_7_selected_topics/28_matrix_operations/1_solving_systems_of_linear_equations/main.c
+SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC = src/part_7_selected_topics/28_matrix_operations/1_solving_systems_of_linear_equations/solving_systems_of_linear_equations.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -421,6 +425,7 @@ CHAPTER_27_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/27_online_algorithms/
 		maintaining-a-search-list run-maintaining-a-search-list \
 		online-cache-management run-online-cache-management \
 		chapter-27-problems run-chapter-27-problems \
+		solving-systems-of-linear-equations run-solving-systems-of-linear-equations
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1062,6 +1067,13 @@ chapter-27-problems: $(BINDIR)
 
 run-chapter-27-problems: chapter-27-problems
 	$(BINDIR)/chapter_27_problems
+
+# Chapter 28
+solving-systems-of-linear-equations: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC) $(SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_MAIN) -o $(BINDIR)/solving_systems_of_linear_equations
+
+run-solving-systems-of-linear-equations: solving-systems-of-linear-equations
+	$(BINDIR)/solving_systems_of_linear_equations
 
 # ============================================================================
 # UTILITY TARGETS
