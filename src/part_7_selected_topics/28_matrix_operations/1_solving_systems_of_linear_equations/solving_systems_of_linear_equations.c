@@ -22,7 +22,7 @@ void lu_decomposition(double** A, double** L, double** U, int n) {
     }
 }
 
-static void forward_substitution(double** L, double* y, double* b, int n) {
+void forward_substitution(double** L, double* y, double* b, int n) {
     for (int i = 0; i < n; ++i) {
         y[i] = b[i];
         for (int j = 0; j < i; ++j) y[i] -= L[i][j] * y[j];
@@ -30,7 +30,7 @@ static void forward_substitution(double** L, double* y, double* b, int n) {
     }
 }
 
-static void backward_substitution(double** U, double* x, double* y, int n) {
+void backward_substitution(double** U, double* x, double* y, int n) {
     for (int i = n - 1; i >= 0; --i) {
         x[i] = y[i];
         for (int j = i + 1; j < n; j++) x[i] -= U[i][j] * x[j];
@@ -134,7 +134,7 @@ int lup_decomposition(double** A, int* pi, int n) {
     return 1;
 }
 
-static void extract_lu_from_lup(double** A, double** L, double** U, int n) {
+void extract_lu_from_lup(double** A, double** L, double** U, int n) {
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             if (i > j) {

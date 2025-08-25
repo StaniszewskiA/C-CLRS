@@ -326,6 +326,9 @@ CHAPTER_27_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/27_online_algorithms/
 SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_MAIN = src/part_7_selected_topics/28_matrix_operations/1_solving_systems_of_linear_equations/main.c
 SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC = src/part_7_selected_topics/28_matrix_operations/1_solving_systems_of_linear_equations/solving_systems_of_linear_equations.c
 
+INVERTING_MATRICES_MAIN = src/part_7_selected_topics/28_matrix_operations/2_inverting_matrices/main.c
+INVERTING_MATRICES_SRC = src/part_7_selected_topics/28_matrix_operations/2_inverting_matrices/inverting_matrices.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -425,7 +428,8 @@ SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC = src/part_7_selected_topics/28_matrix_o
 		maintaining-a-search-list run-maintaining-a-search-list \
 		online-cache-management run-online-cache-management \
 		chapter-27-problems run-chapter-27-problems \
-		solving-systems-of-linear-equations run-solving-systems-of-linear-equations
+		solving-systems-of-linear-equations run-solving-systems-of-linear-equations \
+		inverting-matrices run-inverting-matrices \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1074,6 +1078,12 @@ solving-systems-of-linear-equations: $(BINDIR)
 
 run-solving-systems-of-linear-equations: solving-systems-of-linear-equations
 	$(BINDIR)/solving_systems_of_linear_equations
+
+inverting-matrices: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC) $(INVERTING_MATRICES_SRC) $(INVERTING_MATRICES_MAIN) -o $(BINDIR)/inverting_matrices
+
+run-inverting-matrices: inverting-matrices
+	$(BINDIR)/inverting_matrices
 
 # ============================================================================
 # UTILITY TARGETS

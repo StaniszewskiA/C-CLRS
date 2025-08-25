@@ -9,7 +9,10 @@
 // ============================================================================
 
 void lu_decomposition(double** A, double** L, double** U, int n);
+void forward_substitution(double** L, double* y, double* b, int n);
+void backward_substitution(double** U, double* x, double* y, int n);
 void lu_solve(double** A, double* x, double* b, int n);
+void extract_lu_from_lup(double** A, double** L, double** U, int n);
 void test_lu_decomposition(void);
 
 int lup_decomposition(double** A, int* pi, int n);
@@ -17,10 +20,44 @@ void lup_solve(double** A, double* x, double* b, int n);
 void test_lup_decomposition(void);
 
 // ============================================================================
-// CHAPTER 28.2: INVERTING MATRICS
+// CHAPTER 28.2: INVERTING MATRICES
 // ============================================================================
 
+void lup_invert_matrix(double** A, double** invA, int n);
+void test_matrix_inversion(void);
 
+void conjugate_transpose(complex double** A, complex double** B, int n);
+void multiply_matrix_complex(
+    complex double** A, 
+    complex double** B, 
+    complex double** C, 
+    int n
+);
+void forward_substitution_complex(
+    complex double** L, 
+    complex double* y, 
+    complex double* b, 
+    int n
+);
+void backward_substitution_complex(
+    complex double** U, 
+    complex double* x,
+    complex double* y,
+    int n
+);
+int lup_decomposition_complex(complex double** A, int* pi, int n);
+void extract_lu_from_lup_complex(
+    complex double** A, 
+    complex double** L, 
+    complex double** U, 
+    int n
+);
+void lup_invert_matrix_complex(
+    complex double** A,
+    complex double** invA,
+    int n
+);
+void test_complex_matrix_inversion(void);
 
 // ============================================================================
 // CHAPTER 28.3: SYMMETRIC POSITIVE-DEFINITE MATRICES AND LEST-SQUARES

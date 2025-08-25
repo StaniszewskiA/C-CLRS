@@ -425,3 +425,27 @@ complex_t complex_exp(double theta) {
     complex_t res = {cos(theta), sin(theta)};
     return res;
 }
+
+complex double** allocate_matrix_complex(int n) {
+    complex double** mat = (complex double**)safe_malloc(n * sizeof(complex double*));
+    for (int i = 0; i < n; ++i) 
+        mat[i] = (complex double*)safe_malloc(n * sizeof(complex double));
+    return mat;
+}
+
+void free_matrix_complex(complex double** mat, int n) {
+    for (int i = 0; i < n; ++i) safe_free(mat[i]);
+    safe_free(mat);
+}
+
+void print_matrix_complex(complex double** mat, int n) {
+    for (int i = 0; i < n; ++i) {
+        printf("[");
+        for (int j = 0; j < n; ++j) {
+            printf("(%8.3f %+8.3fi)", creal(mat[i][j]), cimag(mat[i][j]));
+            printf("]");
+        }
+        printf("\n");
+    }
+    printf("\n");
+}

@@ -38,6 +38,7 @@
 #define SWAP_INT(a, b) SWAPS(a, b, int);
 #define SWAP_DOUBLE(a, b) SWAPS(a, b, double);
 #define SWAP_INTERVAL(a, b) SWAPS(a, b, Interval);
+#define SWAP_COMPLEX(a, b) SWAPS(a, b, complex double);
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -149,6 +150,10 @@ complex_t complex_add(complex_t a, complex_t b);
 complex_t complex_sub(complex_t a, complex_t b);
 complex_t complex_mul(complex_t a, complex_t b);
 complex_t complex_exp(double theta);
+
+complex double** allocate_matrix_complex(int n);
+void free_matrix_complex(complex double** mat, int n);
+void print_matrix_complex(complex double** mat, int n);
 
 // Debug
 #ifdef DEBUG
