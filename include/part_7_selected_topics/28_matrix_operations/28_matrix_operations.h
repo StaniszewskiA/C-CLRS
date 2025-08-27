@@ -60,11 +60,19 @@ void lup_invert_matrix_complex(
 void test_complex_matrix_inversion(void);
 
 // ============================================================================
-// CHAPTER 28.3: SYMMETRIC POSITIVE-DEFINITE MATRICES AND LEST-SQUARES
+// CHAPTER 28.3: SYMMETRIC POSITIVE-DEFINITE MATRICES AND LEAST-SQUARES
 //               APPROXIMATION
 // ============================================================================
 
-
+void compute_pseudoinverse(double** A, double** Ap, int rows, int cols);
+void polynomial_least_squares_pseudoinverse(
+    const double* x, 
+    const double* y, 
+    int n, 
+    int degree, 
+    double* coeffs
+);
+void test_polynomial_least_squares_pseudoinverse(void);
 
 // ============================================================================
 // PROBLEMS

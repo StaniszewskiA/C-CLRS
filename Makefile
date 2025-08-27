@@ -329,6 +329,9 @@ SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC = src/part_7_selected_topics/28_matrix_o
 INVERTING_MATRICES_MAIN = src/part_7_selected_topics/28_matrix_operations/2_inverting_matrices/main.c
 INVERTING_MATRICES_SRC = src/part_7_selected_topics/28_matrix_operations/2_inverting_matrices/inverting_matrices.c
 
+POLYNOMIAL_LEAST_SQUARES_MAIN = src/part_7_selected_topics/28_matrix_operations/3_symmetric_positive-definite_matrices_and_least-squares_approximation/main.c
+POLYNOMIAL_LEAST_SQUARES_SRC = src/part_7_selected_topics/28_matrix_operations/3_symmetric_positive-definite_matrices_and_least-squares_approximation/symmetric_positive-definite_matrices_and_least-squares_approximation.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -430,6 +433,7 @@ INVERTING_MATRICES_SRC = src/part_7_selected_topics/28_matrix_operations/2_inver
 		chapter-27-problems run-chapter-27-problems \
 		solving-systems-of-linear-equations run-solving-systems-of-linear-equations \
 		inverting-matrices run-inverting-matrices \
+		polynomial-least-squares run-polynomial-least-squares \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1084,6 +1088,17 @@ inverting-matrices: $(BINDIR)
 
 run-inverting-matrices: inverting-matrices
 	$(BINDIR)/inverting_matrices
+
+polynomial-least-squares: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+    $(SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC) \
+    $(INVERTING_MATRICES_SRC) \
+    $(POLYNOMIAL_LEAST_SQUARES_SRC) \
+    $(POLYNOMIAL_LEAST_SQUARES_MAIN) \
+    -o $(BINDIR)/polynomial_least_squares
+
+run-polynomial-least-squares: polynomial-least-squares
+	$(BINDIR)/polynomial_least_squares
 
 # ============================================================================
 # UTILITY TARGETS
