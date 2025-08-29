@@ -322,6 +322,19 @@ ONLINE_CACHE_MANAGEMENT_SRC = src/part_7_selected_topics/27_online_algorithms/3_
 
 CHAPTER_27_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/27_online_algorithms/problems.c
 
+# Chapter 28
+SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_MAIN = src/part_7_selected_topics/28_matrix_operations/1_solving_systems_of_linear_equations/main.c
+SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC = src/part_7_selected_topics/28_matrix_operations/1_solving_systems_of_linear_equations/solving_systems_of_linear_equations.c
+
+INVERTING_MATRICES_MAIN = src/part_7_selected_topics/28_matrix_operations/2_inverting_matrices/main.c
+INVERTING_MATRICES_SRC = src/part_7_selected_topics/28_matrix_operations/2_inverting_matrices/inverting_matrices.c
+
+POLYNOMIAL_LEAST_SQUARES_MAIN = src/part_7_selected_topics/28_matrix_operations/3_symmetric_positive-definite_matrices_and_least-squares_approximation/main.c
+POLYNOMIAL_LEAST_SQUARES_SRC = src/part_7_selected_topics/28_matrix_operations/3_symmetric_positive-definite_matrices_and_least-squares_approximation/symmetric_positive-definite_matrices_and_least-squares_approximation.c
+
+CHAPTER_28_PROBLEMS_MAIN = src/part_7_selected_topics/28_matrix_operations/problems.c
+CHAPTER_28_PROBLEMS_SRC = src/part_7_selected_topics/28_matrix_operations/problems.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -421,6 +434,10 @@ CHAPTER_27_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/27_online_algorithms/
 		maintaining-a-search-list run-maintaining-a-search-list \
 		online-cache-management run-online-cache-management \
 		chapter-27-problems run-chapter-27-problems \
+		solving-systems-of-linear-equations run-solving-systems-of-linear-equations \
+		inverting-matrices run-inverting-matrices \
+		polynomial-least-squares run-polynomial-least-squares \
+		chapter-28-problems run-chapter-28-problems \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1062,6 +1079,36 @@ chapter-27-problems: $(BINDIR)
 
 run-chapter-27-problems: chapter-27-problems
 	$(BINDIR)/chapter_27_problems
+
+# Chapter 28
+solving-systems-of-linear-equations: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC) $(SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_MAIN) -o $(BINDIR)/solving_systems_of_linear_equations
+
+run-solving-systems-of-linear-equations: solving-systems-of-linear-equations
+	$(BINDIR)/solving_systems_of_linear_equations
+
+inverting-matrices: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC) $(INVERTING_MATRICES_SRC) $(INVERTING_MATRICES_MAIN) -o $(BINDIR)/inverting_matrices
+
+run-inverting-matrices: inverting-matrices
+	$(BINDIR)/inverting_matrices
+
+polynomial-least-squares: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+    $(SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC) \
+    $(INVERTING_MATRICES_SRC) \
+    $(POLYNOMIAL_LEAST_SQUARES_SRC) \
+    $(POLYNOMIAL_LEAST_SQUARES_MAIN) \
+    -o $(BINDIR)/polynomial_least_squares
+
+run-polynomial-least-squares: polynomial-least-squares
+	$(BINDIR)/polynomial_least_squares
+
+chapter-28-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) src/part_7_selected_topics/28_matrix_operations/problems.c -o $(BINDIR)/chapter_28_problems
+
+run-chapter-28-problems: chapter-28-problems
+	$(BINDIR)/chapter_28_problems
 
 # ============================================================================
 # UTILITY TARGETS
