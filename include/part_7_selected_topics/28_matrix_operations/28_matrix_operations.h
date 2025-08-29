@@ -78,6 +78,24 @@ void test_polynomial_least_squares_pseudoinverse(void);
 // PROBLEMS
 // ============================================================================
 
-
+void solve_tridiagonal(
+    int n, 
+    double* a, 
+    double* b, 
+    double* c, 
+    double* d, 
+    double* x
+);
+void cubic_spline(int n, double* x, double* y, double* D);
+double eval_cubic_spline(
+    double x0,
+    double x1,
+    double y0,
+    double y1,
+    double D0,
+    double D1,
+    double x
+);
+void test_cubic_spline(void);
 
 #endif 

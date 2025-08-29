@@ -332,6 +332,9 @@ INVERTING_MATRICES_SRC = src/part_7_selected_topics/28_matrix_operations/2_inver
 POLYNOMIAL_LEAST_SQUARES_MAIN = src/part_7_selected_topics/28_matrix_operations/3_symmetric_positive-definite_matrices_and_least-squares_approximation/main.c
 POLYNOMIAL_LEAST_SQUARES_SRC = src/part_7_selected_topics/28_matrix_operations/3_symmetric_positive-definite_matrices_and_least-squares_approximation/symmetric_positive-definite_matrices_and_least-squares_approximation.c
 
+CHAPTER_28_PROBLEMS_MAIN = src/part_7_selected_topics/28_matrix_operations/problems.c
+CHAPTER_28_PROBLEMS_SRC = src/part_7_selected_topics/28_matrix_operations/problems.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -434,6 +437,7 @@ POLYNOMIAL_LEAST_SQUARES_SRC = src/part_7_selected_topics/28_matrix_operations/3
 		solving-systems-of-linear-equations run-solving-systems-of-linear-equations \
 		inverting-matrices run-inverting-matrices \
 		polynomial-least-squares run-polynomial-least-squares \
+		chapter-28-problems run-chapter-28-problems \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1099,6 +1103,12 @@ polynomial-least-squares: $(BINDIR)
 
 run-polynomial-least-squares: polynomial-least-squares
 	$(BINDIR)/polynomial_least_squares
+
+chapter-28-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) src/part_7_selected_topics/28_matrix_operations/problems.c -o $(BINDIR)/chapter_28_problems
+
+run-chapter-28-problems: chapter-28-problems
+	$(BINDIR)/chapter_28_problems
 
 # ============================================================================
 # UTILITY TARGETS

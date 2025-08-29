@@ -1,5 +1,4 @@
 #include "part_7_selected_topics/28_matrix_operations/28_matrix_operations.h"
-#include <math.h>
 
 void compute_pseudoinverse(double** A, double** Ap, int rows, int cols) {
     // Compute A^T
