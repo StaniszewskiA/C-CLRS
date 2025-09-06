@@ -335,6 +335,8 @@ POLYNOMIAL_LEAST_SQUARES_SRC = src/part_7_selected_topics/28_matrix_operations/3
 CHAPTER_28_PROBLEMS_MAIN = src/part_7_selected_topics/28_matrix_operations/problems.c
 CHAPTER_28_PROBLEMS_SRC = src/part_7_selected_topics/28_matrix_operations/problems.c
 
+# Chapter 29
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -1109,6 +1111,8 @@ chapter-28-problems: $(BINDIR)
 
 run-chapter-28-problems: chapter-28-problems
 	$(BINDIR)/chapter_28_problems
+
+# Chapter 29
 
 # ============================================================================
 # UTILITY TARGETS
