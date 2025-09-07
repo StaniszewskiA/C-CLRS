@@ -8,7 +8,14 @@
 // CHAPTER 30.1: REPRESENTING POLYNOMIALS
 // ============================================================================
 
-
+void naive_polynomial_multiply(
+    const double* a,
+    int n,
+    const double* b,
+    int m,
+    double* c
+);
+void test_naive_polynomial_multiply(void);
 
 // ============================================================================
 // CHAPTER 30.2: THE DFT AND FFT

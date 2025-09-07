@@ -337,6 +337,10 @@ CHAPTER_28_PROBLEMS_SRC = src/part_7_selected_topics/28_matrix_operations/proble
 
 # Chapter 29
 
+# Chapter 30
+REPRESENTING_POLYNOMIALS_SRC = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/1_representing_polynomials/representing_polynomials.c
+REPRESENTING_POLYNOMIALS_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/1_representing_polynomials/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -440,6 +444,7 @@ CHAPTER_28_PROBLEMS_SRC = src/part_7_selected_topics/28_matrix_operations/proble
 		inverting-matrices run-inverting-matrices \
 		polynomial-least-squares run-polynomial-least-squares \
 		chapter-28-problems run-chapter-28-problems \
+		representing-polynomials run-representing-polynomials\
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1115,6 +1120,11 @@ run-chapter-28-problems: chapter-28-problems
 # Chapter 29
 
 # Chapter 30
+representing-polynomials: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(REPRESENTING_POLYNOMIALS_SRC) $(REPRESENTING_POLYNOMIALS_MAIN) -o $(BINDIR)/representing_polynomials
+
+run-representing-polynomials: representing-polynomials
+	$(BINDIR)/representing_polynomials
 
 # ============================================================================
 # UTILITY TARGETS
