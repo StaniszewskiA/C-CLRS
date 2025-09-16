@@ -341,6 +341,9 @@ CHAPTER_28_PROBLEMS_SRC = src/part_7_selected_topics/28_matrix_operations/proble
 REPRESENTING_POLYNOMIALS_SRC = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/1_representing_polynomials/representing_polynomials.c
 REPRESENTING_POLYNOMIALS_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/1_representing_polynomials/main.c
 
+THE_DFT_AND_FFT_SRC = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/2_the_dft_and_fft/the_dft_and_fft.c
+THE_DFT_AND_FFT_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/2_the_dft_and_fft/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -444,7 +447,8 @@ REPRESENTING_POLYNOMIALS_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_
 		inverting-matrices run-inverting-matrices \
 		polynomial-least-squares run-polynomial-least-squares \
 		chapter-28-problems run-chapter-28-problems \
-		representing-polynomials run-representing-polynomials\
+		representing-polynomials run-representing-polynomials \
+		the-dft-and-fft run-the-dft-and-fft\
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1125,6 +1129,12 @@ representing-polynomials: $(BINDIR)
 
 run-representing-polynomials: representing-polynomials
 	$(BINDIR)/representing_polynomials
+
+the-dft-and-fft: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(THE_DFT_AND_FFT_SRC) $(THE_DFT_AND_FFT_MAIN) -o $(BINDIR)/the_dft_and_fft
+
+run-the-dft-and-fft: the-dft-and-fft
+	$(BINDIR)/the_dft_and_fft
 
 # ============================================================================
 # UTILITY TARGETS
