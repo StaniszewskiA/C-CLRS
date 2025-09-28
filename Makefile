@@ -344,6 +344,9 @@ REPRESENTING_POLYNOMIALS_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_
 THE_DFT_AND_FFT_SRC = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/2_the_dft_and_fft/the_dft_and_fft.c
 THE_DFT_AND_FFT_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/2_the_dft_and_fft/main.c
 
+EFFICIENT_FFT_IMPLEMENTATION_SRC = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/3_efficient_fft_implementations/efficient_fft_implementations.c
+EFFICIENT_FFT_IMPLEMENTATION_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/3_efficient_fft_implementations/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -449,6 +452,7 @@ THE_DFT_AND_FFT_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_f
 		chapter-28-problems run-chapter-28-problems \
 		representing-polynomials run-representing-polynomials \
 		the-dft-and-fft run-the-dft-and-fft\
+		efficient_fft_implementations run_efficient_fft_implementations \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1135,6 +1139,12 @@ the-dft-and-fft: $(BINDIR)
 
 run-the-dft-and-fft: the-dft-and-fft
 	$(BINDIR)/the_dft_and_fft
+
+efficient_fft_implementations: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(EFFICIENT_FFT_IMPLEMENTATION_SRC) $(EFFICIENT_FFT_IMPLEMENTATION_MAIN) -o $(BINDIR)/efficient_fft_implementations
+
+run_efficient_fft_implementations: efficient_fft_implementations
+	$(BINDIR)/efficient_fft_implementations
 
 # ============================================================================
 # UTILITY TARGETS

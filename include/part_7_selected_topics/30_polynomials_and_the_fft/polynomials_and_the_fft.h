@@ -38,7 +38,9 @@ void test_z_transform(void);
 // CHAPTER 30.3: EFFICIENT FFT IMPLEMENTATIONS
 // ============================================================================
 
-
+int bit_reverse(int k, int b);
+void bit_reverse_permutation(complex double* a, int n);
+void test_bit_reverse_permutation(void);
 
 // ============================================================================
 // PROBLEMS
