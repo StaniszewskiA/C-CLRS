@@ -347,6 +347,8 @@ THE_DFT_AND_FFT_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_f
 EFFICIENT_FFT_IMPLEMENTATION_SRC = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/3_efficient_fft_implementations/efficient_fft_implementations.c
 EFFICIENT_FFT_IMPLEMENTATION_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/3_efficient_fft_implementations/main.c
 
+CHAPTER_30_PROBLEMS_SRC = src/part_7_selected_topics/30_polynomials_and_the_fft/problems.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -453,6 +455,7 @@ EFFICIENT_FFT_IMPLEMENTATION_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomi
 		representing-polynomials run-representing-polynomials \
 		the-dft-and-fft run-the-dft-and-fft\
 		efficient_fft_implementations run_efficient_fft_implementations \
+		chapter-30-problems run-chapter-30-problems \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1145,6 +1148,12 @@ efficient_fft_implementations: $(BINDIR)
 
 run_efficient_fft_implementations: efficient_fft_implementations
 	$(BINDIR)/efficient_fft_implementations
+
+chapter-30-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/problems.c -o $(BINDIR)/chapter_30_problems
+
+run-chapter-30-problems: chapter-30-problems
+	$(BINDIR)/chapter_30_problems
 
 # ============================================================================
 # UTILITY TARGETS

@@ -46,6 +46,29 @@ void test_bit_reverse_permutation(void);
 // PROBLEMS
 // ============================================================================
 
-
+void multiply_deq1_polynomials(
+    const double a,
+    const double b,
+    const double c,
+    const double d,
+    double* res
+);
+void test_multiply_deq1_polynomials(void);
+void multiply_polynomials_hili(
+    const double* a1,
+    const double* a2,
+    int n,
+    double* res
+);
+void test_multiply_polynomials_hili(void);
+void multiply_polynomials_oiei(
+    const double* a1,
+    const double* a2,
+    int n,
+    double* res
+);
+void test_multiply_polynomials_oiei(void);
+uint karatsuba(uint x, uint y);
+void test_karatsuba(void);
 
 #endif 
