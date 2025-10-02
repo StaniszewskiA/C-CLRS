@@ -71,4 +71,14 @@ void test_multiply_polynomials_oiei(void);
 uint karatsuba(uint x, uint y);
 void test_karatsuba(void);
 
+void dft_1d(complex double* x, int n);
+void dft_along_axis(
+    complex double* data,
+    const int* dims,
+    int d,
+    int axis
+);
+void dfs_nd_iterative(complex double* data, const int* dims, int d);
+void test_dft_nd_iterative(void);
+
 #endif 

@@ -223,7 +223,100 @@ void test_karatsuba(void) {
     printf("Karatsuba's algorithm result: %u * %u = %u\n", x, y, res);
 }
 
-#define TASK 4
+/*
+    30-2
+*/
+
+void dft_1d(complex double* x, int n) {
+    complex double* tmp = safe_malloc(n * sizeof(complex double));
+    for (int k = 0; k < n; ++k) {
+        tmp[k] = 0.0;
+        for (int j = 0; j < n; ++j) {
+            double angle = -2.0 * M_PI * k * j / n;
+            tmp[k] += x[j] * cexp(I * angle);
+        }
+    }
+    for (int k = 0; k < n; ++k) x[k] = tmp[k];
+    free(tmp);
+}
+
+static int get_idx(const int* idx, const int* dims, int d) {
+    int res = 0;
+    int mult = 1;
+
+    for (int i = d - 1; i >= 0; --i) {
+        res += idx[i] * mult;
+        mult *= dims[i];
+    }
+
+    return res;
+}
+
+void dft_along_axis(
+    complex double* data,
+    const int* dims,
+    int d,
+    int axis
+) {
+    int total = 1;
+    for (int i = 0; i < d; ++i) total *= dims[i];
+
+    int stride = 1;
+    for (int i = axis + 1; i < d; ++i) stride *= dims[i];
+
+    int nAxis = dims[axis];
+    int nOther = total / nAxis;
+
+    int* idx = safe_malloc(d * sizeof(int));
+    for (int i = 0; i < nOther; ++i) {
+        int tmp = i;
+        for (int j = d - 1; j >= 0; --j) {
+            if (j == axis) continue;
+            idx[j] = tmp % dims[j];
+            tmp /= dims[j];
+        }
+
+        complex double* vec = safe_malloc(nAxis * sizeof(complex double));
+        for (int k = 0; k < nAxis; ++k) {
+            idx[axis] = k;
+            vec[k] = data[get_idx(idx, dims, d)];
+        }
+
+        dft_1d(vec, nAxis);
+        for (int k = 0; k < nAxis; ++k) {
+            idx[axis] = k;
+            data[get_idx(idx, dims, d)] = vec[k];
+        }
+
+        safe_free(vec);
+    }
+
+    safe_free(idx);
+}
+
+void dfs_nd_iterative(complex double* data, const int* dims, int d) {
+    for (int axis = 0; axis < d; axis++) dft_along_axis(data, dims, d, axis);
+}
+
+void test_dft_nd_iterative(void) {
+    int d = 2;
+    int dims[2] = {2, 2};
+    complex double data[4] = {1, 2, 3, 4};
+
+    printf("d-dimensional DFT input:\n");
+    for (int i = 0; i < 4; ++i) 
+        printf("%.2f%+.2fi ", creal(data[i]), cimag(data[i]));
+    printf("\n");
+
+    dfs_nd_iterative(data, dims, d);
+
+    printf("d-dimensional DFT output:\n");
+    for (int i = 0; i < 4; ++i) 
+        printf("%.2f%+.2fi ", creal(data[i]), cimag(data[i]));
+    printf("\n");
+}
+
+#define TASK 5
 
 int main(void) {
     switch (TASK)
@@ -245,6 +338,11 @@ int main(void) {
 
         case 4: {
             test_karatsuba();
+            break;
+        }
+
+        case 5: {
+            test_dft_nd_iterative();
             break;
         }
 
