@@ -337,6 +337,18 @@ CHAPTER_28_PROBLEMS_SRC = src/part_7_selected_topics/28_matrix_operations/proble
 
 # Chapter 29
 
+# Chapter 30
+REPRESENTING_POLYNOMIALS_SRC = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/1_representing_polynomials/representing_polynomials.c
+REPRESENTING_POLYNOMIALS_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/1_representing_polynomials/main.c
+
+THE_DFT_AND_FFT_SRC = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/2_the_dft_and_fft/the_dft_and_fft.c
+THE_DFT_AND_FFT_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/2_the_dft_and_fft/main.c
+
+EFFICIENT_FFT_IMPLEMENTATION_SRC = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/3_efficient_fft_implementations/efficient_fft_implementations.c
+EFFICIENT_FFT_IMPLEMENTATION_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/3_efficient_fft_implementations/main.c
+
+CHAPTER_30_PROBLEMS_SRC = src/part_7_selected_topics/30_polynomials_and_the_fft/problems.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -440,6 +452,10 @@ CHAPTER_28_PROBLEMS_SRC = src/part_7_selected_topics/28_matrix_operations/proble
 		inverting-matrices run-inverting-matrices \
 		polynomial-least-squares run-polynomial-least-squares \
 		chapter-28-problems run-chapter-28-problems \
+		representing-polynomials run-representing-polynomials \
+		the-dft-and-fft run-the-dft-and-fft\
+		efficient_fft_implementations run_efficient_fft_implementations \
+		chapter-30-problems run-chapter-30-problems \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1113,6 +1129,31 @@ run-chapter-28-problems: chapter-28-problems
 	$(BINDIR)/chapter_28_problems
 
 # Chapter 29
+
+# Chapter 30
+representing-polynomials: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(REPRESENTING_POLYNOMIALS_SRC) $(REPRESENTING_POLYNOMIALS_MAIN) -o $(BINDIR)/representing_polynomials
+
+run-representing-polynomials: representing-polynomials
+	$(BINDIR)/representing_polynomials
+
+the-dft-and-fft: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(THE_DFT_AND_FFT_SRC) $(THE_DFT_AND_FFT_MAIN) -o $(BINDIR)/the_dft_and_fft
+
+run-the-dft-and-fft: the-dft-and-fft
+	$(BINDIR)/the_dft_and_fft
+
+efficient_fft_implementations: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(EFFICIENT_FFT_IMPLEMENTATION_SRC) $(EFFICIENT_FFT_IMPLEMENTATION_MAIN) -o $(BINDIR)/efficient_fft_implementations
+
+run_efficient_fft_implementations: efficient_fft_implementations
+	$(BINDIR)/efficient_fft_implementations
+
+chapter-30-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/problems.c -o $(BINDIR)/chapter_30_problems
+
+run-chapter-30-problems: chapter-30-problems
+	$(BINDIR)/chapter_30_problems
 
 # ============================================================================
 # UTILITY TARGETS
