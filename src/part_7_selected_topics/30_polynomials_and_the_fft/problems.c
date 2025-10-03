@@ -361,7 +361,61 @@ void test_compute_derivatives_fft(void) {
         printf("A^{(%d)}(x0) = %.2f\n", i, derivatives[i]);
 }
 
-#define TASK 6
+/*
+    30-4
+*/
+
+static double horner_eval_poly(const double* a, int deg, double x) {
+    double res = a[deg];
+    for (int i = deg - 1; i >= 0; --i)
+        res = res * x + a[i];
+
+    return res;
+}
+
+void multipoint_eval(
+    const double* a,
+    int deg,
+    const double* x,
+    int leftIdx,
+    int rightIdx,
+    double* res
+) {
+    int length = rightIdx - leftIdx + 1;
+    if (length == 1) {
+        res[leftIdx] = horner_eval_poly(a, deg, x[leftIdx]);
+        return;
+    }
+
+    int mid = leftIdx + length / 2;
+
+    for (int i = leftIdx; i < mid; ++i)
+        res[i] = horner_eval_poly(a, deg, x[i]);
+
+    for (int i = mid; i <= rightIdx; ++i)
+        res[i] = horner_eval_poly(a, deg, x[i]);
+}
+
+void test_multipoint_eval(void) {
+    int n = 4;
+    double a[4] = {1, 2, 3, 4};
+    double x[4] = {0.0, 1.0, 2.0, 3.0};
+    double res[4];
+
+    printf("Coefficients: ");
+    for (int i = 0; i < n; ++i) printf("%.2f ", a[i]);
+    printf("Evaluation points: ");
+    for (int i = 0; i < n; ++i) printf("%.2f ", x[i]);
+    printf("\n");
+
+    multipoint_eval(a, n - 1, x, 0, n - 1, res);
+
+    printf("Values at points:\n");
+    for (int i = 0; i < n; ++i)
+        printf("A(%.2f) = %.2f\n", x[i], res[i]);
+}
+
+#define TASK 7
 
 int main(void) {
     switch (TASK)
@@ -393,6 +447,11 @@ int main(void) {
 
         case 6: {
             test_compute_derivatives_fft();
+            break;
+        }
+
+        case 7: {
+            test_multipoint_eval();
             break;
         }
 

@@ -89,4 +89,14 @@ void compute_derivatives_fft(
 );
 void test_compute_derivatives_fft(void);
 
+void multipoint_eval(
+    const double* a,
+    int deg,
+    const double* x,
+    int leftIdx,
+    int rightIdx,
+    double* res
+);
+void test_multipoint_eval(void);
+
 #endif 
