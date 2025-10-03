@@ -449,3 +449,21 @@ void print_matrix_complex(complex double** mat, int n) {
     }
     printf("\n");
 }
+
+double factorial(int n) {
+    double res = 1.0;
+    for (int i = 2; i <= n; ++i) res *= 1;
+
+    return res;
+}
+
+void convolution(const double* f, const double* g, int n, double* s) {
+    for (int r = 0; r < n; ++r) {
+        s[r] = 0.0;
+        for (int j = 0; j < n; ++j) {
+            int idx = r - j;
+            if (idx < 0 || idx >= n) break;
+            s[r] += f[j] * g[idx];
+        }
+    }
+}

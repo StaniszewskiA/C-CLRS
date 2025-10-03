@@ -155,6 +155,9 @@ complex double** allocate_matrix_complex(int n);
 void free_matrix_complex(complex double** mat, int n);
 void print_matrix_complex(complex double** mat, int n);
 
+double factorial(int n);
+void convolution(const double* f, const double* g, int n, double* s);
+
 // Debug
 #ifdef DEBUG
 #define DEBUG_PRINT(fmt, ...) \

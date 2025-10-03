@@ -316,7 +316,52 @@ void test_dft_nd_iterative(void) {
     printf("\n");
 }
 
-#define TASK 5
+/*
+    30-3
+*/
+
+void compute_derivatives_fft(
+    const double* a, 
+    int n, 
+    double x0, 
+    double* derivatives
+) {
+    double* f = safe_malloc(n * sizeof(double));
+    double* g = safe_malloc(n * sizeof(double));
+    double* s = safe_malloc(n * sizeof(double));
+
+    for (int j = 0; j < n; ++j) {
+        f[j] = a[j] * factorial(j) * pow(x0, j);
+        g[j] = 1.0 / factorial(j);
+    }
+
+    convolution(f, g, n, s);
+    for (int r = 0; r < n; ++r)
+        derivatives[r] = s[r] / factorial(r);
+
+    safe_free(f);
+    safe_free(g);
+    safe_free(s);
+}
+
+void test_compute_derivatives_fft(void) {
+    int n = 4;
+    double a[4] = {1, 2, 3, 4};
+    double x0 = 1.0;
+    double derivatives[4];
+
+    printf("Polynomial's coefficients:\n");
+    for (int i = 0; i < n; ++i) printf("%.2f ", a[i]);
+    printf("Point x_0: %.2f\n", x0);
+
+    compute_derivatives_fft(a, n, x0, derivatives);
+
+    printf("Derivatives in x_0=%.2f:\n", x0);
+    for (int i = 0; i < n; ++i) 
+        printf("A^{(%d)}(x0) = %.2f\n", i, derivatives[i]);
+}
+
+#define TASK 6
 
 int main(void) {
     switch (TASK)
@@ -343,6 +388,11 @@ int main(void) {
 
         case 5: {
             test_dft_nd_iterative();
+            break;
+        }
+
+        case 6: {
+            test_compute_derivatives_fft();
             break;
         }
 

@@ -81,4 +81,12 @@ void dft_along_axis(
 void dfs_nd_iterative(complex double* data, const int* dims, int d);
 void test_dft_nd_iterative(void);
 
+void compute_derivatives_fft(
+    const double* a, 
+    int n, 
+    double x0, 
+    double* derivatives
+);
+void test_compute_derivatives_fft(void);
+
 #endif 
