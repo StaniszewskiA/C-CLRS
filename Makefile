@@ -349,6 +349,10 @@ EFFICIENT_FFT_IMPLEMENTATION_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomi
 
 CHAPTER_30_PROBLEMS_SRC = src/part_7_selected_topics/30_polynomials_and_the_fft/problems.c
 
+# Chapter 31
+ELEMENTARY_NUMBER_THEORETIC_NOTIONS_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/1_elementary_number-theoretic_notions/elementary_number-theoretic_notions.c
+ELEMENTARY_NUMBER_THEORETIC_NOTIONS_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/1_elementary_number-theoretic_notions/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -456,6 +460,7 @@ CHAPTER_30_PROBLEMS_SRC = src/part_7_selected_topics/30_polynomials_and_the_fft/
 		the-dft-and-fft run-the-dft-and-fft\
 		efficient_fft_implementations run_efficient_fft_implementations \
 		chapter-30-problems run-chapter-30-problems \
+		elementary-number-theoretic-notions run-elementary-number-theoretic-notions \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1154,6 +1159,16 @@ chapter-30-problems: $(BINDIR)
 
 run-chapter-30-problems: chapter-30-problems
 	$(BINDIR)/chapter_30_problems
+
+# Chapter 31
+elementary-number-theoretic-notions: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(ELEMENTARY_NUMBER_THEORETIC_NOTIONS_SRC) \
+	$(ELEMENTARY_NUMBER_THEORETIC_NOTIONS_MAIN) \
+	-o $(BINDIR)/elementary_number_theoretic_notions
+
+run-elementary-number-theoretic-notions: elementary-number-theoretic-notions
+	$(BINDIR)/elementary_number_theoretic_notions
 
 # ============================================================================
 # UTILITY TARGETS
