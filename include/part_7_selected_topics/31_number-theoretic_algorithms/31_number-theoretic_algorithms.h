@@ -5,7 +5,7 @@
 #include "../part_7_commons.h"
 
 // ============================================================================
-// CHAPTER 31.1: REPRESENTING POLYNOMIALS
+// CHAPTER 31.1: ELEMENTARY NUMBER-THEORET NOTIONS
 // ============================================================================
 
 int is_perfect_kth_power(uint64_t n, uint64_t k, uint64_t* root);
@@ -24,6 +24,33 @@ void test_bin_to_dec(void);
 
 void print_on_bulbs(int n);
 void test_print_on_bulbs(void);
+
+// ============================================================================
+// CHAPTER 31.2: GREATEST COMMON DIVISOR
+// ============================================================================
+
+uint64_t euclid_gcd(uint64_t a, uint64_t b);
+void test_euclid_gcd(void);
+
+uint64_t extended_euclid_gcd(uint64_t a, uint64_t b, int64_t* x, int64_t* y);
+void test_extended_euclid_gcd(void);
+
+uint64_t euclid_gcd_recursive(uint64_t a, uint64_t b);
+void test_euclid_gcd_recursive(void);
+
+void extended_euclid_gcd_multiple(
+    const int64_t* a, 
+    int n, 
+    int64_t* g, 
+    int64_t* xs
+);
+void test_extended_euclid_gcd_multiple(void);
+
+uint64_t lcm(uint64_t a, uint64_t b);
+void test_lcm(void);
+
+uint64_t lcm_multiple(const int64_t* a, int n);
+void test_lcm_multiple(void);
 
 // ============================================================================
 // PROBLEMS

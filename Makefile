@@ -353,6 +353,9 @@ CHAPTER_30_PROBLEMS_SRC = src/part_7_selected_topics/30_polynomials_and_the_fft/
 ELEMENTARY_NUMBER_THEORETIC_NOTIONS_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/1_elementary_number-theoretic_notions/elementary_number-theoretic_notions.c
 ELEMENTARY_NUMBER_THEORETIC_NOTIONS_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/1_elementary_number-theoretic_notions/main.c
 
+GREATEST_COMMON_DIVISOR_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/2_greatest_common_divisor/greatest_common_divisor.c
+GREATEST_COMMON_DIVISOR_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/2_greatest_common_divisor/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -461,6 +464,8 @@ ELEMENTARY_NUMBER_THEORETIC_NOTIONS_MAIN = $(SRCDIR)/part_7_selected_topics/31_n
 		efficient_fft_implementations run_efficient_fft_implementations \
 		chapter-30-problems run-chapter-30-problems \
 		elementary-number-theoretic-notions run-elementary-number-theoretic-notions \
+		greatest-common-divisor  run-greatest-common-divisor \
+
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1169,6 +1174,15 @@ elementary-number-theoretic-notions: $(BINDIR)
 
 run-elementary-number-theoretic-notions: elementary-number-theoretic-notions
 	$(BINDIR)/elementary_number_theoretic_notions
+
+greatest-common-divisor: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(GREATEST_COMMON_DIVISOR_MAIN) \
+	-o $(BINDIR)/greatest-common-divisor
+
+run-greatest-common-divisor: greatest-common-divisor
+	$(BINDIR)/greatest-common-divisor
 
 # ============================================================================
 # UTILITY TARGETS
