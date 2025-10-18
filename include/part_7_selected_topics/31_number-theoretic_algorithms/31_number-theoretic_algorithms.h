@@ -53,6 +53,16 @@ uint64_t lcm_multiple(const int64_t* a, int n);
 void test_lcm_multiple(void);
 
 // ============================================================================
+// CHAPTER 31.4: SOLVING MODULAR LINEAR EQUATIONS
+// ============================================================================
+
+void modular_linear_equation_solver(int a, int b, int n);
+void test_modular_linear_equation_solver(void);
+
+void modular_linear_equation_solver_modified(int a, int b, int n);
+void test_modular_linear_equation_solver_modified(void);
+
+// ============================================================================
 // PROBLEMS
 // ============================================================================
 

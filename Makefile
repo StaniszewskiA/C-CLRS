@@ -356,6 +356,9 @@ ELEMENTARY_NUMBER_THEORETIC_NOTIONS_MAIN = $(SRCDIR)/part_7_selected_topics/31_n
 GREATEST_COMMON_DIVISOR_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/2_greatest_common_divisor/greatest_common_divisor.c
 GREATEST_COMMON_DIVISOR_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/2_greatest_common_divisor/main.c
 
+SOLVING_MODULAR_LINEAR_EQAUTIONS_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/4_solving_modular_linear_equations/solving_modular_linear_equations.c
+SOLVING_MODULAR_LINEAR_EQAUTIONS_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/4_solving_modular_linear_equations/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -464,7 +467,8 @@ GREATEST_COMMON_DIVISOR_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theore
 		efficient_fft_implementations run_efficient_fft_implementations \
 		chapter-30-problems run-chapter-30-problems \
 		elementary-number-theoretic-notions run-elementary-number-theoretic-notions \
-		greatest-common-divisor  run-greatest-common-divisor \
+		greatest-common-divisor run-greatest-common-divisor \
+		solving-modular-linear-equations solving-modular-linear-equations \
 
 
 # ============================================================================
@@ -1183,6 +1187,16 @@ greatest-common-divisor: $(BINDIR)
 
 run-greatest-common-divisor: greatest-common-divisor
 	$(BINDIR)/greatest-common-divisor
+
+solving-modular-linear-equations: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(SOLVING_MODULAR_LINEAR_EQAUTIONS_SRC) \
+	$(SOLVING_MODULAR_LINEAR_EQAUTIONS_MAIN) \
+	-o $(BINDIR)/solving-modular-linear-equations
+
+run-solving-modular-linear-equations: solving-modular-linear-equations
+	$(BINDIR)/solving-modular-linear-equations
 
 # ============================================================================
 # UTILITY TARGETS
