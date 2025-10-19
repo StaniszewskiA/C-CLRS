@@ -102,17 +102,17 @@ int64_t modular_linear_equation_solver_crt(int a, int b, int n) {
             return -1;
         }
         
-        int64_t a_reduced = a / d;
-        int64_t b_reduced = b / d;
-        int64_t mod_reduced = moduli[i] / d;
+        int64_t aReduced = a / d;
+        int64_t bReduced = b / d;
+        int64_t modReduced = moduli[i] / d;
         
-        int64_t inv = modular_inverse(a_reduced, mod_reduced);
+        int64_t inv = modular_inverse(aReduced, modReduced);
         if (inv == -1) {
             printf("Error: inverse calculation failed\n");
             return -1;
         }
         
-        int64_t x0 = (b_reduced * inv) % mod_reduced;
+        int64_t x0 = (bReduced * inv) % modReduced;
         
         remainders[i] = x0;  
         
