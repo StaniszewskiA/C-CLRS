@@ -63,6 +63,15 @@ void modular_linear_equation_solver_modified(int a, int b, int n);
 void test_modular_linear_equation_solver_modified(void);
 
 // ============================================================================
+// CHAPTER 31.5: CHINESE REMAINDER THEOREM
+// ============================================================================
+
+int64_t modular_inverse(int64_t a, int64_t m);
+int64_t crt(int64_t* remainders, int64_t* moduli, int numEqs);
+int64_t modular_linear_equation_solver_crt(int a, int b, int n);
+void test_modular_linear_equation_solver_crt(void);
+
+// ============================================================================
 // PROBLEMS
 // ============================================================================
 

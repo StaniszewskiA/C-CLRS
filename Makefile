@@ -359,6 +359,9 @@ GREATEST_COMMON_DIVISOR_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theore
 SOLVING_MODULAR_LINEAR_EQAUTIONS_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/4_solving_modular_linear_equations/solving_modular_linear_equations.c
 SOLVING_MODULAR_LINEAR_EQAUTIONS_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/4_solving_modular_linear_equations/main.c
 
+CHINESE_REMAINDER_THEOREM_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/5_chinese_remainder_theorem/chinese_remainder_theorem.c
+CHINESE_REMAINDER_THEOREM_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/5_chinese_remainder_theorem/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -469,6 +472,7 @@ SOLVING_MODULAR_LINEAR_EQAUTIONS_MAIN = $(SRCDIR)/part_7_selected_topics/31_numb
 		elementary-number-theoretic-notions run-elementary-number-theoretic-notions \
 		greatest-common-divisor run-greatest-common-divisor \
 		solving-modular-linear-equations solving-modular-linear-equations \
+		chinese-remainder-theorem run-chinese-remainder-theorem
 
 
 # ============================================================================
@@ -1197,6 +1201,16 @@ solving-modular-linear-equations: $(BINDIR)
 
 run-solving-modular-linear-equations: solving-modular-linear-equations
 	$(BINDIR)/solving-modular-linear-equations
+
+chinese-remainder-theorem: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(CHINESE_REMAINDER_THEOREM_SRC) \
+	$(CHINESE_REMAINDER_THEOREM_MAIN) \
+	-o $(BINDIR)/chinese-remainder-theorem
+
+run-chinese-remainder-theorem: chinese-remainder-theorem
+	$(BINDIR)/chinese-remainder-theorem
 
 # ============================================================================
 # UTILITY TARGETS
