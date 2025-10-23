@@ -72,6 +72,16 @@ int64_t modular_linear_equation_solver_crt(int a, int b, int n);
 void test_modular_linear_equation_solver_crt(void);
 
 // ============================================================================
+// CHAPTER 31.6: POWERS OF AN ELEMENT
+// ============================================================================
+
+int64_t modular_exponentation(int64_t a, int64_t b, int64_t n);
+void test_modular_exponentation(void);
+
+int64_t modular_exponentation_iterative(int64_t a, int64_t b, int64_t n);
+void test_modular_exponentation_iterative(void);
+
+// ============================================================================
 // PROBLEMS
 // ============================================================================
 

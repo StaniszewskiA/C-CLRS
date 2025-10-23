@@ -362,6 +362,9 @@ SOLVING_MODULAR_LINEAR_EQAUTIONS_MAIN = $(SRCDIR)/part_7_selected_topics/31_numb
 CHINESE_REMAINDER_THEOREM_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/5_chinese_remainder_theorem/chinese_remainder_theorem.c
 CHINESE_REMAINDER_THEOREM_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/5_chinese_remainder_theorem/main.c
 
+POWERS_OF_AN_ELEMENT_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/6_powers_of_an_element/powers_of_an_element.c
+POWERS_OF_AN_ELEMENT_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/6_powers_of_an_element/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -472,7 +475,8 @@ CHINESE_REMAINDER_THEOREM_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theo
 		elementary-number-theoretic-notions run-elementary-number-theoretic-notions \
 		greatest-common-divisor run-greatest-common-divisor \
 		solving-modular-linear-equations solving-modular-linear-equations \
-		chinese-remainder-theorem run-chinese-remainder-theorem
+		chinese-remainder-theorem run-chinese-remainder-theorem \
+		powers-of-an-element run-powers-of-an-element
 
 
 # ============================================================================
@@ -1211,6 +1215,15 @@ chinese-remainder-theorem: $(BINDIR)
 
 run-chinese-remainder-theorem: chinese-remainder-theorem
 	$(BINDIR)/chinese-remainder-theorem
+
+powers-of-an-element: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(POWERS_OF_AN_ELEMENT_SRC) \
+	$(POWERS_OF_AN_ELEMENT_MAIN) \
+	-o $(BINDIR)/powers-of-an-element
+
+run-powers-of-an-element: powers-of-an-element
+	$(BINDIR)/powers-of-an-element
 
 # ============================================================================
 # UTILITY TARGETS
