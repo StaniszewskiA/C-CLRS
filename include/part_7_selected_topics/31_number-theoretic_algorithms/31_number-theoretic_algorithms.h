@@ -82,6 +82,15 @@ int64_t modular_exponentation_iterative(int64_t a, int64_t b, int64_t n);
 void test_modular_exponentation_iterative(void);
 
 // ============================================================================
+// CHAPTER 31.7: THE RSA PUBLIC-KEY CRYPTOSYSTEM
+// ============================================================================
+
+void rsa_generate_keys(int64_t p, int64_t q, int64_t* n, int64_t* e, int64_t* d);
+int64_t rsa_encrypt(int64_t m, int64_t e, int64_t n);
+int64_t rsa_decrypt(int64_t c, int64_t d, int64_t n);
+void test_simple_rsa(void);
+
+// ============================================================================
 // PROBLEMS
 // ============================================================================
 

@@ -365,6 +365,9 @@ CHINESE_REMAINDER_THEOREM_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theo
 POWERS_OF_AN_ELEMENT_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/6_powers_of_an_element/powers_of_an_element.c
 POWERS_OF_AN_ELEMENT_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/6_powers_of_an_element/main.c
 
+THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/7_the_rsa_public-key-cryptosystem/the_rsa_public-key-cryptosystem.c
+THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/7_the_rsa_public-key-cryptosystem/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -476,7 +479,8 @@ POWERS_OF_AN_ELEMENT_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic
 		greatest-common-divisor run-greatest-common-divisor \
 		solving-modular-linear-equations solving-modular-linear-equations \
 		chinese-remainder-theorem run-chinese-remainder-theorem \
-		powers-of-an-element run-powers-of-an-element
+		powers-of-an-element run-powers-of-an-element \
+		the-rsa-public-key-cryptosystem run-the-rsa-public-key-cryptosystem \
 
 
 # ============================================================================
@@ -1224,6 +1228,18 @@ powers-of-an-element: $(BINDIR)
 
 run-powers-of-an-element: powers-of-an-element
 	$(BINDIR)/powers-of-an-element
+
+the-rsa-public-key-cryptosystem: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(POWERS_OF_AN_ELEMENT_SRC) \
+	$(CHINESE_REMAINDER_THEOREM_SRC) \
+	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC) \
+	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_MAIN) \
+	-o $(BINDIR)/the-rsa-public-key-cryptosystem
+
+run-the-rsa-public-key-cryptosystem: the-rsa-public-key-cryptosystem
+	$(BINDIR)/the-rsa-public-key-cryptosystem
 
 # ============================================================================
 # UTILITY TARGETS
