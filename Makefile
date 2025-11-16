@@ -368,6 +368,9 @@ POWERS_OF_AN_ELEMENT_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic
 THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/7_the_rsa_public-key-cryptosystem/the_rsa_public-key-cryptosystem.c
 THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/7_the_rsa_public-key-cryptosystem/main.c
 
+PRIMALITY_TESTING_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/8_primality_testing/primality_testing.c
+PRIMALITY_TESTING_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/8_primality_testing/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -481,6 +484,7 @@ THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_MAIN = $(SRCDIR)/part_7_selected_topics/31_numbe
 		chinese-remainder-theorem run-chinese-remainder-theorem \
 		powers-of-an-element run-powers-of-an-element \
 		the-rsa-public-key-cryptosystem run-the-rsa-public-key-cryptosystem \
+		primality-testing run-primality-testing
 
 
 # ============================================================================
@@ -1240,6 +1244,19 @@ the-rsa-public-key-cryptosystem: $(BINDIR)
 
 run-the-rsa-public-key-cryptosystem: the-rsa-public-key-cryptosystem
 	$(BINDIR)/the-rsa-public-key-cryptosystem
+
+primality-testing: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(POWERS_OF_AN_ELEMENT_SRC) \
+	$(CHINESE_REMAINDER_THEOREM_SRC) \
+	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC) \
+	$(PRIMALITY_TESTING_SRC) \
+	$(PRIMALITY_TESTING_MAIN) \
+	-o $(BINDIR)/primality-testing
+
+run-primality-testing: primality-testing
+	$(BINDIR)/primality-testing
 
 # ============================================================================
 # UTILITY TARGETS
