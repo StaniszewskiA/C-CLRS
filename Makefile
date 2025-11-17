@@ -371,6 +371,8 @@ THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_MAIN = $(SRCDIR)/part_7_selected_topics/31_numbe
 PRIMALITY_TESTING_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/8_primality_testing/primality_testing.c
 PRIMALITY_TESTING_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/8_primality_testing/main.c
 
+CHAPTER_31_PROBLEMS_SRC = src/part_7_selected_topics/31_number-theoretic_algorithms/problems.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -485,6 +487,7 @@ PRIMALITY_TESTING_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_al
 		powers-of-an-element run-powers-of-an-element \
 		the-rsa-public-key-cryptosystem run-the-rsa-public-key-cryptosystem \
 		primality-testing run-primality-testing
+		chapter-31-problems run-chapter-31-problems \
 
 
 # ============================================================================
@@ -1257,6 +1260,19 @@ primality-testing: $(BINDIR)
 
 run-primality-testing: primality-testing
 	$(BINDIR)/primality-testing
+
+chapter-31-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(POWERS_OF_AN_ELEMENT_SRC) \
+	$(CHINESE_REMAINDER_THEOREM_SRC) \
+	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC) \
+	$(PRIMALITY_TESTING_SRC) \
+	src/part_7_selected_topics/31_number-theoretic_algorithms/problems.c \
+	-o $(BINDIR)/chapter-31-problems
+
+run-chapter-31-problems: chapter-31-problems
+	$(BINDIR)/chapter-31-problems
 
 # ============================================================================
 # UTILITY TARGETS
