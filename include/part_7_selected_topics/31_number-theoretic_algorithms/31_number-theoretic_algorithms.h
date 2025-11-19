@@ -101,5 +101,8 @@ int miller_rabin(int n, int s);
 // PROBLEMS
 // ============================================================================
 
+int stein_gcd(int a, int b)
+
+void mat_pow(int res[2][2], int A[2][2], int n);
 
 #endif 
