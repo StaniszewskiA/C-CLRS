@@ -101,8 +101,14 @@ int miller_rabin(int n, int s);
 // PROBLEMS
 // ============================================================================
 
-int stein_gcd(int a, int b)
+int stein_gcd(int a, int b);
+void test_stein_gcd(void);
 
 void mat_pow(int res[2][2], int A[2][2], int n);
+void test_mat_pow(void);
+
+int is_quadratic_residue(int64_t a, int64_t p);
+void test_is_quadratic_residue(void);
+int find_non_quadratic_residue(int64_t p, int64_t* aFound, int* trials);
 
 #endif 

@@ -1263,6 +1263,11 @@ run-primality-testing: primality-testing
 
 chapter-31-problems: $(BINDIR)
 	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(POWERS_OF_AN_ELEMENT_SRC) \
+	$(CHINESE_REMAINDER_THEOREM_SRC) \
+	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC) \
+	$(PRIMALITY_TESTING_SRC) \
 	src/part_7_selected_topics/31_number-theoretic_algorithms/problems.c \
 	-o $(BINDIR)/chapter-31-problems
 
