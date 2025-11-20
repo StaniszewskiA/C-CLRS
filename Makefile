@@ -349,6 +349,30 @@ EFFICIENT_FFT_IMPLEMENTATION_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomi
 
 CHAPTER_30_PROBLEMS_SRC = src/part_7_selected_topics/30_polynomials_and_the_fft/problems.c
 
+# Chapter 31
+ELEMENTARY_NUMBER_THEORETIC_NOTIONS_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/1_elementary_number-theoretic_notions/elementary_number-theoretic_notions.c
+ELEMENTARY_NUMBER_THEORETIC_NOTIONS_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/1_elementary_number-theoretic_notions/main.c
+
+GREATEST_COMMON_DIVISOR_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/2_greatest_common_divisor/greatest_common_divisor.c
+GREATEST_COMMON_DIVISOR_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/2_greatest_common_divisor/main.c
+
+SOLVING_MODULAR_LINEAR_EQAUTIONS_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/4_solving_modular_linear_equations/solving_modular_linear_equations.c
+SOLVING_MODULAR_LINEAR_EQAUTIONS_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/4_solving_modular_linear_equations/main.c
+
+CHINESE_REMAINDER_THEOREM_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/5_chinese_remainder_theorem/chinese_remainder_theorem.c
+CHINESE_REMAINDER_THEOREM_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/5_chinese_remainder_theorem/main.c
+
+POWERS_OF_AN_ELEMENT_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/6_powers_of_an_element/powers_of_an_element.c
+POWERS_OF_AN_ELEMENT_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/6_powers_of_an_element/main.c
+
+THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/7_the_rsa_public-key-cryptosystem/the_rsa_public-key-cryptosystem.c
+THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/7_the_rsa_public-key-cryptosystem/main.c
+
+PRIMALITY_TESTING_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/8_primality_testing/primality_testing.c
+PRIMALITY_TESTING_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/8_primality_testing/main.c
+
+CHAPTER_31_PROBLEMS_SRC = src/part_7_selected_topics/31_number-theoretic_algorithms/problems.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -456,6 +480,15 @@ CHAPTER_30_PROBLEMS_SRC = src/part_7_selected_topics/30_polynomials_and_the_fft/
 		the-dft-and-fft run-the-dft-and-fft\
 		efficient_fft_implementations run_efficient_fft_implementations \
 		chapter-30-problems run-chapter-30-problems \
+		elementary-number-theoretic-notions run-elementary-number-theoretic-notions \
+		greatest-common-divisor run-greatest-common-divisor \
+		solving-modular-linear-equations solving-modular-linear-equations \
+		chinese-remainder-theorem run-chinese-remainder-theorem \
+		powers-of-an-element run-powers-of-an-element \
+		the-rsa-public-key-cryptosystem run-the-rsa-public-key-cryptosystem \
+		primality-testing run-primality-testing
+		chapter-31-problems run-chapter-31-problems \
+
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1154,6 +1187,92 @@ chapter-30-problems: $(BINDIR)
 
 run-chapter-30-problems: chapter-30-problems
 	$(BINDIR)/chapter_30_problems
+
+# Chapter 31
+elementary-number-theoretic-notions: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(ELEMENTARY_NUMBER_THEORETIC_NOTIONS_SRC) \
+	$(ELEMENTARY_NUMBER_THEORETIC_NOTIONS_MAIN) \
+	-o $(BINDIR)/elementary_number_theoretic_notions
+
+run-elementary-number-theoretic-notions: elementary-number-theoretic-notions
+	$(BINDIR)/elementary_number_theoretic_notions
+
+greatest-common-divisor: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(GREATEST_COMMON_DIVISOR_MAIN) \
+	-o $(BINDIR)/greatest-common-divisor
+
+run-greatest-common-divisor: greatest-common-divisor
+	$(BINDIR)/greatest-common-divisor
+
+solving-modular-linear-equations: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(SOLVING_MODULAR_LINEAR_EQAUTIONS_SRC) \
+	$(SOLVING_MODULAR_LINEAR_EQAUTIONS_MAIN) \
+	-o $(BINDIR)/solving-modular-linear-equations
+
+run-solving-modular-linear-equations: solving-modular-linear-equations
+	$(BINDIR)/solving-modular-linear-equations
+
+chinese-remainder-theorem: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(CHINESE_REMAINDER_THEOREM_SRC) \
+	$(CHINESE_REMAINDER_THEOREM_MAIN) \
+	-o $(BINDIR)/chinese-remainder-theorem
+
+run-chinese-remainder-theorem: chinese-remainder-theorem
+	$(BINDIR)/chinese-remainder-theorem
+
+powers-of-an-element: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(POWERS_OF_AN_ELEMENT_SRC) \
+	$(POWERS_OF_AN_ELEMENT_MAIN) \
+	-o $(BINDIR)/powers-of-an-element
+
+run-powers-of-an-element: powers-of-an-element
+	$(BINDIR)/powers-of-an-element
+
+the-rsa-public-key-cryptosystem: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(POWERS_OF_AN_ELEMENT_SRC) \
+	$(CHINESE_REMAINDER_THEOREM_SRC) \
+	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC) \
+	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_MAIN) \
+	-o $(BINDIR)/the-rsa-public-key-cryptosystem
+
+run-the-rsa-public-key-cryptosystem: the-rsa-public-key-cryptosystem
+	$(BINDIR)/the-rsa-public-key-cryptosystem
+
+primality-testing: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(POWERS_OF_AN_ELEMENT_SRC) \
+	$(CHINESE_REMAINDER_THEOREM_SRC) \
+	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC) \
+	$(PRIMALITY_TESTING_SRC) \
+	$(PRIMALITY_TESTING_MAIN) \
+	-o $(BINDIR)/primality-testing
+
+run-primality-testing: primality-testing
+	$(BINDIR)/primality-testing
+
+chapter-31-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(GREATEST_COMMON_DIVISOR_SRC) \
+	$(POWERS_OF_AN_ELEMENT_SRC) \
+	$(CHINESE_REMAINDER_THEOREM_SRC) \
+	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC) \
+	$(PRIMALITY_TESTING_SRC) \
+	src/part_7_selected_topics/31_number-theoretic_algorithms/problems.c \
+	-o $(BINDIR)/chapter-31-problems
+
+run-chapter-31-problems: chapter-31-problems
+	$(BINDIR)/chapter-31-problems
 
 # ============================================================================
 # UTILITY TARGETS

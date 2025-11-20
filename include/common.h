@@ -157,6 +157,7 @@ void print_matrix_complex(complex double** mat, int n);
 
 double factorial(int n);
 void convolution(const double* f, const double* g, int n, double* s);
+int get_num_bits(int n);
 
 // Debug
 #ifdef DEBUG

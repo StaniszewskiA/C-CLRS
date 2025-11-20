@@ -467,3 +467,7 @@ void convolution(const double* f, const double* g, int n, double* s) {
         }
     }
 }
+
+int get_num_bits(int n) {
+    return (int)ceil(log2(n + 1));
+}
