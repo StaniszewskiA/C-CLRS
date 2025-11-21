@@ -373,6 +373,8 @@ PRIMALITY_TESTING_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_al
 
 CHAPTER_31_PROBLEMS_SRC = src/part_7_selected_topics/31_number-theoretic_algorithms/problems.c
 
+# Chapter 32
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -1273,6 +1275,8 @@ chapter-31-problems: $(BINDIR)
 
 run-chapter-31-problems: chapter-31-problems
 	$(BINDIR)/chapter-31-problems
+
+# Chapter 32
 
 # ============================================================================
 # UTILITY TARGETS
