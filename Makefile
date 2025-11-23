@@ -377,6 +377,9 @@ CHAPTER_31_PROBLEMS_SRC = src/part_7_selected_topics/31_number-theoretic_algorit
 THE_NAIVE_STRING_MATCHING_ALGORITHM_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/1_the_naive_string-matching_algorithm/the_naive_string-matching_algorithm.c
 THE_NAIVE_STRING_MATCHING_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/1_the_naive_string-matching_algorithm/main.c
 
+THE_RABIN_KARP_ALGORITHM_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/2_the_rabin-karp_algorithm/the_rabin-karp_algorithm.c
+THE_RABIN_KARP_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/2_the_rabin-karp_algorithm/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -493,7 +496,7 @@ THE_NAIVE_STRING_MATCHING_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_s
 		primality-testing run-primality-testing \
 		chapter-31-problems run-chapter-31-problems \
 		the-naive-string-matching-algorithm run-the-naive-string-matching-algorithm \
-
+		the-rabin-karp-algorithm run-the-rabin-karp-algorithm \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1288,6 +1291,16 @@ the-naive-string-matching-algorithm: $(BINDIR)
 
 run-the-naive-string-matching-algorithm: the-naive-string-matching-algorithm
 	$(BINDIR)/the-naive-string-matching-algorithm
+
+the-rabin-karp-algorithm: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(POWERS_OF_AN_ELEMENT_SRC) \
+	$(THE_RABIN_KARP_ALGORITHM_SRC) \
+	$(THE_RABIN_KARP_ALGORITHM_MAIN) \
+	-o $(BINDIR)/the-rabin-karp-algorithm
+
+run-the-rabin-karp-algorithm: the-rabin-karp-algorithm
+	$(BINDIR)/the-rabin-karp-algorithm
 
 # ============================================================================
 # UTILITY TARGETS

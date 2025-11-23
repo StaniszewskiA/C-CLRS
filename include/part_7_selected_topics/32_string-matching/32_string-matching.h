@@ -1,8 +1,9 @@
-#ifndef NUMBER_THEORETIC_ALGORITHMS_H
-#define NUMBER_THEORETIC_ALGORITHMS_H
+#ifndef STRING_MATCHING_H
+#define STRING_MATCHING_H
 
 #include "../../common.h"
 #include "../part_7_commons.h"
+#include "part_7_selected_topics/31_number-theoretic_algorithms/31_number-theoretic_algorithms.h"
 
 // ============================================================================
 // CHAPTER 32.1: THE NAIVE STRING-MATCHING ALGORITHM
@@ -21,7 +22,27 @@ void test_gap_string_matcher(void);
 // CHAPTER 32.2: THE RABIN-KARP ALGORITHM 
 // ============================================================================
 
+int rabin_karp_matcher(char* T, char* P, int n, int m, int d, int q);
+void test_rabin_karp_matcher(void);
 
+typedef struct {
+    char* pattern;
+    int length;
+    int hash;
+} PatternHash;
+
+int rabin_karp_multi_matcher(
+    char* T, 
+    PatternHash* patterns, 
+    int patternCnt, 
+    int n, 
+    int d, 
+    int q
+);
+void test_rabin_karp_multi_matcher(void);
+
+int rabin_karp_2d_matcher(char** T, char** P, int n, int m, int d, int q);
+void test_rabin_karp_2d_matcher(void);
 
 // ============================================================================
 // CHAPTER 32.3: STRING MATCHING WITH FINITE AUTOMATA
