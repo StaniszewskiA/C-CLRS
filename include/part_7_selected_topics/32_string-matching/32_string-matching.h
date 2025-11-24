@@ -48,6 +48,15 @@ void test_rabin_karp_2d_matcher(void);
 // CHAPTER 32.3: STRING MATCHING WITH FINITE AUTOMATA
 // ============================================================================
 
+#define ALPHABET_SIZE 256
+void compute_transition_function(char* P, int m, int delta[][ALPHABET_SIZE]);
+void finite_automaton_matcher(char* T, int n, char* P, int m, int delta[][ALPHABET_SIZE]);
+void test_finite_automaton_matcher(void);
+
+#define MAX_SUBS 16
+#define MAX_SUB_LEN 128
+void finite_automaton_gap_matcher(char* T, int m, char* P);
+void test_finite_automaton_gap_matcher(void);
 
 
 // ============================================================================

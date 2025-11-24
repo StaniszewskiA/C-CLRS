@@ -380,6 +380,9 @@ THE_NAIVE_STRING_MATCHING_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_s
 THE_RABIN_KARP_ALGORITHM_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/2_the_rabin-karp_algorithm/the_rabin-karp_algorithm.c
 THE_RABIN_KARP_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/2_the_rabin-karp_algorithm/main.c
 
+STRING_MATCHING_WITH_FINITE_AUTOMATA_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/3_string_matching_with_finite_automata/string_matching_with_finite_automata.c
+STRING_MATCHING_WITH_FINITE_AUTOMATA_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/3_string_matching_with_finite_automata/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -497,6 +500,7 @@ THE_RABIN_KARP_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-match
 		chapter-31-problems run-chapter-31-problems \
 		the-naive-string-matching-algorithm run-the-naive-string-matching-algorithm \
 		the-rabin-karp-algorithm run-the-rabin-karp-algorithm \
+		string-matching-with-finite-automata run-string-matching-with-finite-automata
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1301,6 +1305,15 @@ the-rabin-karp-algorithm: $(BINDIR)
 
 run-the-rabin-karp-algorithm: the-rabin-karp-algorithm
 	$(BINDIR)/the-rabin-karp-algorithm
+
+string-matching-with-finite-automata: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(STRING_MATCHING_WITH_FINITE_AUTOMATA_SRC) \
+	$(STRING_MATCHING_WITH_FINITE_AUTOMATA_MAIN) \
+	-o $(BINDIR)/string-matching-with-finite-automata
+
+run-string-matching-with-finite-automata: string-matching-with-finite-automata
+	$(BINDIR)/string-matching-with-finite-automata
 
 # ============================================================================
 # UTILITY TARGETS
