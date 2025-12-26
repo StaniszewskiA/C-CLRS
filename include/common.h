@@ -12,6 +12,7 @@
 #include <limits.h>
 #include <float.h>
 #include <complex.h>
+#include <stdbool.h>
 
 // Constants
 #define MAX_SIZE 1000

@@ -383,6 +383,9 @@ THE_RABIN_KARP_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-match
 STRING_MATCHING_WITH_FINITE_AUTOMATA_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/3_string_matching_with_finite_automata/string_matching_with_finite_automata.c
 STRING_MATCHING_WITH_FINITE_AUTOMATA_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/3_string_matching_with_finite_automata/main.c
 
+THE_KNUTH_MORRIS_PRATT_ALGORITHM_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/4_the_knuth-morris-pratt_algorithm/the_knuth-morris-pratt_algorithm.c
+THE_KNUTH_MORRIS_PRATT_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/4_the_knuth-morris-pratt_algorithm/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -500,7 +503,8 @@ STRING_MATCHING_WITH_FINITE_AUTOMATA_MAIN = $(SRCDIR)/part_7_selected_topics/32_
 		chapter-31-problems run-chapter-31-problems \
 		the-naive-string-matching-algorithm run-the-naive-string-matching-algorithm \
 		the-rabin-karp-algorithm run-the-rabin-karp-algorithm \
-		string-matching-with-finite-automata run-string-matching-with-finite-automata
+		string-matching-with-finite-automata run-string-matching-with-finite-automata \
+		the-knuth-morris-pratt-algorithm run-the-knuth-morris-pratt-algorithm
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1314,6 +1318,15 @@ string-matching-with-finite-automata: $(BINDIR)
 
 run-string-matching-with-finite-automata: string-matching-with-finite-automata
 	$(BINDIR)/string-matching-with-finite-automata
+
+the-knuth-morris-pratt-algorithm: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(THE_KNUTH_MORRIS_PRATT_ALGORITHM_SRC) \
+	$(THE_KNUTH_MORRIS_PRATT_ALGORITHM_MAIN) \
+	-o $(BINDIR)/the-knuth-morris-pratt-algorithm
+
+run-the-knuth-morris-pratt-algorithm: the-knuth-morris-pratt-algorithm
+	$(BINDIR)/the-knuth-morris-pratt-algorithm
 
 # ============================================================================
 # UTILITY TARGETS
