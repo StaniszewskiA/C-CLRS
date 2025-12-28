@@ -386,6 +386,9 @@ STRING_MATCHING_WITH_FINITE_AUTOMATA_MAIN = $(SRCDIR)/part_7_selected_topics/32_
 THE_KNUTH_MORRIS_PRATT_ALGORITHM_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/4_the_knuth-morris-pratt_algorithm/the_knuth-morris-pratt_algorithm.c
 THE_KNUTH_MORRIS_PRATT_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/4_the_knuth-morris-pratt_algorithm/main.c
 
+SUFFIX_ARRAYS_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/5_suffix_arrays/suffix_arrays.c
+SUFFIX_ARRAYS_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/5_suffix_arrays/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -504,7 +507,8 @@ THE_KNUTH_MORRIS_PRATT_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_stri
 		the-naive-string-matching-algorithm run-the-naive-string-matching-algorithm \
 		the-rabin-karp-algorithm run-the-rabin-karp-algorithm \
 		string-matching-with-finite-automata run-string-matching-with-finite-automata \
-		the-knuth-morris-pratt-algorithm run-the-knuth-morris-pratt-algorithm
+		the-knuth-morris-pratt-algorithm run-the-knuth-morris-pratt-algorithm \
+		suffix-arrays run-suffix-arrays
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1327,6 +1331,15 @@ the-knuth-morris-pratt-algorithm: $(BINDIR)
 
 run-the-knuth-morris-pratt-algorithm: the-knuth-morris-pratt-algorithm
 	$(BINDIR)/the-knuth-morris-pratt-algorithm
+
+suffix-arrays: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(SUFFIX_ARRAYS_SRC) \
+	$(SUFFIX_ARRAYS_MAIN) \
+	-o $(BINDIR)/suffix-arrays
+
+run-suffix-arrays: suffix-arrays
+	$(BINDIR)/suffix-arrays
 
 # ============================================================================
 # UTILITY TARGETS

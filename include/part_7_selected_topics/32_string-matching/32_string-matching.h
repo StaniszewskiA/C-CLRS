@@ -92,10 +92,31 @@ void compute_transition_function_kmp(
 void test_compute_transition_function_kmp(void);
 
 // ============================================================================
-// CHAPTER 32.5: SUFFIX TABLES
+// CHAPTER 32.5: SUFFIX ARRAYS
 // ============================================================================
 
+typedef struct {
+    int rightRank;
+    int leftRank;
+    int idx;
+} SubstrRank;
 
+int* compute_suffix_array(const char* T, int n);
+void text_compute_suffix_array(void);
+
+int* compute_lcp(const char* T, int* SA, int n);
+void test_compute_lcp(void);
+
+void test_compute_lcp_hippity_hoppity(void);
+
+int* compute_suffix_array_early(const char* T, int n);
+void test_compute_suffix_array_early(void);
+
+void longest_common_substrings(const char* T1, const char* T2);
+void test_longest_common_substrings(void);
+
+void possibly_longest_palindromes(const char* T);
+void test_possibly_longest_palindromes(void);
 
 // ============================================================================
 // PROBLEMS
