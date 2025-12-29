@@ -122,6 +122,7 @@ void test_possibly_longest_palindromes(void);
 // PROBLEMS
 // ============================================================================
 
-
+int* repetition_factors(const char* P);
+void test_repetition_factors(void);
 
 #endif 

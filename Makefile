@@ -389,6 +389,8 @@ THE_KNUTH_MORRIS_PRATT_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_stri
 SUFFIX_ARRAYS_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/5_suffix_arrays/suffix_arrays.c
 SUFFIX_ARRAYS_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/5_suffix_arrays/main.c
 
+CHAPTER_32_PROBLEMS_SRC = src/part_7_selected_topics/32_string-matching/problems.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -508,7 +510,8 @@ SUFFIX_ARRAYS_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/5_suffi
 		the-rabin-karp-algorithm run-the-rabin-karp-algorithm \
 		string-matching-with-finite-automata run-string-matching-with-finite-automata \
 		the-knuth-morris-pratt-algorithm run-the-knuth-morris-pratt-algorithm \
-		suffix-arrays run-suffix-arrays
+		suffix-arrays run-suffix-arrays \
+		chapter-32-problems run-chapter-32-problems \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1341,9 +1344,19 @@ suffix-arrays: $(BINDIR)
 run-suffix-arrays: suffix-arrays
 	$(BINDIR)/suffix-arrays
 
+chapter-32-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(CHAPTER_32_PROBLEMS_SRC) \
+	$(THE_KNUTH_MORRIS_PRATT_ALGORITHM_SRC) \
+	-o $(BINDIR)/chapter-32-problems
+
+run-chapter-32-problems: chapter-32-problems
+	$(BINDIR)/chapter-32-problems
+
 # ============================================================================
 # UTILITY TARGETS
 # ============================================================================
 
 clean:
 	rm -rf $(BINDIR)
+	
