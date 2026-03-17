@@ -373,6 +373,24 @@ PRIMALITY_TESTING_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_al
 
 CHAPTER_31_PROBLEMS_SRC = src/part_7_selected_topics/31_number-theoretic_algorithms/problems.c
 
+# Chapter 32
+THE_NAIVE_STRING_MATCHING_ALGORITHM_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/1_the_naive_string-matching_algorithm/the_naive_string-matching_algorithm.c
+THE_NAIVE_STRING_MATCHING_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/1_the_naive_string-matching_algorithm/main.c
+
+THE_RABIN_KARP_ALGORITHM_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/2_the_rabin-karp_algorithm/the_rabin-karp_algorithm.c
+THE_RABIN_KARP_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/2_the_rabin-karp_algorithm/main.c
+
+STRING_MATCHING_WITH_FINITE_AUTOMATA_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/3_string_matching_with_finite_automata/string_matching_with_finite_automata.c
+STRING_MATCHING_WITH_FINITE_AUTOMATA_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/3_string_matching_with_finite_automata/main.c
+
+THE_KNUTH_MORRIS_PRATT_ALGORITHM_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/4_the_knuth-morris-pratt_algorithm/the_knuth-morris-pratt_algorithm.c
+THE_KNUTH_MORRIS_PRATT_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/4_the_knuth-morris-pratt_algorithm/main.c
+
+SUFFIX_ARRAYS_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/5_suffix_arrays/suffix_arrays.c
+SUFFIX_ARRAYS_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/5_suffix_arrays/main.c
+
+CHAPTER_32_PROBLEMS_SRC = src/part_7_selected_topics/32_string-matching/problems.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -486,9 +504,14 @@ CHAPTER_31_PROBLEMS_SRC = src/part_7_selected_topics/31_number-theoretic_algorit
 		chinese-remainder-theorem run-chinese-remainder-theorem \
 		powers-of-an-element run-powers-of-an-element \
 		the-rsa-public-key-cryptosystem run-the-rsa-public-key-cryptosystem \
-		primality-testing run-primality-testing
+		primality-testing run-primality-testing \
 		chapter-31-problems run-chapter-31-problems \
-
+		the-naive-string-matching-algorithm run-the-naive-string-matching-algorithm \
+		the-rabin-karp-algorithm run-the-rabin-karp-algorithm \
+		string-matching-with-finite-automata run-string-matching-with-finite-automata \
+		the-knuth-morris-pratt-algorithm run-the-knuth-morris-pratt-algorithm \
+		suffix-arrays run-suffix-arrays \
+		chapter-32-problems run-chapter-32-problems \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1274,9 +1297,66 @@ chapter-31-problems: $(BINDIR)
 run-chapter-31-problems: chapter-31-problems
 	$(BINDIR)/chapter-31-problems
 
+# Chapter 32
+the-naive-string-matching-algorithm: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(THE_NAIVE_STRING_MATCHING_ALGORITHM_SRC) \
+	$(THE_NAIVE_STRING_MATCHING_ALGORITHM_MAIN) \
+	-o $(BINDIR)/the-naive-string-matching-algorithm
+
+run-the-naive-string-matching-algorithm: the-naive-string-matching-algorithm
+	$(BINDIR)/the-naive-string-matching-algorithm
+
+the-rabin-karp-algorithm: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(POWERS_OF_AN_ELEMENT_SRC) \
+	$(THE_RABIN_KARP_ALGORITHM_SRC) \
+	$(THE_RABIN_KARP_ALGORITHM_MAIN) \
+	-o $(BINDIR)/the-rabin-karp-algorithm
+
+run-the-rabin-karp-algorithm: the-rabin-karp-algorithm
+	$(BINDIR)/the-rabin-karp-algorithm
+
+string-matching-with-finite-automata: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(STRING_MATCHING_WITH_FINITE_AUTOMATA_SRC) \
+	$(STRING_MATCHING_WITH_FINITE_AUTOMATA_MAIN) \
+	-o $(BINDIR)/string-matching-with-finite-automata
+
+run-string-matching-with-finite-automata: string-matching-with-finite-automata
+	$(BINDIR)/string-matching-with-finite-automata
+
+the-knuth-morris-pratt-algorithm: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(THE_KNUTH_MORRIS_PRATT_ALGORITHM_SRC) \
+	$(THE_KNUTH_MORRIS_PRATT_ALGORITHM_MAIN) \
+	-o $(BINDIR)/the-knuth-morris-pratt-algorithm
+
+run-the-knuth-morris-pratt-algorithm: the-knuth-morris-pratt-algorithm
+	$(BINDIR)/the-knuth-morris-pratt-algorithm
+
+suffix-arrays: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(SUFFIX_ARRAYS_SRC) \
+	$(SUFFIX_ARRAYS_MAIN) \
+	-o $(BINDIR)/suffix-arrays
+
+run-suffix-arrays: suffix-arrays
+	$(BINDIR)/suffix-arrays
+
+chapter-32-problems: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(CHAPTER_32_PROBLEMS_SRC) \
+	$(THE_KNUTH_MORRIS_PRATT_ALGORITHM_SRC) \
+	-o $(BINDIR)/chapter-32-problems
+
+run-chapter-32-problems: chapter-32-problems
+	$(BINDIR)/chapter-32-problems
+
 # ============================================================================
 # UTILITY TARGETS
 # ============================================================================
 
 clean:
 	rm -rf $(BINDIR)
+	
