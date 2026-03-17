@@ -125,4 +125,26 @@ void test_possibly_longest_palindromes(void);
 int* repetition_factors(const char* P);
 void test_repetition_factors(void);
 
+void burrows_wheeler_transform(
+    const char* T,
+    const int* SA,
+    int n,
+    char* out
+);
+void test_burrows_wheeler_transform(void);
+void compute_rank(
+    const char* bwt,
+    int n,
+    int* rank
+);
+void test_compute_rank(void);
+void inverse_bwt(
+    const char* bwt,
+    const int* rank,
+    int n,
+    char* out
+);
+void test_inverse_bwt(void);
+
+
 #endif 
