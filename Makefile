@@ -391,6 +391,10 @@ SUFFIX_ARRAYS_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/5_suffi
 
 CHAPTER_32_PROBLEMS_SRC = src/part_7_selected_topics/32_string-matching/problems.c
 
+# Chapter 33
+CLUSTERING_SRC = $(SRCDIR)/part_7_selected_topics/33_machine_learning_algorithms/1_clustering/clustering.c
+CLUSTERING_MAIN = $(SRCDIR)/part_7_selected_topics/33_machine_learning_algorithms/1_clustering/main.c
+
 # ============================================================================
 # PHONY TARGETS
 # ============================================================================
@@ -512,6 +516,7 @@ CHAPTER_32_PROBLEMS_SRC = src/part_7_selected_topics/32_string-matching/problems
 		the-knuth-morris-pratt-algorithm run-the-knuth-morris-pratt-algorithm \
 		suffix-arrays run-suffix-arrays \
 		chapter-32-problems run-chapter-32-problems \
+		clustering run-clustering \
 
 # ============================================================================
 # DEFAULT TARGETS
@@ -1352,6 +1357,17 @@ chapter-32-problems: $(BINDIR)
 
 run-chapter-32-problems: chapter-32-problems
 	$(BINDIR)/chapter-32-problems
+
+# Chapter 33
+clustering: $(BINDIR)
+	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
+	$(CLUSTERING_SRC) \
+	$(CLUSTERING_MAIN) \
+	-o $(BINDIR)/clustering
+
+run-clustering: clustering
+	$(BINDIR)/clustering
+
 
 # ============================================================================
 # UTILITY TARGETS
