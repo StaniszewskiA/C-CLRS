@@ -446,10 +446,12 @@ chapter-32-problems_SRC                  := $(P7_COMMONS) $(KMP) $(CH32)/problem
 
 # Chapter 33
 CH33 := $(P7)/33_machine_learning_algorithms
-CLUSTERING := $(CH33)/1_clustering/clustering.c
+CLUSTERING             := $(CH33)/1_clustering/clustering.c
+MULTIPLICATIVE_WEIGHTS := $(CH33)/2_multiplicative_weight_update_method/multiplicative_weight_update_method.c
 
-PROGRAMS += clustering
-clustering_SRC := $(P7_COMMONS) $(call app,$(CLUSTERING))
+PROGRAMS += clustering multiplicative-weights
+clustering_SRC             := $(P7_COMMONS) $(call app,$(CLUSTERING))
+multiplicative-weights_SRC := $(P7_COMMONS) $(call app,$(MULTIPLICATIVE_WEIGHTS))
 
 # ============================================================================
 # RULES

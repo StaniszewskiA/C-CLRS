@@ -44,7 +44,49 @@ void test_kmeans_1d(void);
 // CHAPTER 33.2: Multiplicative weight update method
 // ============================================================================
 
+#define MWU_N_EXPERTS 4
+#define MWU_N_ROUNDS 10
+#define MWU_N_TRIALS 100000
 
+void weighted_majority(
+    const int* predictions,
+    const int* outcomes,
+    int T,
+    int n,
+    double gamma,
+    double* weights,
+    int* p
+);
+void test_weighted_majority(void);
+
+int halving_with_reset(
+    const int* preds,
+    const int* outcomes,
+    int T,
+    int n,
+    int* p
+);
+void test_halving_with_reset(void);
+
+void randomized_halving(
+    const int* preds,
+    const int* outcomes,
+    int T,
+    int n,
+    int* p
+);
+void test_randomized_halving(void);
+
+void randomized_weighted_majority(
+    const int* preds,
+    const int* outcomes,
+    int T,
+    int n,
+    double epsilon,
+    double* weights,
+    int* p
+);
+void test_randomized_weighted_majority(void);
 
 // ============================================================================
 // CHAPTER 33.3: Gradient descent
