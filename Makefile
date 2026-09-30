@@ -1,1362 +1,486 @@
-# C-CLRS Makefile
-# Compiler and flags
-CC = gcc
-CFLAGS = -std=c99 -Wall -Wextra -Iinclude -lm
-SRCDIR = src
-BINDIR = bin
+CC      := gcc
+CFLAGS  := -std=c99 -Wall -Wextra -Iinclude
+LDLIBS  := -lm
+SRCDIR  := src
+BINDIR  := bin
+EXE     := $(if $(filter Windows_NT,$(OS)),.exe)
+OPENMP  := -fopenmp -lpthread
 
-# Common source files
-COMMON_SRC = $(SRCDIR)/common.c
-MAIN_SRC = $(SRCDIR)/main.c
+ifeq ($(shell echo "x"),"x")
+  MKDIR = if not exist $(subst /,\,$(1)) mkdir $(subst /,\,$(1))
+  RMDIR = if exist $(subst /,\,$(1)) rmdir /s /q $(subst /,\,$(1))
+else
+  MKDIR = mkdir -p $(1)
+  RMDIR = rm -rf $(1)
+endif
 
-# Part commons
-PART_1_COMMONS_SRC = $(SRCDIR)/part_1_foundations/part_1_commons.c
-PART_2_COMMONS_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/part_2_commons.c
-PART_3_COMMONS_SRC = $(SRCDIR)/part_3_data_structures/part_3_commons.c
-PART_4_COMMONS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/part_4_commons.c
-PART_5_COMMONS_SRC = $(SRCDIR)/part_5_advanced_data_structures/part_5_commons.c
-PART_6_COMMONS_SRC = $(SRCDIR)/part_6_graph_algorithms/part_6_commons.c
-PART_7_COMMONS_SRC = $(SRCDIR)/part_7_selected_topics/part_7_commons.c
+COMMON  := $(SRCDIR)/common.c
+rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$(d),$(2)) $(filter $(subst *,%,$(2)),$(d)))
+HEADERS := $(call rwildcard,include,*.h)
+
+app = $(1) $(dir $(1))main.c
+
+P1 := $(SRCDIR)/part_1_foundations
+P2 := $(SRCDIR)/part_2_sorting_and_order_statistics
+P3 := $(SRCDIR)/part_3_data_structures
+P4 := $(SRCDIR)/part_4_advanced_design_and_analysis_techniques
+P5 := $(SRCDIR)/part_5_advanced_data_structures
+P6 := $(SRCDIR)/part_6_graph_algorithms
+P7 := $(SRCDIR)/part_7_selected_topics
+
+P1_COMMONS := $(P1)/part_1_commons.c
+P2_COMMONS := $(P2)/part_2_commons.c
+P3_COMMONS := $(P3)/part_3_commons.c
+P4_COMMONS := $(P4)/part_4_commons.c
+P5_COMMONS := $(P5)/part_5_commons.c
+P6_COMMONS := $(P6)/part_6_commons.c
+P7_COMMONS := $(P7)/part_7_commons.c
+
+# ============================================================================
+# MAIN DEMO
+# ============================================================================
+
+PROGRAMS += demo demo-debug
+demo_SRC        := $(SRCDIR)/main.c
+demo-debug_SRC  := $(SRCDIR)/main.c
+demo-debug_FLAGS := -DDEBUG
 
 # ============================================================================
 # PART 1: FOUNDATIONS
 # ============================================================================
 
 # Chapter 1
-COMPLEXITY_TABLE_SRC = $(SRCDIR)/part_1_foundations/1_the_role_of_algorithms_in_computing/complexity_table/complexity_table.c
-COMPLEXITY_TABLE_MAIN = $(SRCDIR)/part_1_foundations/1_the_role_of_algorithms_in_computing/complexity_table/main.c
+CH1 := $(P1)/1_the_role_of_algorithms_in_computing
+COMPLEXITY_TABLE := $(CH1)/complexity_table/complexity_table.c
+
+PROGRAMS += complexity-table
+complexity-table_SRC := $(call app,$(COMPLEXITY_TABLE))
 
 # Chapter 2
-INSERTION_SORT_SRC = $(SRCDIR)/part_1_foundations/2_getting_started/1_insertion_sort/insertion_sort.c
-INSERTION_SORT_MAIN = $(SRCDIR)/part_1_foundations/2_getting_started/1_insertion_sort/main.c
+CH2 := $(P1)/2_getting_started
+INSERTION_SORT       := $(CH2)/1_insertion_sort/insertion_sort.c
+ANALYZING_ALGORITHMS := $(CH2)/2_analyzing_algorithms/analyzing_algorithms.c
+DESIGNING_ALGORITHMS := $(CH2)/3_designing_algorithms/designing_algorithms.c
 
-ANALYZING_ALGORITHMS_SRC = $(SRCDIR)/part_1_foundations/2_getting_started/2_analyzing_algorithms/analyzing_algorithms.c
-ANALYZING_ALGORITHMS_MAIN = $(SRCDIR)/part_1_foundations/2_getting_started/2_analyzing_algorithms/main.c
-
-DESIGNING_ALGORITHMS_SRC = $(SRCDIR)/part_1_foundations/2_getting_started/3_designing_algorithms/designing_algorithms.c
-DESIGNING_ALGORITHMS_MAIN = $(SRCDIR)/part_1_foundations/2_getting_started/3_designing_algorithms/main.c
-
-CHAPTER_2_PROBLEMS_SRC = $(SRCDIR)/part_1_foundations/2_getting_started/problems.c
+PROGRAMS += insertion-sort analyzing-algorithms designing-algorithms chapter-2-problems
+insertion-sort_SRC       := $(P1_COMMONS) $(call app,$(INSERTION_SORT))
+analyzing-algorithms_SRC := $(P1_COMMONS) $(call app,$(ANALYZING_ALGORITHMS))
+designing-algorithms_SRC := $(P1_COMMONS) $(call app,$(DESIGNING_ALGORITHMS))
+chapter-2-problems_SRC   := $(P1_COMMONS) $(CH2)/problems.c
 
 # Chapter 4
-SQUARE_MATRIX_MULT_SRC = $(SRCDIR)/part_1_foundations/4_divide_and_conquer/1_square_matrix_mutliplication/square_matrix_multiplication.c
-SQUARE_MATRIX_MULT_MAIN = $(SRCDIR)/part_1_foundations/4_divide_and_conquer/1_square_matrix_mutliplication/main.c
+CH4 := $(P1)/4_divide_and_conquer
+SQUARE_MATRIX_MULT := $(CH4)/1_square_matrix_mutliplication/square_matrix_multiplication.c
+STRASSEN           := $(CH4)/2_strassen_algorithm/strassen_algorithm.c
 
-STRASSEN_SRC = $(SRCDIR)/part_1_foundations/4_divide_and_conquer/2_strassen_algorithm/strassen_algorithm.c
-STRASSEN_MAIN = $(SRCDIR)/part_1_foundations/4_divide_and_conquer/2_strassen_algorithm/main.c
+PROGRAMS += square-matrix-mult strassen
+square-matrix-mult_SRC := $(P1_COMMONS) $(call app,$(SQUARE_MATRIX_MULT))
+strassen_SRC           := $(P1_COMMONS) $(call app,$(STRASSEN))
 
 # Chapter 5
-HIRE_ASSISTANT_SRC = $(SRCDIR)/part_1_foundations/5_probabilistic_analysis_and_randomized_algorithms/1_hire_assistant/hire_assistant.c
-HIRE_ASSISTANT_MAIN = $(SRCDIR)/part_1_foundations/5_probabilistic_analysis_and_randomized_algorithms/1_hire_assistant/main.c
+CH5 := $(P1)/5_probabilistic_analysis_and_randomized_algorithms
+HIRE_ASSISTANT := $(CH5)/1_hire_assistant/hire_assistant.c
 
-CHAPTER_5_PROBLEMS_SRC = $(SRCDIR)/part_1_foundations/5_probabilistic_analysis_and_randomized_algorithms/problems.c
+PROGRAMS += hire-assistant chapter-5-problems
+hire-assistant_SRC     := $(P1_COMMONS) $(call app,$(HIRE_ASSISTANT))
+chapter-5-problems_SRC := $(P1_COMMONS) $(CH5)/problems.c
 
 # ============================================================================
 # PART 2: SORTING AND ORDER STATISTICS
 # ============================================================================
 
 # Chapter 6
-MAINTAINING_HEAP_PROPERTY_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/6_heapsort/2_maintaining_the_heap_property/maintaining_the_heap_property.c
-MAINTAINING_HEAP_PROPERTY_MAIN = $(SRCDIR)/part_2_sorting_and_order_statistics/6_heapsort/2_maintaining_the_heap_property/main.c
+CH6 := $(P2)/6_heapsort
+HEAPIFY         := $(CH6)/2_maintaining_the_heap_property/maintaining_the_heap_property.c
+HEAPSORT        := $(CH6)/4_the_heapsort_algorithm/the_heapsort_algorithm.c
+PRIORITY_QUEUES := $(CH6)/5_priority_queues/priority_queues.c
 
-HEAPSORT_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/6_heapsort/4_the_heapsort_algorithm/the_heapsort_algorithm.c
-HEAPSORT_MAIN = $(SRCDIR)/part_2_sorting_and_order_statistics/6_heapsort/4_the_heapsort_algorithm/main.c
-
-PRIORITY_QUEUES_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/6_heapsort/5_priority_queues/priority_queues.c
-PRIORITY_QUEUES_MAIN = $(SRCDIR)/part_2_sorting_and_order_statistics/6_heapsort/5_priority_queues/main.c
-
-CHAPTER_6_PROBLEMS_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/6_heapsort/problems.c
+PROGRAMS += maintaining-heap-property heapsort priority-queues chapter-6-problems
+maintaining-heap-property_SRC := $(P2_COMMONS) $(call app,$(HEAPIFY))
+heapsort_SRC                  := $(P2_COMMONS) $(HEAPIFY) $(call app,$(HEAPSORT))
+priority-queues_SRC           := $(P2_COMMONS) $(HEAPIFY) $(HEAPSORT) $(call app,$(PRIORITY_QUEUES))
+chapter-6-problems_SRC        := $(P2_COMMONS) $(HEAPIFY) $(PRIORITY_QUEUES) $(CH6)/problems.c
 
 # Chapter 7
-QUICKSORT_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/7_quicksort/1_quicksort/quicksort.c
-QUICKSORT_MAIN = $(SRCDIR)/part_2_sorting_and_order_statistics/7_quicksort/1_quicksort/main.c
+CH7 := $(P2)/7_quicksort
+QUICKSORT := $(CH7)/1_quicksort/quicksort.c
 
-CHAPTER_7_PROBLEMS_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/7_quicksort/problems.c
+PROGRAMS += quicksort chapter-7-problems
+quicksort_SRC          := $(P2_COMMONS) $(call app,$(QUICKSORT))
+chapter-7-problems_SRC := $(P2_COMMONS) $(QUICKSORT) $(CH7)/problems.c
 
 # Chapter 8
-COUNTING_SORT_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/8_sorting_in_linear_time/2_counting_sort/counting_sort.c
-COUNTING_SORT_MAIN = $(SRCDIR)/part_2_sorting_and_order_statistics/8_sorting_in_linear_time/2_counting_sort/main.c
+CH8 := $(P2)/8_sorting_in_linear_time
+COUNTING_SORT := $(CH8)/2_counting_sort/counting_sort.c
+RADIX_SORT    := $(CH8)/3_radix_sort/radix_sort.c
+BUCKET_SORT   := $(CH8)/4_bucket_sort/bucket_sort.c
 
-RADIX_SORT_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/8_sorting_in_linear_time/3_radix_sort/radix_sort.c
-RADIX_SORT_MAIN = $(SRCDIR)/part_2_sorting_and_order_statistics/8_sorting_in_linear_time/3_radix_sort/main.c
-
-BUCKET_SORT_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/8_sorting_in_linear_time/4_bucket_sort/bucket_sort.c
-BUCKET_SORT_MAIN = $(SRCDIR)/part_2_sorting_and_order_statistics/8_sorting_in_linear_time/4_bucket_sort/main.c
-
-CHAPTER_8_PROBLEMS_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/8_sorting_in_linear_time/problems.c
+PROGRAMS += counting-sort radix-sort bucket-sort chapter-8-problems
+counting-sort_SRC      := $(P2_COMMONS) $(call app,$(COUNTING_SORT))
+radix-sort_SRC         := $(P2_COMMONS) $(COUNTING_SORT) $(call app,$(RADIX_SORT))
+bucket-sort_SRC        := $(P2_COMMONS) $(call app,$(BUCKET_SORT))
+chapter-8-problems_SRC := $(P2_COMMONS) $(COUNTING_SORT) $(CH8)/problems.c
 
 # Chapter 9
-MIN_MAX_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/9_medians_and_order_statistics/1_minimum_and_maximum/minimum_and_maximum.c
-MIN_MAX_MAIN = $(SRCDIR)/part_2_sorting_and_order_statistics/9_medians_and_order_statistics/1_minimum_and_maximum/main.c
+CH9 := $(P2)/9_medians_and_order_statistics
+MIN_MAX           := $(CH9)/1_minimum_and_maximum/minimum_and_maximum.c
+RANDOMIZED_SELECT := $(CH9)/2_selection_in_expected_linear_time/selection_in_expected_linear_time.c
+WORST_CASE_SELECT := $(CH9)/3_selection_in_worst-case_linear_time/selection_in_worst-case_linear_time.c
 
-RANDOMIZED_SELECT_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/9_medians_and_order_statistics/2_selection_in_expected_linear_time/selection_in_expected_linear_time.c
-RANDOMIZED_SELECT_MAIN = $(SRCDIR)/part_2_sorting_and_order_statistics/9_medians_and_order_statistics/2_selection_in_expected_linear_time/main.c
-
-WORST_CASE_SELECT_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/9_medians_and_order_statistics/3_selection_in_worst-case_linear_time/selection_in_worst-case_linear_time.c
-WORST_CASE_SELECT_MAIN = $(SRCDIR)/part_2_sorting_and_order_statistics/9_medians_and_order_statistics/3_selection_in_worst-case_linear_time/main.c
-
-CHAPTER_9_PROBLEMS_SRC = $(SRCDIR)/part_2_sorting_and_order_statistics/9_medians_and_order_statistics/problems.c
+PROGRAMS += min-max randomized-select worst-case-select chapter-9-problems
+min-max_SRC            := $(P2_COMMONS) $(call app,$(MIN_MAX))
+randomized-select_SRC  := $(P2_COMMONS) $(call app,$(RANDOMIZED_SELECT))
+worst-case-select_SRC  := $(P2_COMMONS) $(call app,$(WORST_CASE_SELECT))
+chapter-9-problems_SRC := $(P2_COMMONS) $(RANDOMIZED_SELECT) $(CH9)/problems.c
 
 # ============================================================================
 # PART 3: DATA STRUCTURES
 # ============================================================================
 
 # Chapter 10
-STACKS_QUEUES_SRC = $(SRCDIR)/part_3_data_structures/10_elementary_data_structures/1_stacks_and_queues/stacks_and_queues.c
-STACKS_QUEUES_MAIN = $(SRCDIR)/part_3_data_structures/10_elementary_data_structures/1_stacks_and_queues/main.c
+CH10 := $(P3)/10_elementary_data_structures
+STACKS_QUEUES := $(CH10)/1_stacks_and_queues/stacks_and_queues.c
+LINKED_LISTS  := $(CH10)/2_linked_lists/linked_lists.c
+ROOTED_TREES  := $(CH10)/4_representing_rooted_trees/representing_rooted_trees.c
 
-LINKED_LISTS_SRC = $(SRCDIR)/part_3_data_structures/10_elementary_data_structures/2_linked_lists/linked_lists.c
-LINKED_LISTS_MAIN = $(SRCDIR)/part_3_data_structures/10_elementary_data_structures/2_linked_lists/main.c
-
-ROOTED_TREES_SRC = $(SRCDIR)/part_3_data_structures/10_elementary_data_structures/4_representing_rooted_trees/representing_rooted_trees.c
-ROOTED_TREES_MAIN = $(SRCDIR)/part_3_data_structures/10_elementary_data_structures/4_representing_rooted_trees/main.c
-
-CHAPTER_10_PROBLEMS_SRC = $(SRCDIR)/part_3_data_structures/10_elementary_data_structures/problems.c
+PROGRAMS += stacks-queues linked-lists rooted-trees chapter-10-problems
+stacks-queues_SRC       := $(P3_COMMONS) $(call app,$(STACKS_QUEUES))
+linked-lists_SRC        := $(P3_COMMONS) $(call app,$(LINKED_LISTS))
+rooted-trees_SRC        := $(P3_COMMONS) $(call app,$(ROOTED_TREES))
+chapter-10-problems_SRC := $(P3_COMMONS) $(CH10)/problems.c
 
 # Chapter 11
-DIRECT_ACCESS_TABLES_SRC = $(SRCDIR)/part_3_data_structures/11_hash_tables/1_direct-address_tables/direct_address_tables.c
-DIRECT_ACCESS_TABLES_MAIN = $(SRCDIR)/part_3_data_structures/11_hash_tables/1_direct-address_tables/main.c
+CH11 := $(P3)/11_hash_tables
+DIRECT_ACCESS_TABLES := $(CH11)/1_direct-address_tables/direct_address_tables.c
+HASH_TABLES          := $(CH11)/2_hash_tables/hash_tables.c
+HASH_FUNCTIONS       := $(CH11)/3_hash_functions/hash_functions.c
+OPEN_ADDRESSING      := $(CH11)/4_open_addressing/open_addressing.c
+PERFECT_HASHING      := $(CH11)/5_perfect_hashing/perfect_hashing.c
 
-HASH_TABLES_SRC = $(SRCDIR)/part_3_data_structures/11_hash_tables/2_hash_tables/hash_tables.c
-HASH_TABLES_MAIN = $(SRCDIR)/part_3_data_structures/11_hash_tables/2_hash_tables/main.c
-
-HASH_FUNCTIONS_SRC = $(SRCDIR)/part_3_data_structures/11_hash_tables/3_hash_functions/hash_functions.c
-HASH_FUNCTIONS_MAIN = $(SRCDIR)/part_3_data_structures/11_hash_tables/3_hash_functions/main.c
-
-OPEN_ADDRESSING_SRC = $(SRCDIR)/part_3_data_structures/11_hash_tables/4_open_addressing/open_addressing.c
-OPEN_ADDRESSING_MAIN = $(SRCDIR)/part_3_data_structures/11_hash_tables/4_open_addressing/main.c
-
-PERFECT_HASHING_SRC = $(SRCDIR)/part_3_data_structures/11_hash_tables/5_perfect_hashing/perfect_hashing.c
-PERFECT_HASHING_MAIN = $(SRCDIR)/part_3_data_structures/11_hash_tables/5_perfect_hashing/main.c
+PROGRAMS += direct-access-tables hash-tables hash-functions open-addressing perfect-hashing
+direct-access-tables_SRC := $(P3_COMMONS) $(call app,$(DIRECT_ACCESS_TABLES))
+hash-tables_SRC          := $(P3_COMMONS) $(call app,$(HASH_TABLES))
+hash-functions_SRC       := $(P3_COMMONS) $(call app,$(HASH_FUNCTIONS))
+open-addressing_SRC      := $(P3_COMMONS) $(HASH_FUNCTIONS) $(call app,$(OPEN_ADDRESSING))
+perfect-hashing_SRC      := $(P3_COMMONS) $(HASH_FUNCTIONS) $(call app,$(PERFECT_HASHING))
 
 # Chapter 12
-WHAT_IS_BST_SRC = $(SRCDIR)/part_3_data_structures/12_binary_search_trees/1_what_is_a_binary_search_tree/what_is_a_binary_search_tree.c
-WHAT_IS_BST_MAIN = $(SRCDIR)/part_3_data_structures/12_binary_search_trees/1_what_is_a_binary_search_tree/main.c
+CH12 := $(P3)/12_binary_search_trees
+WHAT_IS_BST            := $(CH12)/1_what_is_a_binary_search_tree/what_is_a_binary_search_tree.c
+BST_QUERYING           := $(CH12)/2_querying_a_binary_search_tree/querying_a_binary_search_tree.c
+BST_INSERTION_DELETION := $(CH12)/3_insertion_and_deletion/insertion_and_deletion.c
 
-BST_QUERYING_SRC = $(SRCDIR)/part_3_data_structures/12_binary_search_trees/2_querying_a_binary_search_tree/querying_a_binary_search_tree.c
-BST_QUERYING_MAIN = $(SRCDIR)/part_3_data_structures/12_binary_search_trees/2_querying_a_binary_search_tree/main.c
-
-BST_INSERTION_DELETION_SRC = $(SRCDIR)/part_3_data_structures/12_binary_search_trees/3_insertion_and_deletion/insertion_and_deletion.c
-BST_INSERTION_DELETION_MAIN = $(SRCDIR)/part_3_data_structures/12_binary_search_trees/3_insertion_and_deletion/main.c
+PROGRAMS += bst-what-is bst-querying bst-insertion-deletion
+bst-what-is_SRC            := $(P3_COMMONS) $(call app,$(WHAT_IS_BST))
+bst-querying_SRC           := $(P3_COMMONS) $(call app,$(BST_QUERYING))
+bst-insertion-deletion_SRC := $(P3_COMMONS) $(BST_QUERYING) $(call app,$(BST_INSERTION_DELETION))
 
 # Chapter 13
-RED_BLACK_TREES_SRC = $(SRCDIR)/part_3_data_structures/13_red-black_trees/red-black_trees.c
-RED_BLACK_TREES_MAIN = $(SRCDIR)/part_3_data_structures/13_red-black_trees/main.c
+CH13 := $(P3)/13_red-black_trees
+RED_BLACK_TREES := $(CH13)/red-black_trees.c
 
-CHAPTER_13_PROBLEMS_SRC = $(SRCDIR)/part_3_data_structures/13_red-black_trees/problems.c
+PROGRAMS += red-black-trees chapter-13-problems
+red-black-trees_SRC     := $(P3_COMMONS) $(call app,$(RED_BLACK_TREES))
+chapter-13-problems_SRC := $(P3_COMMONS) $(CH13)/problems.c
 
 # ============================================================================
 # PART 4: ADVANCED DESIGN AND ANALYSIS TECHNIQUES
 # ============================================================================
 
 # Chapter 14
-ROD_CUTTING_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/1_rod_cutting/rod_cutting.c
-ROD_CUTTING_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/1_rod_cutting/main.c
+CH14 := $(P4)/14_dynamic_programming
+ROD_CUTTING       := $(CH14)/1_rod_cutting/rod_cutting.c
+MATRIX_CHAIN_MULT := $(CH14)/2_matrix_chain_multiplication/matrix_chain_multiplication.c
+ELEMENTS_DP       := $(CH14)/3_elements_of_dynamic_programming/elements_of_dynamic_programming.c
+LCS               := $(CH14)/4_longest_common_subsequence/longest_common_subsequence.c
+OPTIMAL_BST       := $(CH14)/5_optimal_binary_search_trees/optimal_binary_search_trees.c
 
-MATRIX_CHAIN_MULT_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/2_matrix_chain_multiplication/matrix_chain_multiplication.c
-MATRIX_CHAIN_MULT_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/2_matrix_chain_multiplication/main.c
-
-ELEMENTS_DP_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/3_elements_of_dynamic_programming/elements_of_dynamic_programming.c
-ELEMENTS_DP_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/3_elements_of_dynamic_programming/main.c
-
-LCS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/4_longest_common_subsequence/longest_common_subsequence.c
-LCS_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/4_longest_common_subsequence/main.c
-
-OPTIMAL_BST_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/5_optimal_binary_search_trees/optimal_binary_search_trees.c
-OPTIMAL_BST_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/5_optimal_binary_search_trees/main.c
-
-CHAPTER_14_PROBLEMS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/14_dynamic_programming/problems.c
+PROGRAMS += rod-cutting matrix-chain-mult elements-dp lcs optimal-bst chapter-14-problems
+rod-cutting_SRC         := $(P4_COMMONS) $(call app,$(ROD_CUTTING))
+matrix-chain-mult_SRC   := $(P4_COMMONS) $(call app,$(MATRIX_CHAIN_MULT))
+elements-dp_SRC         := $(P4_COMMONS) $(call app,$(ELEMENTS_DP))
+lcs_SRC                 := $(P4_COMMONS) $(call app,$(LCS))
+optimal-bst_SRC         := $(P3_COMMONS) $(P4_COMMONS) $(BST_QUERYING) $(call app,$(OPTIMAL_BST))
+chapter-14-problems_SRC := $(P4_COMMONS) $(CH14)/problems.c
 
 # Chapter 15
-ACTIVITY_SELECTION_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/1_activity_selection_problem/activity_selection_problem.c
-ACTIVITY_SELECTION_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/1_activity_selection_problem/main.c
+CH15 := $(P4)/15_greedy_algorithms
+ACTIVITY_SELECTION := $(CH15)/1_activity_selection_problem/activity_selection_problem.c
+GREEDY_ELEMENTS    := $(CH15)/2_elements_of_the_greedy_strategy/elements_of_the_greedy_strategy.c
+HUFFMAN_CODES      := $(CH15)/3_huffman_codes/huffman_codes.c
+OFFLINE_CACHING    := $(CH15)/4_off-line_caching/off-line_caching.c
 
-GREEDY_ELEMENTS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/2_elements_of_the_greedy_strategy/elements_of_the_greedy_strategy.c
-GREEDY_ELEMENTS_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/2_elements_of_the_greedy_strategy/main.c
-
-HUFFMAN_CODES_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/3_huffman_codes/huffman_codes.c
-HUFFMAN_CODES_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/3_huffman_codes/main.c
-
-OFFLINE_CACHING_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/4_off-line_caching/off-line_caching.c
-OFFLINE_CACHING_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/4_off-line_caching/main.c
-
-CHAPTER_15_PROBLEMS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/15_greedy_algorithms/problems.c
+PROGRAMS += activity-selection greedy-elements huffman-codes offline-caching chapter-15-problems
+activity-selection_SRC  := $(P4_COMMONS) $(call app,$(ACTIVITY_SELECTION))
+greedy-elements_SRC     := $(P4_COMMONS) $(call app,$(GREEDY_ELEMENTS))
+huffman-codes_SRC       := $(P4_COMMONS) $(call app,$(HUFFMAN_CODES))
+offline-caching_SRC     := $(P4_COMMONS) $(call app,$(OFFLINE_CACHING))
+chapter-15-problems_SRC := $(P4_COMMONS) $(CH15)/problems.c
 
 # Chapter 16
-AMORTIZED_ANALYSIS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/16_amortized_analysis/amortized_analysis.c
-AMORTIZED_ANALYSIS_MAIN = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/16_amortized_analysis/main.c
+CH16 := $(P4)/16_amortized_analysis
+AMORTIZED_ANALYSIS := $(CH16)/amortized_analysis.c
 
-CHAPTER_16_PROBLEMS_SRC = $(SRCDIR)/part_4_advanced_design_and_analysis_techniques/16_amortized_analysis/problems.c
+PROGRAMS += amortized-analysis chapter-16-problems
+amortized-analysis_SRC  := $(P4_COMMONS) $(call app,$(AMORTIZED_ANALYSIS))
+chapter-16-problems_SRC := $(P4_COMMONS) $(CH16)/problems.c
 
 # ============================================================================
 # PART 5: ADVANCED DATA STRUCTURES
 # ============================================================================
 
 # Chapter 17
-DYNAMIC_ORDER_STATISTICS_SRC = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/1_dynamic_order_statistics/dynamic_order_statistics.c
-DYNAMIC_ORDER_STATISTICS_MAIN = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/1_dynamic_order_statistics/main.c
+CH17 := $(P5)/17_enriching_data_structures
+DYNAMIC_ORDER_STATISTICS     := $(CH17)/1_dynamic_order_statistics/dynamic_order_statistics.c
+HOW_TO_ENRICH_DATA_STRUCTURE := $(CH17)/2_how_to_enrich_a_data_structure/how_to_enrich_a_data_structure.c
+INTERVAL_TREES               := $(CH17)/3_interval_trees/interval_trees.c
 
-HOW_TO_ENRICH_DATA_STRUCTURE_SRC = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/2_how_to_enrich_a_data_structure/how_to_enrich_a_data_structure.c
-HOW_TO_ENRICH_DATA_STRUCTURE_MAIN = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/2_how_to_enrich_a_data_structure/main.c
-
-INTERVAL_TREES_SRC = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/3_interval_trees/interval_trees.c
-INTERVAL_TREES_MAIN = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/3_interval_trees/main.c
-
-CHAPTER_17_PROBLEMS_SRC = $(SRCDIR)/part_5_advanced_data_structures/17_enriching_data_structures/problems.c
+PROGRAMS += dynamic-order-statistics how-to-enrich-data-structure interval-trees chapter-17-problems
+dynamic-order-statistics_SRC     := $(P3_COMMONS) $(RED_BLACK_TREES) $(call app,$(DYNAMIC_ORDER_STATISTICS))
+how-to-enrich-data-structure_SRC := $(P3_COMMONS) $(RED_BLACK_TREES) $(call app,$(HOW_TO_ENRICH_DATA_STRUCTURE))
+interval-trees_SRC               := $(P3_COMMONS) $(RED_BLACK_TREES) $(call app,$(INTERVAL_TREES))
+chapter-17-problems_SRC          := $(P3_COMMONS) $(P5_COMMONS) $(RED_BLACK_TREES) $(CH17)/problems.c
 
 # Chapter 18
-B_TREES_SRC = $(SRCDIR)/part_5_advanced_data_structures/18_b-trees/b-trees.c
-B_TREES_MAIN = $(SRCDIR)/part_5_advanced_data_structures/18_b-trees/main.c
+CH18 := $(P5)/18_b-trees
+B_TREES := $(CH18)/b-trees.c
 
-CHAPTER_18_PROBLEMS_SRC = $(SRCDIR)/part_5_advanced_data_structures/18_b-trees/problems.c
+PROGRAMS += b-trees chapter-18-problems
+b-trees_SRC             := $(P5_COMMONS) $(call app,$(B_TREES))
+chapter-18-problems_SRC := $(P5_COMMONS) $(B_TREES) $(CH18)/problems.c
 
 # Chapter 19
-DISJOINT_SET_OPERATIONS_SRC = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/1_disjoint_set_operations/disjoint_set_operations.c
-DISJOINT_SET_OPERATIONS_MAIN = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/1_disjoint_set_operations/main.c
+CH19 := $(P5)/19_data_structures_for_disjoint_sets
+DISJOINT_SET_OPERATIONS    := $(CH19)/1_disjoint_set_operations/disjoint_set_operations.c
+LINKED_LIST_REPRESENTATION := $(CH19)/2_linked-list_representation_of_disjoint_sets/linked-list_representation_of_disjoint_sets.c
+DISJOINT_SET_FORESTS       := $(CH19)/3_disjoint_set_forests/disjoint_set_forests.c
 
-LINKED_LIST_REPRESENTATION_SRC = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/2_linked-list_representation_of_disjoint_sets/linked-list_representation_of_disjoint_sets.c
-LINKED_LIST_REPRESENTATION_MAIN = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/2_linked-list_representation_of_disjoint_sets/main.c
-
-DISJOINT_SET_FORESTS_SRC = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/3_disjoint_set_forests/disjoint_set_forests.c
-DISJOINT_SET_FORESTS_MAIN = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/3_disjoint_set_forests/main.c
-
-CHAPTER_19_PROBLEMS_SRC = $(SRCDIR)/part_5_advanced_data_structures/19_data_structures_for_disjoint_sets/problems.c
+PROGRAMS += disjoint-set-operations linked-list-representation disjoint-set-forests chapter-19-problems
+disjoint-set-operations_SRC    := $(P5_COMMONS) $(call app,$(DISJOINT_SET_OPERATIONS))
+linked-list-representation_SRC := $(P5_COMMONS) $(call app,$(LINKED_LIST_REPRESENTATION))
+disjoint-set-forests_SRC       := $(P5_COMMONS) $(call app,$(DISJOINT_SET_FORESTS))
+chapter-19-problems_SRC        := $(P5_COMMONS) $(CH19)/problems.c
 
 # ============================================================================
 # PART 6: GRAPH ALGORITHMS
 # ============================================================================
 
 # Chapter 20
-REPRESENTATIONS_OF_GRAPHS_SRC = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/1_representations_of_graphs/representations_of_graphs.c
-REPRESENTATIONS_OF_GRAPHS_MAIN = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/1_representations_of_graphs/main.c
+CH20 := $(P6)/20_elementary_graph_algorithms
+REPRESENTATIONS_OF_GRAPHS     := $(CH20)/1_representations_of_graphs/representations_of_graphs.c
+BREADTH_FIRST_SEARCH          := $(CH20)/2_breadth-first_search/breadth-first_search.c
+DEPTH_FIRST_SEARCH            := $(CH20)/3_depth-first_search/depth-first_search.c
+TOPOLOGICAL_SORT              := $(CH20)/4_topological_sort/topological_sort.c
+STRONGLY_CONNECTED_COMPONENTS := $(CH20)/5_strongly_connected_components/strongly_connected_components.c
 
-BREADTH_FIRST_SEARCH_SRC = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/2_breadth-first_search/breadth-first_search.c
-BREADTH_FIRST_SEARCH_MAIN = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/2_breadth-first_search/main.c
-
-DEPTH_FIRST_SEARCH_SRC = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/3_depth-first_search/depth-first_search.c
-DEPTH_FIRST_SEARCH_MAIN = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/3_depth-first_search/main.c
-
-TOPOLOGICAL_SORT_SRC = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/4_topological_sort/topological_sort.c
-TOPOLOGICAL_SORT_MAIN = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/4_topological_sort/main.c
-
-STRONGLY_CONNECTED_COMPONENTS_SRC = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/5_strongly_connected_components/strongly_connected_components.c
-STRONGLY_CONNECTED_COMPONENTS_MAIN = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/5_strongly_connected_components/main.c
-
-CHAPTER_20_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/20_elementary_graph_algorithms/problems.c
+PROGRAMS += representations-of-graphs breadth-first-search depth-first-search topological-sort \
+            strongly-connected-components chapter-20-problems
+representations-of-graphs_SRC     := $(P1_COMMONS) $(P6_COMMONS) $(STRASSEN) $(call app,$(REPRESENTATIONS_OF_GRAPHS))
+breadth-first-search_SRC          := $(P1_COMMONS) $(P6_COMMONS) $(STRASSEN) $(call app,$(BREADTH_FIRST_SEARCH))
+depth-first-search_SRC            := $(P1_COMMONS) $(P6_COMMONS) $(call app,$(DEPTH_FIRST_SEARCH))
+topological-sort_SRC              := $(P6_COMMONS) $(call app,$(TOPOLOGICAL_SORT))
+strongly-connected-components_SRC := $(P6_COMMONS) $(STRASSEN) $(TOPOLOGICAL_SORT) $(call app,$(STRONGLY_CONNECTED_COMPONENTS))
+chapter-20-problems_SRC           := $(P6_COMMONS) $(TOPOLOGICAL_SORT) $(STRONGLY_CONNECTED_COMPONENTS) $(CH20)/problems.c
 
 # Chapter 21
-GROWING_MST_SRC = $(SRCDIR)/part_6_graph_algorithms/21_minimum_spanning_trees/1_growing_a_minimum_spanning_tree/growing_a_minimum_spanning_tree.c
-GROWING_MST_MAIN = $(SRCDIR)/part_6_graph_algorithms/21_minimum_spanning_trees/1_growing_a_minimum_spanning_tree/main.c
+CH21 := $(P6)/21_minimum_spanning_trees
+GROWING_MST  := $(CH21)/1_growing_a_minimum_spanning_tree/growing_a_minimum_spanning_tree.c
+KRUSKAL_PRIM := $(CH21)/2_the_algorithms_of_kruskal_and_prim/the_algorithms_of_kruskal_and_prim.c
 
-THE_ALGORITHMS_OF_KRUSKAL_AND_PRIM_SRC = $(SRCDIR)/part_6_graph_algorithms/21_minimum_spanning_trees/2_the_algorithms_of_kruskal_and_prim/the_algorithms_of_kruskal_and_prim.c
-THE_ALGORITHMS_OF_KRUSKAL_AND_PRIM_MAIN = $(SRCDIR)/part_6_graph_algorithms/21_minimum_spanning_trees/2_the_algorithms_of_kruskal_and_prim/main.c
-
-CHAPTER_21_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/21_minimum_spanning_trees/problems.c
+PROGRAMS += growing-mst kruskal-prim chapter-21-problems
+growing-mst_SRC         := $(P6_COMMONS) $(call app,$(GROWING_MST))
+kruskal-prim_SRC        := $(P5_COMMONS) $(P6_COMMONS) $(DISJOINT_SET_OPERATIONS) $(call app,$(KRUSKAL_PRIM))
+chapter-21-problems_SRC := $(P5_COMMONS) $(P6_COMMONS) $(DISJOINT_SET_OPERATIONS) $(CH21)/problems.c
 
 # Chapter 22
-BELLMAN_FORD_ALGORITHM_SRC = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/1_the_bellman-ford_algorithm/the_bellman-ford_algorithm.c
-BELLMAN_FORD_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/1_the_bellman-ford_algorithm/main.c
+CH22 := $(P6)/22_single-source_shortest_paths
+BELLMAN_FORD           := $(CH22)/1_the_bellman-ford_algorithm/the_bellman-ford_algorithm.c
+DAG_SHORTEST_PATHS     := $(CH22)/2_single-source_shortest_paths_in_dags/single-source_shortest_paths_in_dags.c
+DIJKSTRA               := $(CH22)/3_dijkstras_algorithm/dijkstras_algorithm.c
+DIFFERENCE_CONSTRAINTS := $(CH22)/4_difference_constraints_and_shortest_paths/difference_constraints_and_shortest_paths.c
 
-DAG_SHORTEST_PATHS_SRC = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/2_single-source_shortest_paths_in_dags/single-source_shortest_paths_in_dags.c
-DAG_SHORTEST_PATHS_MAIN = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/2_single-source_shortest_paths_in_dags/main.c
-
-DIJKSTRA_ALGORITHM_SRC = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/3_dijkstras_algorithm/dijkstras_algorithm.c
-DIJKSTRA_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/3_dijkstras_algorithm/main.c
-
-DIFFERENCE_CONSTRAINTS_SRC = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/4_difference_constraints_and_shortest_paths/difference_constraints_and_shortest_paths.c
-DIFFERENCE_CONSTRAINTS_MAIN = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/4_difference_constraints_and_shortest_paths/main.c
-
-CHAPTER_22_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/22_single-source_shortest_paths/problems.c
+PROGRAMS += bellman-ford dag-shortest-paths dijkstra difference-constraints chapter-22-problems
+bellman-ford_SRC           := $(P6_COMMONS) $(call app,$(BELLMAN_FORD))
+dag-shortest-paths_SRC     := $(P6_COMMONS) $(call app,$(DAG_SHORTEST_PATHS))
+dijkstra_SRC               := $(P6_COMMONS) $(call app,$(DIJKSTRA))
+difference-constraints_SRC := $(P6_COMMONS) $(BELLMAN_FORD) $(call app,$(DIFFERENCE_CONSTRAINTS))
+chapter-22-problems_SRC    := $(P6_COMMONS) $(BELLMAN_FORD) $(DAG_SHORTEST_PATHS) $(DIJKSTRA) \
+                              $(DIFFERENCE_CONSTRAINTS) $(CH22)/problems.c
 
 # Chapter 23
-SHORTEST_PATHS_MATRIX_MULT_SRC = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/1_shortest_paths_and_matrix_multiplication/shortest_paths_and_matrix_multiplication.c
-SHORTEST_PATHS_MATRIX_MULT_MAIN = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/1_shortest_paths_and_matrix_multiplication/main.c
+CH23 := $(P6)/23_all-pairs_shortest_paths
+SHORTEST_PATHS_MATRIX_MULT := $(CH23)/1_shortest_paths_and_matrix_multiplication/shortest_paths_and_matrix_multiplication.c
+FLOYD_WARSHALL             := $(CH23)/2_the_floyd-warshall_algorithm/the_floyd-warshall_algorithm.c
+JOHNSONS_ALGORITHM         := $(CH23)/3_johnsons_algorithm_for_sparse_graphs/johnsons_algorithm_for_sparse_graphs.c
 
-FLOYD_WARSHALL_ALGORITHM_SRC = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/2_the_floyd-warshall_algorithm/the_floyd-warshall_algorithm.c
-FLOYD_WARSHALL_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/2_the_floyd-warshall_algorithm/main.c
-
-JOHNSONS_ALGORITHM_SRC = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/3_johnsons_algorithm_for_sparse_graphs/johnsons_algorithm_for_sparse_graphs.c
-JOHNSONS_ALGORITHM_MAIN = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/3_johnsons_algorithm_for_sparse_graphs/main.c
-
-CHAPTER_23_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/23_all-pairs_shortest_paths/problems.c
+PROGRAMS += shortest-paths-matrix-mult floyd-warshall johnsons-algorithm chapter-23-problems
+shortest-paths-matrix-mult_SRC := $(P6_COMMONS) $(call app,$(SHORTEST_PATHS_MATRIX_MULT))
+floyd-warshall_SRC             := $(P6_COMMONS) $(SHORTEST_PATHS_MATRIX_MULT) $(call app,$(FLOYD_WARSHALL))
+johnsons-algorithm_SRC         := $(P6_COMMONS) $(call app,$(JOHNSONS_ALGORITHM))
+chapter-23-problems_SRC        := $(P6_COMMONS) $(SHORTEST_PATHS_MATRIX_MULT) $(FLOYD_WARSHALL) \
+                                  $(JOHNSONS_ALGORITHM) $(CH23)/problems.c
 
 # Chapter 24
-THE_FORD_FULKERSON_METHOD_SRC = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/2_the_ford_fulkerson_method/the_ford_fulkerson_method.c
-THE_FORD_FULKERSON_METHOD_MAIN = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/2_the_ford_fulkerson_method/main.c
+CH24 := $(P6)/24_maximum_flow
+FORD_FULKERSON             := $(CH24)/2_the_ford_fulkerson_method/the_ford_fulkerson_method.c
+MAXIMUM_BIPARTITE_MATCHING := $(CH24)/3_maximum_bipartite_matching/maximum_bipartite_matching.c
 
-MAXIMUM_BIPARTITE_MATCHING_SRC = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/3_maximum_bipartite_matching/maximum_bipartite_matching.c
-MAXIMUM_BIPARTITE_MATCHING_MAIN = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/3_maximum_bipartite_matching/main.c
-
-CHAPTER_24_PROBLEMS_SRC = $(SRCDIR)/part_6_graph_algorithms/24_maximum_flow/problems.c
+PROGRAMS += ford-fulkerson-method maximum-bipartite-matching chapter-24-problems
+ford-fulkerson-method_SRC      := $(P6_COMMONS) $(call app,$(FORD_FULKERSON))
+maximum-bipartite-matching_SRC := $(P6_COMMONS) $(FORD_FULKERSON) $(call app,$(MAXIMUM_BIPARTITE_MATCHING))
+chapter-24-problems_SRC        := $(P6_COMMONS) $(FORD_FULKERSON) $(CH24)/problems.c
 
 # Chapter 25
-CHAPTER_25_PROBLEMS_SRC = \
-	$(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/problems.c \
-	$(SRCDIR)/part_6_graph_algorithms/25_bipartite_matching/1_maximum_bipartite_matching/maximum_bipartite_matching.c
+CH25 := $(P6)/25_bipartite_matching
+MAXIMUM_BIPARTITE_MATCHING_2 := $(CH25)/1_maximum_bipartite_matching/maximum_bipartite_matching.c
+STABLE_MARRIAGE              := $(CH25)/2_stable_marriage_problem/stable_marriage_problem.c
+HUNGARIAN_ALGORITHM          := $(CH25)/3_the_hungarian_algorithm_for_assignment_problem/the_hungarian_algorithm_for_assignment_problem.c
+
+PROGRAMS += maximum-bipartite-matching-2 stable-marriage hungarian-algorithm chapter-25-problems
+maximum-bipartite-matching-2_SRC := $(P6_COMMONS) $(STACKS_QUEUES) $(call app,$(MAXIMUM_BIPARTITE_MATCHING_2))
+stable-marriage_SRC              := $(P6_COMMONS) $(call app,$(STABLE_MARRIAGE))
+hungarian-algorithm_SRC          := $(P6_COMMONS) $(STACKS_QUEUES) $(MAXIMUM_BIPARTITE_MATCHING_2) \
+                                    $(call app,$(HUNGARIAN_ALGORITHM))
+chapter-25-problems_SRC          := $(P6_COMMONS) $(STACKS_QUEUES) $(MAXIMUM_BIPARTITE_MATCHING_2) \
+                                    $(HUNGARIAN_ALGORITHM) $(CH25)/problems.c
 
 # ============================================================================
 # PART 7: SELECTED TOPICS
 # ============================================================================
 
 # Chapter 26
-THE_BASICS_OF_FORK_JOIN_MAIN = src/part_7_selected_topics/26_multithreaded_algorithms/1_the_basics_of_fork-join_multithreading/main.c
-THE_BASICS_OF_FORK_JOIN_SRC = src/part_7_selected_topics/26_multithreaded_algorithms/1_the_basics_of_fork-join_multithreading/the_basics_of_fork-join_multithreading.c
+CH26 := $(P7)/26_multithreaded_algorithms
+FORK_JOIN                  := $(CH26)/1_the_basics_of_fork-join_multithreading/the_basics_of_fork-join_multithreading.c
+MULTITHREADED_MATRIX_MULT  := $(CH26)/2_multithreaded_matrix_multiplication/multithreaded_matrix_multiplication.c
+MULTITHREADED_MERGE_SORT   := $(CH26)/3_multithreaded_merge_sort/multithreaded_merge_sort.c
 
-MULTITHREADED_MATRIX_MULTIPLICATION_MAIN = src/part_7_selected_topics/26_multithreaded_algorithms/2_multithreaded_matrix_multiplication/main.c
-MULTITHREADED_MATRIX_MULTIPLICATION_SRC = src/part_7_selected_topics/26_multithreaded_algorithms/2_multithreaded_matrix_multiplication/multithreaded_matrix_multiplication.c
-
-MULTITHREADED_MERGE_SORT_MAIN = src/part_7_selected_topics/26_multithreaded_algorithms/3_multithreaded_merge_sort/main.c
-MULTITHREADED_MERGE_SORT_SRC = src/part_7_selected_topics/26_multithreaded_algorithms/3_multithreaded_merge_sort/multithreaded_merge_sort.c
-
-CHAPTER_26_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/26_multithreaded_algorithms/problems.c
+PROGRAMS += the-basics-of-fork-join multithreaded-matrix-multiplication multithreaded-merge-sort chapter-26-problems
+the-basics-of-fork-join_SRC             := $(P7_COMMONS) $(call app,$(FORK_JOIN))
+multithreaded-matrix-multiplication_SRC := $(P7_COMMONS) $(call app,$(MULTITHREADED_MATRIX_MULT))
+multithreaded-merge-sort_SRC            := $(P7_COMMONS) $(P1_COMMONS) $(QUICKSORT) $(call app,$(MULTITHREADED_MERGE_SORT))
+chapter-26-problems_SRC                 := $(P7_COMMONS) $(P1_COMMONS) $(QUICKSORT) $(MULTITHREADED_MERGE_SORT) \
+                                           $(CH26)/problems.c
+the-basics-of-fork-join_FLAGS             := $(OPENMP)
+multithreaded-matrix-multiplication_FLAGS := $(OPENMP)
+multithreaded-merge-sort_FLAGS            := $(OPENMP)
+chapter-26-problems_FLAGS                 := $(OPENMP)
 
 # Chapter 27
-WAITING_FOR_AN_ELEVATOR_MAIN = src/part_7_selected_topics/27_online_algorithms/1_waiting_for_an_elevator/main.c
-WAITING_FOR_AN_ELEVATOR_SRC = src/part_7_selected_topics/27_online_algorithms/1_waiting_for_an_elevator/1_waiting_for_an_elevator.c
+CH27 := $(P7)/27_online_algorithms
+WAITING_FOR_AN_ELEVATOR   := $(CH27)/1_waiting_for_an_elevator/1_waiting_for_an_elevator.c
+MAINTAINING_A_SEARCH_LIST := $(CH27)/2_maintaining_a_search_list/maintaining_a_search_list.c
+ONLINE_CACHE_MANAGEMENT   := $(CH27)/3_online_cache_management/online_cache_management.c
 
-MAINTAINING_A_SEARCH_LIST_MAIN = src/part_7_selected_topics/27_online_algorithms/2_maintaining_a_search_list/main.c
-MAINTAINING_A_SEARCH_LIST_SRC = src/part_7_selected_topics/27_online_algorithms/2_maintaining_a_search_list/maintaining_a_search_list.c
-
-ONLINE_CACHE_MANAGEMENT_MAIN = src/part_7_selected_topics/27_online_algorithms/3_online_cache_management/main.c
-ONLINE_CACHE_MANAGEMENT_SRC = src/part_7_selected_topics/27_online_algorithms/3_online_cache_management/online_cache_management.c
-
-CHAPTER_27_PROBLEMS_SRC = $(SRCDIR)/part_7_selected_topics/27_online_algorithms/problems.c
+PROGRAMS += waiting-for-an-elevator maintaining-a-search-list online-cache-management chapter-27-problems
+waiting-for-an-elevator_SRC   := $(P7_COMMONS) $(call app,$(WAITING_FOR_AN_ELEVATOR))
+maintaining-a-search-list_SRC := $(P7_COMMONS) $(call app,$(MAINTAINING_A_SEARCH_LIST))
+online-cache-management_SRC   := $(P7_COMMONS) $(call app,$(ONLINE_CACHE_MANAGEMENT))
+chapter-27-problems_SRC       := $(P7_COMMONS) $(CH27)/problems.c
 
 # Chapter 28
-SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_MAIN = src/part_7_selected_topics/28_matrix_operations/1_solving_systems_of_linear_equations/main.c
-SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC = src/part_7_selected_topics/28_matrix_operations/1_solving_systems_of_linear_equations/solving_systems_of_linear_equations.c
+CH28 := $(P7)/28_matrix_operations
+LINEAR_EQUATIONS         := $(CH28)/1_solving_systems_of_linear_equations/solving_systems_of_linear_equations.c
+INVERTING_MATRICES       := $(CH28)/2_inverting_matrices/inverting_matrices.c
+POLYNOMIAL_LEAST_SQUARES := $(CH28)/3_symmetric_positive-definite_matrices_and_least-squares_approximation/symmetric_positive-definite_matrices_and_least-squares_approximation.c
 
-INVERTING_MATRICES_MAIN = src/part_7_selected_topics/28_matrix_operations/2_inverting_matrices/main.c
-INVERTING_MATRICES_SRC = src/part_7_selected_topics/28_matrix_operations/2_inverting_matrices/inverting_matrices.c
-
-POLYNOMIAL_LEAST_SQUARES_MAIN = src/part_7_selected_topics/28_matrix_operations/3_symmetric_positive-definite_matrices_and_least-squares_approximation/main.c
-POLYNOMIAL_LEAST_SQUARES_SRC = src/part_7_selected_topics/28_matrix_operations/3_symmetric_positive-definite_matrices_and_least-squares_approximation/symmetric_positive-definite_matrices_and_least-squares_approximation.c
-
-CHAPTER_28_PROBLEMS_MAIN = src/part_7_selected_topics/28_matrix_operations/problems.c
-CHAPTER_28_PROBLEMS_SRC = src/part_7_selected_topics/28_matrix_operations/problems.c
-
-# Chapter 29
+PROGRAMS += solving-systems-of-linear-equations inverting-matrices polynomial-least-squares chapter-28-problems
+solving-systems-of-linear-equations_SRC := $(P7_COMMONS) $(call app,$(LINEAR_EQUATIONS))
+inverting-matrices_SRC                  := $(P7_COMMONS) $(LINEAR_EQUATIONS) $(call app,$(INVERTING_MATRICES))
+polynomial-least-squares_SRC            := $(P7_COMMONS) $(LINEAR_EQUATIONS) $(INVERTING_MATRICES) \
+                                           $(call app,$(POLYNOMIAL_LEAST_SQUARES))
+chapter-28-problems_SRC                 := $(P7_COMMONS) $(CH28)/problems.c
 
 # Chapter 30
-REPRESENTING_POLYNOMIALS_SRC = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/1_representing_polynomials/representing_polynomials.c
-REPRESENTING_POLYNOMIALS_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/1_representing_polynomials/main.c
+CH30 := $(P7)/30_polynomials_and_the_fft
+REPRESENTING_POLYNOMIALS := $(CH30)/1_representing_polynomials/representing_polynomials.c
+DFT_AND_FFT              := $(CH30)/2_the_dft_and_fft/the_dft_and_fft.c
+EFFICIENT_FFT            := $(CH30)/3_efficient_fft_implementations/efficient_fft_implementations.c
 
-THE_DFT_AND_FFT_SRC = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/2_the_dft_and_fft/the_dft_and_fft.c
-THE_DFT_AND_FFT_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/2_the_dft_and_fft/main.c
-
-EFFICIENT_FFT_IMPLEMENTATION_SRC = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/3_efficient_fft_implementations/efficient_fft_implementations.c
-EFFICIENT_FFT_IMPLEMENTATION_MAIN = $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/3_efficient_fft_implementations/main.c
-
-CHAPTER_30_PROBLEMS_SRC = src/part_7_selected_topics/30_polynomials_and_the_fft/problems.c
+PROGRAMS += representing-polynomials the-dft-and-fft efficient-fft-implementations chapter-30-problems
+representing-polynomials_SRC      := $(P7_COMMONS) $(call app,$(REPRESENTING_POLYNOMIALS))
+the-dft-and-fft_SRC               := $(P7_COMMONS) $(call app,$(DFT_AND_FFT))
+efficient-fft-implementations_SRC := $(P7_COMMONS) $(call app,$(EFFICIENT_FFT))
+chapter-30-problems_SRC           := $(P7_COMMONS) $(CH30)/problems.c
 
 # Chapter 31
-ELEMENTARY_NUMBER_THEORETIC_NOTIONS_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/1_elementary_number-theoretic_notions/elementary_number-theoretic_notions.c
-ELEMENTARY_NUMBER_THEORETIC_NOTIONS_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/1_elementary_number-theoretic_notions/main.c
+CH31 := $(P7)/31_number-theoretic_algorithms
+NUMBER_THEORETIC_NOTIONS := $(CH31)/1_elementary_number-theoretic_notions/elementary_number-theoretic_notions.c
+GCD                      := $(CH31)/2_greatest_common_divisor/greatest_common_divisor.c
+MODULAR_LINEAR_EQUATIONS := $(CH31)/4_solving_modular_linear_equations/solving_modular_linear_equations.c
+CHINESE_REMAINDER        := $(CH31)/5_chinese_remainder_theorem/chinese_remainder_theorem.c
+POWERS_OF_AN_ELEMENT     := $(CH31)/6_powers_of_an_element/powers_of_an_element.c
+RSA                      := $(CH31)/7_the_rsa_public-key-cryptosystem/the_rsa_public-key-cryptosystem.c
+PRIMALITY_TESTING        := $(CH31)/8_primality_testing/primality_testing.c
 
-GREATEST_COMMON_DIVISOR_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/2_greatest_common_divisor/greatest_common_divisor.c
-GREATEST_COMMON_DIVISOR_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/2_greatest_common_divisor/main.c
-
-SOLVING_MODULAR_LINEAR_EQAUTIONS_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/4_solving_modular_linear_equations/solving_modular_linear_equations.c
-SOLVING_MODULAR_LINEAR_EQAUTIONS_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/4_solving_modular_linear_equations/main.c
-
-CHINESE_REMAINDER_THEOREM_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/5_chinese_remainder_theorem/chinese_remainder_theorem.c
-CHINESE_REMAINDER_THEOREM_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/5_chinese_remainder_theorem/main.c
-
-POWERS_OF_AN_ELEMENT_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/6_powers_of_an_element/powers_of_an_element.c
-POWERS_OF_AN_ELEMENT_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/6_powers_of_an_element/main.c
-
-THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/7_the_rsa_public-key-cryptosystem/the_rsa_public-key-cryptosystem.c
-THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/7_the_rsa_public-key-cryptosystem/main.c
-
-PRIMALITY_TESTING_SRC = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/8_primality_testing/primality_testing.c
-PRIMALITY_TESTING_MAIN = $(SRCDIR)/part_7_selected_topics/31_number-theoretic_algorithms/8_primality_testing/main.c
-
-CHAPTER_31_PROBLEMS_SRC = src/part_7_selected_topics/31_number-theoretic_algorithms/problems.c
+PROGRAMS += elementary-number-theoretic-notions greatest-common-divisor solving-modular-linear-equations \
+            chinese-remainder-theorem powers-of-an-element the-rsa-public-key-cryptosystem \
+            primality-testing chapter-31-problems
+elementary-number-theoretic-notions_SRC := $(P7_COMMONS) $(call app,$(NUMBER_THEORETIC_NOTIONS))
+greatest-common-divisor_SRC             := $(P7_COMMONS) $(call app,$(GCD))
+solving-modular-linear-equations_SRC    := $(P7_COMMONS) $(GCD) $(call app,$(MODULAR_LINEAR_EQUATIONS))
+chinese-remainder-theorem_SRC           := $(P7_COMMONS) $(GCD) $(call app,$(CHINESE_REMAINDER))
+powers-of-an-element_SRC                := $(P7_COMMONS) $(call app,$(POWERS_OF_AN_ELEMENT))
+the-rsa-public-key-cryptosystem_SRC     := $(P7_COMMONS) $(GCD) $(POWERS_OF_AN_ELEMENT) $(CHINESE_REMAINDER) \
+                                           $(call app,$(RSA))
+primality-testing_SRC                   := $(P7_COMMONS) $(GCD) $(POWERS_OF_AN_ELEMENT) $(CHINESE_REMAINDER) \
+                                           $(RSA) $(call app,$(PRIMALITY_TESTING))
+chapter-31-problems_SRC                 := $(P7_COMMONS) $(GCD) $(POWERS_OF_AN_ELEMENT) $(CHINESE_REMAINDER) \
+                                           $(RSA) $(PRIMALITY_TESTING) $(CH31)/problems.c
 
 # Chapter 32
-THE_NAIVE_STRING_MATCHING_ALGORITHM_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/1_the_naive_string-matching_algorithm/the_naive_string-matching_algorithm.c
-THE_NAIVE_STRING_MATCHING_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/1_the_naive_string-matching_algorithm/main.c
+CH32 := $(P7)/32_string-matching
+NAIVE_STRING_MATCHING := $(CH32)/1_the_naive_string-matching_algorithm/the_naive_string-matching_algorithm.c
+RABIN_KARP            := $(CH32)/2_the_rabin-karp_algorithm/the_rabin-karp_algorithm.c
+FINITE_AUTOMATA       := $(CH32)/3_string_matching_with_finite_automata/string_matching_with_finite_automata.c
+KMP                   := $(CH32)/4_the_knuth-morris-pratt_algorithm/the_knuth-morris-pratt_algorithm.c
+SUFFIX_ARRAYS         := $(CH32)/5_suffix_arrays/suffix_arrays.c
 
-THE_RABIN_KARP_ALGORITHM_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/2_the_rabin-karp_algorithm/the_rabin-karp_algorithm.c
-THE_RABIN_KARP_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/2_the_rabin-karp_algorithm/main.c
+PROGRAMS += the-naive-string-matching-algorithm the-rabin-karp-algorithm string-matching-with-finite-automata \
+            the-knuth-morris-pratt-algorithm suffix-arrays chapter-32-problems
+the-naive-string-matching-algorithm_SRC  := $(P7_COMMONS) $(call app,$(NAIVE_STRING_MATCHING))
+the-rabin-karp-algorithm_SRC             := $(P7_COMMONS) $(POWERS_OF_AN_ELEMENT) $(call app,$(RABIN_KARP))
+string-matching-with-finite-automata_SRC := $(P7_COMMONS) $(call app,$(FINITE_AUTOMATA))
+the-knuth-morris-pratt-algorithm_SRC     := $(P7_COMMONS) $(call app,$(KMP))
+suffix-arrays_SRC                        := $(P7_COMMONS) $(call app,$(SUFFIX_ARRAYS))
+chapter-32-problems_SRC                  := $(P7_COMMONS) $(KMP) $(CH32)/problems.c
 
-STRING_MATCHING_WITH_FINITE_AUTOMATA_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/3_string_matching_with_finite_automata/string_matching_with_finite_automata.c
-STRING_MATCHING_WITH_FINITE_AUTOMATA_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/3_string_matching_with_finite_automata/main.c
+# Chapter 33
+CH33 := $(P7)/33_machine_learning_algorithms
+CLUSTERING             := $(CH33)/1_clustering/clustering.c
+MULTIPLICATIVE_WEIGHTS := $(CH33)/2_multiplicative_weight_update_method/multiplicative_weight_update_method.c
 
-THE_KNUTH_MORRIS_PRATT_ALGORITHM_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/4_the_knuth-morris-pratt_algorithm/the_knuth-morris-pratt_algorithm.c
-THE_KNUTH_MORRIS_PRATT_ALGORITHM_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/4_the_knuth-morris-pratt_algorithm/main.c
-
-SUFFIX_ARRAYS_SRC = $(SRCDIR)/part_7_selected_topics/32_string-matching/5_suffix_arrays/suffix_arrays.c
-SUFFIX_ARRAYS_MAIN = $(SRCDIR)/part_7_selected_topics/32_string-matching/5_suffix_arrays/main.c
-
-CHAPTER_32_PROBLEMS_SRC = src/part_7_selected_topics/32_string-matching/problems.c
-
-# ============================================================================
-# PHONY TARGETS
-# ============================================================================
-
-.PHONY: all clean help \
-        demo demo-debug run run-debug \
-        complexity-table run-complexity-table \
-        insertion-sort run-insertion-sort \
-        analyzing-algorithms run-analyzing-algorithms \
-        designing-algorithms run-designing-algorithms \
-        chapter-2-problems run-chapter-2-problems \
-        square-matrix-mult run-square-matrix-mult \
-        strassen run-strassen \
-        hire-assistant run-hire-assistant \
-        chapter-5-problems run-chapter-5-problems \
-        maintaining-heap-property run-maintaining-heap-property \
-        heapsort run-heapsort \
-        priority-queues run-priority-queues \
-        chapter-6-problems run-chapter-6-problems \
-        quicksort run-quicksort \
-        chapter-7-problems run-chapter-7-problems \
-        counting-sort run-counting-sort \
-        radix-sort run-radix-sort \
-        bucket-sort run-bucket-sort \
-        chapter-8-problems run-chapter-8-problems \
-        min-max run-min-max \
-        randomized-select run-randomized-select \
-        worst-case-select run-worst-case-select \
-        chapter-9-problems run-chapter-9-problems \
-        stacks-queues run-stacks-queues \
-        linked-lists run-linked-lists \
-        rooted-trees run-rooted-trees \
-        chapter-10-problems run-chapter-10-problems \
-        direct-access-tables run-direct-access-tables \
-        hash-tables run-hash-tables \
-        hash-functions run-hash-functions \
-        open-addressing run-open-addressing \
-        perfect-hashing run-perfect-hashing \
-        bst-what-is run-bst-what-is \
-        bst-querying run-bst-querying \
-        bst-insertion-deletion run-bst-insertion-deletion \
-        red-black-trees run-red-black-trees \
-        chapter-13-problems run-chapter-13-problems \
-        rod-cutting run-rod-cutting \
-		matrix-chain-mult run-matrix-chain-mult \
-		elements-dp run-elements-dp \
-		lcs run-lcs \
-		optimal-bst run-optimal-bst \
-		dp-problems run-dp-problems \
-		activity-selection run-activity-selection \
-		greedy-elements run-greedy-elements \
-		huffman-codes run-huffman-codes \
-		offline-caching run-offline-caching \
-		chapter-15-problems run-chapter-15-problems \
-		amortized-analysis run-amortized-analysis \
-		chapter-16-problems run-chapter-16-problems \
-		dynamic-order-statistics run-dynamic-order-statistics \
-		how-to-enrich-data-structure run-how-to-enrich-data-structure \
-		interval-trees run-interval-trees \
-		chapter-17-problems run-chapter-17-problems \
-        b-trees run-b-trees \
-		chapter-18-problems run-chapter-18-problems \
-		disjoint-set-operations run-disjoint-set-operations \
-		linked-list-representation run-linked-list-representation \
-		disjoint-set-forests run-disjoint-set-forests \
-		chapter-19-problems run-chapter-19-problems \
-		representations-of-graphs run-representations-of-graphs \
-		breadth-first-search run-breadth-first-search \
-		depth-first-search run-depth-first-search \
-		topological-sort run-topological-sort \
-		strongly-connected-components run-strongly-connected-components \
-		chapter-20-problems run-chapter-20-problems \
-		growing-mst run-growing-mst \
-		kruskal-prim run-kruskal-prim \
-		chapter-21-problems run-chapter-21-problems \
-		bellman-ford run-bellman-ford \
-		dag-shortest-paths run-dag-shortest-paths \
-		dijkstra run-dijkstra \
-		difference-constraints run-difference-constraints \
-		chapter-22-problems run-chapter-22-problems \
-		shortest-paths-matrix-mult run-shortest-paths-matrix-mult \
-		floyd-warshall run-floyd-warshall \
-		johnsons-algorithm run-johnsons-algorithm \
-		chapter-23-problems run-chapter-23-problems \
-		ford-fulkerson-method run-ford-fulkerson-method \
-		maximum-bipartite-matching run-maximum-bipartite-matching \
-		chapter-24-problems run-chapter-24-problems \
-		maximum-bipartite-matching-2 run-maximum-bipartite-matching-2 \
-		stable-marriage run-stable-marriage \
-		hungarian-algorithm run-hungarian-algorithm \
-		chapter-25-problems run-chapter-25-problems \
-		the-basics-of-fork-join run-the-basics-of-fork-join \
-		multithreaded-matrix-multiplication run-multithreaded-matrix-multiplication \
-		multithreaded-merge-sort run-multithreaded-merge-sort \
-		chapter-26-problems run-chapter-26-problems \
-		waiting-for-an-elevator run-waiting-for-an-elevator \
-		maintaining-a-search-list run-maintaining-a-search-list \
-		online-cache-management run-online-cache-management \
-		chapter-27-problems run-chapter-27-problems \
-		solving-systems-of-linear-equations run-solving-systems-of-linear-equations \
-		inverting-matrices run-inverting-matrices \
-		polynomial-least-squares run-polynomial-least-squares \
-		chapter-28-problems run-chapter-28-problems \
-		representing-polynomials run-representing-polynomials \
-		the-dft-and-fft run-the-dft-and-fft\
-		efficient_fft_implementations run_efficient_fft_implementations \
-		chapter-30-problems run-chapter-30-problems \
-		elementary-number-theoretic-notions run-elementary-number-theoretic-notions \
-		greatest-common-divisor run-greatest-common-divisor \
-		solving-modular-linear-equations solving-modular-linear-equations \
-		chinese-remainder-theorem run-chinese-remainder-theorem \
-		powers-of-an-element run-powers-of-an-element \
-		the-rsa-public-key-cryptosystem run-the-rsa-public-key-cryptosystem \
-		primality-testing run-primality-testing \
-		chapter-31-problems run-chapter-31-problems \
-		the-naive-string-matching-algorithm run-the-naive-string-matching-algorithm \
-		the-rabin-karp-algorithm run-the-rabin-karp-algorithm \
-		string-matching-with-finite-automata run-string-matching-with-finite-automata \
-		the-knuth-morris-pratt-algorithm run-the-knuth-morris-pratt-algorithm \
-		suffix-arrays run-suffix-arrays \
-		chapter-32-problems run-chapter-32-problems \
+PROGRAMS += clustering multiplicative-weights
+clustering_SRC             := $(P7_COMMONS) $(call app,$(CLUSTERING))
+multiplicative-weights_SRC := $(P7_COMMONS) $(call app,$(MULTIPLICATIVE_WEIGHTS))
 
 # ============================================================================
-# DEFAULT TARGETS
+# RULES
 # ============================================================================
 
-all: demo
+.DEFAULT_GOAL := demo
+
+define PROGRAM
+.PHONY: $(1) run-$(1)
+$(1): $(BINDIR)/$(1)$(EXE)
+run-$(1): $(BINDIR)/$(1)$(EXE)
+	$(BINDIR)/$(1)$(EXE)
+$(BINDIR)/$(1)$(EXE): $(COMMON) $($(1)_SRC) $(HEADERS) | $(BINDIR)
+	$$(CC) $$(CFLAGS) $$($(1)_FLAGS) $(COMMON) $($(1)_SRC) -o $$@ $$(LDLIBS)
+endef
+
+$(foreach p,$(PROGRAMS),$(eval $(call PROGRAM,$(p))))
+
+.PHONY: all list clean assembly-online-cache-management
+all: $(PROGRAMS)
+
+list:
+	@$(foreach p,$(PROGRAMS),$(info $(p)))
 
 $(BINDIR):
-	mkdir -p $(BINDIR)
+	$(call MKDIR,$@)
 
-# ============================================================================
-# MAIN DEMO TARGETS
-# ============================================================================
-
-demo: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(MAIN_SRC) -o $(BINDIR)/demo
-
-demo-debug: $(BINDIR)
-	$(CC) -DDEBUG $(CFLAGS) $(COMMON_SRC) $(MAIN_SRC) -o $(BINDIR)/demo_debug
-
-run: demo
-	$(BINDIR)/demo
-
-run-debug: demo-debug
-	$(BINDIR)/demo_debug
-
-# ============================================================================
-# PART 1: FOUNDATIONS
-# ============================================================================
-	
-# Chapter 1
-complexity-table: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(COMPLEXITY_TABLE_SRC) $(COMPLEXITY_TABLE_MAIN) -o $(BINDIR)/complexity_table
-
-run-complexity-table: complexity-table
-	$(BINDIR)/complexity_table
-
-# Chapter 2
-insertion-sort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(INSERTION_SORT_SRC) $(INSERTION_SORT_MAIN) -o $(BINDIR)/insertion_sort
-
-run-insertion-sort: insertion-sort
-	$(BINDIR)/insertion_sort
-
-analyzing-algorithms: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(ANALYZING_ALGORITHMS_SRC) $(ANALYZING_ALGORITHMS_MAIN) -o $(BINDIR)/analyzing_algorithms
-
-run-analyzing-algorithms: analyzing-algorithms
-	$(BINDIR)/analyzing_algorithms
-
-designing-algorithms: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(DESIGNING_ALGORITHMS_SRC) $(DESIGNING_ALGORITHMS_MAIN) -o $(BINDIR)/designing_algorithms
-
-run-designing-algorithms: designing-algorithms
-	$(BINDIR)/designing_algorithms
-
-chapter-2-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(CHAPTER_2_PROBLEMS_SRC) -o $(BINDIR)/chapter_2_problems
-
-run-chapter-2-problems: chapter-2-problems
-	$(BINDIR)/chapter_2_problems
-
-# Chapter 4
-square-matrix-mult: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(SQUARE_MATRIX_MULT_SRC) $(SQUARE_MATRIX_MULT_MAIN) -o $(BINDIR)/square_matrix_mult
-
-run-square-matrix-mult: square-matrix-mult
-	$(BINDIR)/square_matrix_mult
-
-strassen: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(STRASSEN_SRC) $(STRASSEN_MAIN) -o $(BINDIR)/strassen
-
-run-strassen: strassen
-	$(BINDIR)/strassen
-
-# Chapter 5
-hire-assistant: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(HIRE_ASSISTANT_SRC) $(HIRE_ASSISTANT_MAIN) -o $(BINDIR)/hire_assistant
-
-run-hire-assistant: hire-assistant
-	$(BINDIR)/hire_assistant
-
-chapter-5-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(CHAPTER_5_PROBLEMS_SRC) -o $(BINDIR)/chapter_5_problems
-
-run-chapter-5-problems: chapter-5-problems
-	$(BINDIR)/chapter_5_problems
-
-# ============================================================================
-# PART 2: SORTING AND ORDER STATISTICS
-# ============================================================================
-
-# Chapter 6
-maintaining-heap-property: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(MAINTAINING_HEAP_PROPERTY_SRC) $(MAINTAINING_HEAP_PROPERTY_MAIN) -o $(BINDIR)/maintaining_heap_property
-
-run-maintaining-heap-property: maintaining-heap-property
-	$(BINDIR)/maintaining_heap_property
-
-heapsort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(MAINTAINING_HEAP_PROPERTY_SRC) $(HEAPSORT_SRC) $(HEAPSORT_MAIN) -o $(BINDIR)/heapsort
-
-run-heapsort: heapsort
-	$(BINDIR)/heapsort
-
-priority-queues: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(MAINTAINING_HEAP_PROPERTY_SRC) $(HEAPSORT_SRC) $(PRIORITY_QUEUES_SRC) $(PRIORITY_QUEUES_MAIN) -o $(BINDIR)/priority_queues
-
-run-priority-queues: priority-queues
-	$(BINDIR)/priority_queues
-
-chapter-6-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(MAINTAINING_HEAP_PROPERTY_SRC) $(PRIORITY_QUEUES_SRC) $(CHAPTER_6_PROBLEMS_SRC) -o $(BINDIR)/chapter_6_problems
-
-run-chapter-6-problems: chapter-6-problems
-	$(BINDIR)/chapter_6_problems
-
-# Chapter 7
-quicksort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(QUICKSORT_SRC) $(QUICKSORT_MAIN) -o $(BINDIR)/quicksort
-
-run-quicksort: quicksort
-	$(BINDIR)/quicksort
-
-chapter-7-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(QUICKSORT_SRC) $(CHAPTER_7_PROBLEMS_SRC) -o $(BINDIR)/chapter_7_problems
-
-run-chapter-7-problems: chapter-7-problems
-	$(BINDIR)/chapter_7_problems
-
-# Chapter 8
-counting-sort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(COUNTING_SORT_SRC) $(COUNTING_SORT_MAIN) -o $(BINDIR)/counting_sort
-
-run-counting-sort: counting-sort
-	$(BINDIR)/counting_sort
-
-radix-sort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(COUNTING_SORT_SRC) $(RADIX_SORT_SRC) $(RADIX_SORT_MAIN) -o $(BINDIR)/radix_sort
-
-run-radix-sort: radix-sort
-	$(BINDIR)/radix_sort
-
-bucket-sort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(BUCKET_SORT_SRC) $(BUCKET_SORT_MAIN) -o $(BINDIR)/bucket_sort
-
-run-bucket-sort: bucket-sort
-	$(BINDIR)/bucket_sort
-
-chapter-8-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(COUNTING_SORT_SRC) $(CHAPTER_8_PROBLEMS_SRC) -o $(BINDIR)/chapter_8_problems
-
-run-chapter-8-problems: chapter-8-problems
-	$(BINDIR)/chapter_8_problems
-
-# Chapter 9
-min-max: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(MIN_MAX_SRC) $(MIN_MAX_MAIN) -o $(BINDIR)/min_max
-
-run-min-max: min-max
-	$(BINDIR)/min_max
-
-randomized-select: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(RANDOMIZED_SELECT_SRC) $(RANDOMIZED_SELECT_MAIN) -o $(BINDIR)/randomized_select
-
-run-randomized-select: randomized-select
-	$(BINDIR)/randomized_select
-
-worst-case-select: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(WORST_CASE_SELECT_SRC) $(WORST_CASE_SELECT_MAIN) -o $(BINDIR)/worst_case_select
-
-run-worst-case-select: worst-case-select
-	$(BINDIR)/worst_case_select
-
-chapter-9-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_2_COMMONS_SRC) $(RANDOMIZED_SELECT_SRC) $(CHAPTER_9_PROBLEMS_SRC) -o $(BINDIR)/chapter_9_problems
-
-run-chapter-9-problems: chapter-9-problems
-	$(BINDIR)/chapter_9_problems
-
-# ============================================================================
-# PART 3: DATA STRUCTURES
-# ============================================================================
-
-# Chapter 10
-stacks-queues: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(STACKS_QUEUES_SRC) $(STACKS_QUEUES_MAIN) -o $(BINDIR)/stacks_queues
-
-run-stacks-queues: stacks-queues
-	$(BINDIR)/stacks_queues
-
-linked-lists: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(LINKED_LISTS_SRC) $(LINKED_LISTS_MAIN) -o $(BINDIR)/linked_lists
-
-run-linked-lists: linked-lists
-	$(BINDIR)/linked_lists
-
-rooted-trees: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(ROOTED_TREES_SRC) $(ROOTED_TREES_MAIN) -o $(BINDIR)/rooted_trees
-
-run-rooted-trees: rooted-trees
-	$(BINDIR)/rooted_trees
-
-chapter-10-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(CHAPTER_10_PROBLEMS_SRC) -o $(BINDIR)/chapter_10_problems
-
-run-chapter-10-problems: chapter-10-problems
-	$(BINDIR)/chapter_10_problems
-
-# Chapter 11
-direct-access-tables: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(DIRECT_ACCESS_TABLES_SRC) $(DIRECT_ACCESS_TABLES_MAIN) -o $(BINDIR)/direct_access_tables
-
-run-direct-access-tables: direct-access-tables
-	$(BINDIR)/direct_access_tables
-
-hash-tables: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(HASH_TABLES_SRC) $(HASH_TABLES_MAIN) -o $(BINDIR)/hash_tables
-
-run-hash-tables: hash-tables
-	$(BINDIR)/hash_tables
-
-hash-functions: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(HASH_FUNCTIONS_SRC) $(HASH_FUNCTIONS_MAIN) -o $(BINDIR)/hash_functions
-
-run-hash-functions: hash-functions
-	$(BINDIR)/hash_functions
-
-open-addressing: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(HASH_FUNCTIONS_SRC) $(OPEN_ADDRESSING_SRC) $(OPEN_ADDRESSING_MAIN) -o $(BINDIR)/open_addressing
-
-run-open-addressing: open-addressing
-	$(BINDIR)/open_addressing
-
-perfect-hashing: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(HASH_FUNCTIONS_SRC) $(PERFECT_HASHING_SRC) $(PERFECT_HASHING_MAIN) -o $(BINDIR)/perfect_hashing
-
-run-perfect-hashing: perfect-hashing
-	$(BINDIR)/perfect_hashing
-
-what-is-bst: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(WHAT_IS_BST_SRC) $(WHAT_IS_BST_MAIN) -o $(BINDIR)/what-is-bst
-
-run-bst-what-is: what-is-bst
-	$(BINDIR)/what-is-bst
-
-bst-querying: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(BST_QUERYING_SRC) $(BST_QUERYING_MAIN) -o $(BINDIR)/bst_querying
-
-run-bst-querying: bst-querying
-	$(BINDIR)/bst_querying
-
-bst-insertion-deletion: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(BST_QUERYING_SRC) $(BST_INSERTION_DELETION_SRC) $(BST_INSERTION_DELETION_MAIN) -o $(BINDIR)/bst_insertion_deletion
-
-run-bst-insertion-deletion: bst-insertion-deletion
-	$(BINDIR)/bst_insertion_deletion
-
-red-black-trees: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(RED_BLACK_TREES_SRC) $(RED_BLACK_TREES_MAIN) -o $(BINDIR)/red-black_trees
-
-run-red-black-trees: red-black-trees
-	$(BINDIR)/red-black_trees
-
-chapter-13-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(CHAPTER_13_PROBLEMS_SRC) -o $(BINDIR)/chapter_13_problems
-
-run-chapter-13-problems: chapter-13-problems
-	$(BINDIR)/chapter_13_problems
-
-# Chapter 14
-
-rod-cutting: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(ROD_CUTTING_SRC) $(ROD_CUTTING_MAIN) -o $(BINDIR)/rod_cutting
-
-run-rod-cutting: rod-cutting
-	$(BINDIR)/rod_cutting
-
-matrix-chain-mult: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(MATRIX_CHAIN_MULT_SRC) $(MATRIX_CHAIN_MULT_MAIN) -o $(BINDIR)/matrix_chain_mult
-
-run-matrix-chain-mult: matrix-chain-mult
-	$(BINDIR)/matrix_chain_mult
-
-elements-dp: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(ELEMENTS_DP_SRC) $(ELEMENTS_DP_MAIN) -o $(BINDIR)/elements_dp
-
-run-elements-dp: elements-dp
-	$(BINDIR)/elements_dp
-
-lcs: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(LCS_SRC) $(LCS_MAIN) -o $(BINDIR)/lcs
-
-run-lcs: lcs
-	$(BINDIR)/lcs
-
-optimal-bst: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(PART_4_COMMONS_SRC) $(BST_QUERYING_SRC) $(OPTIMAL_BST_SRC) $(OPTIMAL_BST_MAIN) -o $(BINDIR)/optimal_bst
-
-run-optimal-bst: optimal-bst
-	$(BINDIR)/optimal_bst
-
-chapter-14-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(CHAPTER_14_PROBLEMS_SRC) -o $(BINDIR)/chapter_14_problems
-
-run-chapter-14-problems: chapter-14-problems
-	$(BINDIR)/chapter_14_problems
-
-# Chapter 15
-activity-selection: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(ACTIVITY_SELECTION_SRC) $(ACTIVITY_SELECTION_MAIN) -o $(BINDIR)/activity_selection
-
-run-activity-selection: activity-selection
-	$(BINDIR)/activity_selection
-
-greedy-elements: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(GREEDY_ELEMENTS_SRC) $(GREEDY_ELEMENTS_MAIN) -o $(BINDIR)/greedy_elements
-
-run-greedy-elements: greedy-elements
-	$(BINDIR)/greedy_elements
-
-huffman-codes: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(HUFFMAN_CODES_SRC) $(HUFFMAN_CODES_MAIN) -o $(BINDIR)/huffman_codes
-
-run-huffman-codes: huffman-codes
-	$(BINDIR)/huffman_codes
-
-offline-caching: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(OFFLINE_CACHING_SRC) $(OFFLINE_CACHING_MAIN) -o $(BINDIR)/offline_caching
-
-run-offline-caching: offline-caching
-	$(BINDIR)/offline_caching
-
-chapter-15-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(CHAPTER_15_PROBLEMS_SRC) -o $(BINDIR)/chapter_15_problems
-
-run-chapter-15-problems: chapter-15-problems
-	$(BINDIR)/chapter_15_problems
-
-# Chapter 16
-amortized-analysis: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(AMORTIZED_ANALYSIS_SRC) $(AMORTIZED_ANALYSIS_MAIN) -o $(BINDIR)/amortized_analysis
-
-run-amortized-analysis: amortized-analysis
-	$(BINDIR)/amortized_analysis
-
-chapter-16-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_4_COMMONS_SRC) $(CHAPTER_16_PROBLEMS_SRC) -o $(BINDIR)/chapter_16_problems
-
-run-chapter-16-problems: chapter-16-problems
-	$(BINDIR)/chapter_16_problems
-
-# Chapter 17
-dynamic-order-statistics: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(RED_BLACK_TREES_SRC) $(DYNAMIC_ORDER_STATISTICS_SRC) $(DYNAMIC_ORDER_STATISTICS_MAIN) -o $(BINDIR)/dynamic_order_statistics
-
-run-dynamic-order-statistics: dynamic-order-statistics
-	$(BINDIR)/dynamic_order_statistics
-
-how-to-enrich-data-structure: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(RED_BLACK_TREES_SRC) $(HOW_TO_ENRICH_DATA_STRUCTURE_SRC) $(HOW_TO_ENRICH_DATA_STRUCTURE_MAIN) -o $(BINDIR)/how_to_enrich_data_structure
-
-run-how-to-enrich-data-structure: how-to-enrich-data-structure
-	$(BINDIR)/how_to_enrich_data_structure
-
-interval-trees: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(RED_BLACK_TREES_SRC) $(INTERVAL_TREES_SRC) $(INTERVAL_TREES_MAIN) -o $(BINDIR)/interval_trees
-
-run-interval-trees: interval-trees
-	$(BINDIR)/interval_trees
-
-chapter-17-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_3_COMMONS_SRC) $(PART_5_COMMONS_SRC) $(RED_BLACK_TREES_SRC) $(CHAPTER_17_PROBLEMS_SRC) -o $(BINDIR)/chapter_17_problems
-
-run-chapter-17-problems: chapter-17-problems
-	$(BINDIR)/chapter_17_problems
-
-# Chapter 18
-b-trees: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(B_TREES_SRC) $(B_TREES_MAIN) -o $(BINDIR)/b_trees
-
-run-b-trees: b-trees
-	$(BINDIR)/b_trees
-
-chapter-18-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(B_TREES_SRC) $(CHAPTER_18_PROBLEMS_SRC) -o $(BINDIR)/chapter_18_problems
-
-run-chapter-18-problems: chapter-18-problems
-	$(BINDIR)/chapter_18_problems
-
-# Chapter 19
-disjoint-set-operations: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(DISJOINT_SET_OPERATIONS_SRC) $(DISJOINT_SET_OPERATIONS_MAIN) -o $(BINDIR)/disjoint_set_operations
-
-run-disjoint-set-operations: disjoint-set-operations
-	$(BINDIR)/disjoint_set_operations
-
-linked-list-representation: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(LINKED_LIST_REPRESENTATION_SRC) $(LINKED_LIST_REPRESENTATION_MAIN) -o $(BINDIR)/linked_list_representation
-
-run-linked-list-representation: linked-list-representation
-	$(BINDIR)/linked_list_representation
-
-disjoint-set-forests: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(DISJOINT_SET_FORESTS_SRC) $(DISJOINT_SET_FORESTS_MAIN) -o $(BINDIR)/disjoint_set_forests
-
-run-disjoint-set-forests: disjoint-set-forests
-	$(BINDIR)/disjoint_set_forests
-
-chapter-19-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(CHAPTER_19_PROBLEMS_SRC) -o $(BINDIR)/chapter_19_problems
-
-run-chapter-19-problems: chapter-19-problems
-	$(BINDIR)/chapter_19_problems
-
-# Chapter 20
-representations-of-graphs: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(PART_6_COMMONS_SRC) $(STRASSEN_SRC) $(REPRESENTATIONS_OF_GRAPHS_SRC) $(REPRESENTATIONS_OF_GRAPHS_MAIN) -o $(BINDIR)/representations_of_graphs
-
-run-representations-of-graphs: representations-of-graphs
-	$(BINDIR)/representations_of_graphs
-
-breadth-first-search: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(PART_6_COMMONS_SRC) $(STRASSEN_SRC) $(BREADTH_FIRST_SEARCH_SRC) $(BREADTH_FIRST_SEARCH_MAIN) -o $(BINDIR)/breadth_first_search
-
-run-breadth-first-search: breadth-first-search	
-
-depth-first-search: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_1_COMMONS_SRC) $(PART_6_COMMONS_SRC) $(DEPTH_FIRST_SEARCH_SRC) $(DEPTH_FIRST_SEARCH_MAIN) -o $(BINDIR)/depth_first_search
-
-run-depth-first-search: depth-first-search
-	$(BINDIR)/depth_first_search
-
-topological-sort: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(TOPOLOGICAL_SORT_SRC) $(TOPOLOGICAL_SORT_MAIN) -o $(BINDIR)/topological_sort
-
-run-topological-sort: topological-sort
-	$(BINDIR)/topological_sort
-
-strongly-connected-components: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(STRASSEN_SRC) $(TOPOLOGICAL_SORT_SRC) $(STRONGLY_CONNECTED_COMPONENTS_SRC) $(STRONGLY_CONNECTED_COMPONENTS_MAIN) -o $(BINDIR)/strongly_connected_components
-
-run-strongly-connected-components: strongly-connected-components
-	$(BINDIR)/strongly_connected_components
-
-chapter-20-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(TOPOLOGICAL_SORT_SRC) $(STRONGLY_CONNECTED_COMPONENTS_SRC) $(CHAPTER_20_PROBLEMS_SRC) -o $(BINDIR)/chapter_20_problems
-
-run-chapter-20-problems: chapter-20-problems
-	$(BINDIR)/chapter_20_problems
-
-# Chapter 21
-growing-mst: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(GROWING_MST_SRC) $(GROWING_MST_MAIN) -o $(BINDIR)/growing_mst
-
-run-growing-mst: growing-mst
-	$(BINDIR)/growing_mst
-
-kruskal-prim: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(PART_6_COMMONS_SRC) $(DISJOINT_SET_OPERATIONS_SRC) $(THE_ALGORITHMS_OF_KRUSKAL_AND_PRIM_SRC) $(THE_ALGORITHMS_OF_KRUSKAL_AND_PRIM_MAIN) -o $(BINDIR)/kruskal_prim
-
-run-kruskal-prim: kruskal-prim
-	$(BINDIR)/kruskal_prim
-
-chapter-21-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_5_COMMONS_SRC) $(PART_6_COMMONS_SRC) $(DISJOINT_SET_OPERATIONS_SRC) $(CHAPTER_21_PROBLEMS_SRC) -o $(BINDIR)/chapter_21_problems
-
-run-chapter-21-problems: chapter-21-problems
-	$(BINDIR)/chapter_21_problems
-
-# Chapter 22
-bellman-ford: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(BELLMAN_FORD_ALGORITHM_SRC) $(BELLMAN_FORD_ALGORITHM_MAIN) -o $(BINDIR)/bellman_ford
-
-run-bellman-ford: bellman-ford
-	$(BINDIR)/bellman_ford
-
-dag-shortest-paths: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(DAG_SHORTEST_PATHS_SRC) $(DAG_SHORTEST_PATHS_MAIN) -o $(BINDIR)/dag_shortest_paths
-
-run-dag-shortest-paths: dag-shortest-paths
-	$(BINDIR)/dag_shortest_paths
-
-dijkstra: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(DIJKSTRA_ALGORITHM_SRC) $(DIJKSTRA_ALGORITHM_MAIN) -o $(BINDIR)/dijkstra
-
-run-dijkstra: dijkstra
-	$(BINDIR)/dijkstra
-
-difference-constraints: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(BELLMAN_FORD_ALGORITHM_SRC) $(DIFFERENCE_CONSTRAINTS_SRC) $(DIFFERENCE_CONSTRAINTS_MAIN) -o $(BINDIR)/difference_constraints
-
-run-difference-constraints: difference-constraints
-	$(BINDIR)/difference_constraints
-
-chapter-22-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(BELLMAN_FORD_ALGORITHM_SRC) $(DAG_SHORTEST_PATHS_SRC) $(DIJKSTRA_ALGORITHM_SRC) $(DIFFERENCE_CONSTRAINTS_SRC) $(CHAPTER_22_PROBLEMS_SRC) -o $(BINDIR)/chapter_22_problems
-
-run-chapter-22-problems: chapter-22-problems
-	$(BINDIR)/chapter_22_problems
-
-# Chapter 23
-shortest_paths_matrix_mult: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(SHORTEST_PATHS_MATRIX_MULT_SRC) $(SHORTEST_PATHS_MATRIX_MULT_MAIN) -o $(BINDIR)/shortest_paths_matrix_mult
-
-run-shortest_paths_matrix_mult: shortest_paths_matrix_mult
-	$(BINDIR)/shortest_paths_matrix_mult
-
-floyd-warshall: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(SHORTEST_PATHS_MATRIX_MULT_SRC) $(FLOYD_WARSHALL_ALGORITHM_SRC) $(FLOYD_WARSHALL_ALGORITHM_MAIN) -o $(BINDIR)/floyd_warshall
-
-run-floyd-warshall: floyd-warshall
-	$(BINDIR)/floyd_warshall
-
-johnsons-algorithm: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(JOHNSONS_ALGORITHM_SRC) $(JOHNSONS_ALGORITHM_MAIN) -o $(BINDIR)/johnsons_algorithm
-
-run-johnsons-algorithm: johnsons-algorithm
-	$(BINDIR)/johnsons_algorithm
-
-chapter-23-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(SHORTEST_PATHS_MATRIX_MULT_SRC) $(FLOYD_WARSHALL_ALGORITHM_SRC) $(JOHNSONS_ALGORITHM_SRC) $(CHAPTER_23_PROBLEMS_SRC) -o $(BINDIR)/chapter_23_problems
-
-run-chapter-23-problems: chapter-23-problems
-	$(BINDIR)/chapter_23_problems
-
-# Chapter 24
-ford-fulkerson-method: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(THE_FORD_FULKERSON_METHOD_SRC) $(THE_FORD_FULKERSON_METHOD_MAIN) -o $(BINDIR)/ford_fulkerson_method
-
-run-ford-fulkerson-method: ford-fulkerson-method
-	$(BINDIR)/ford_fulkerson_method
-
-maximum-bipartite-matching: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(THE_FORD_FULKERSON_METHOD_SRC) $(MAXIMUM_BIPARTITE_MATCHING_SRC) $(MAXIMUM_BIPARTITE_MATCHING_MAIN) -o $(BINDIR)/maximum_bipartite_matching
-
-run-maximum-bipartite-matching: maximum-bipartite-matching
-	$(BINDIR)/maximum_bipartite_matching
-
-chapter-24-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(THE_FORD_FULKERSON_METHOD_SRC) $(CHAPTER_24_PROBLEMS_SRC) -o $(BINDIR)/chapter_24_problems
-
-run-chapter-24-problems: chapter-24-problems
-	$(BINDIR)/chapter_24_problems
-
-# Chapter 25
-maximum-bipartite-matching-2: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(MAXIMUM_BIPARTITE_MATCHING_2_SRC) $(MAXIMUM_BIPARTITE_MATCHING_2_MAIN) -o $(BINDIR)/maximum_bipartite_matching
-
-run-maximum-bipartite-matching-2: maximum-bipartite-matching-2
-	$(BINDIR)/maximum_bipartite_matching
-
-stable-marriage: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(STABLE_MARRIAGE_SRC) $(STABLE_MARRIAGE_MAIN) -o $(BINDIR)/stable_marriage
-
-run-stable-marriage: stable-marriage
-	$(BINDIR)/stable_marriage
-
-hungarian-algorithm: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_6_COMMONS_SRC) $(HUNGARIAN_ALGORITHM_SRC) $(HUNGARIAN_ALGORITHM_MAIN) -o $(BINDIR)/hungarian_algorithm
-
-run-hungarian-algorithm: hungarian-algorithm
-	$(BINDIR)/hungarian_algorithm
-
-chapter-25-problems: $(BINDIR)
-	$(CC) $(CFLAGS) \
-	$(COMMON_SRC) \
-	$(PART_6_COMMONS_SRC) \
-	$(STACKS_QUEUES_SRC) \
-	$(CHAPTER_25_PROBLEMS_SRC) \
-	src/part_6_graph_algorithms/25_bipartite_matching/3_the_hungarian_algorithm_for_assignment_problem/the_hungarian_algorithm_for_assignment_problem.c \
-	-o $(BINDIR)/chapter_25_problems
-
-run-chapter-25-problems: chapter-25-problems
-	$(BINDIR)/chapter_25_problems
-
-# ============================================================================
-# PART 7: SELECTED TOPICS
-# ============================================================================
-
-# Chapter 26
-the-basics-of-fork-join: $(BINDIR)
-	$(CC) $(CFLAGS) -fopenmp -lpthread $(COMMON_SRC) $(THE_BASICS_OF_FORK_JOIN_SRC) $(THE_BASICS_OF_FORK_JOIN_MAIN) -o $(BINDIR)/the_basics_of_fork_join 
-
-run-the-basics-of-fork-join: the-basics-of-fork-join
-	$(BINDIR)/the_basics_of_fork_join
-
-multithreaded-matrix-multiplication: $(BINDIR)
-	$(CC) $(CFLAGS) -fopenmp -lpthread $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(MULTITHREADED_MATRIX_MULTIPLICATION_SRC) $(MULTITHREADED_MATRIX_MULTIPLICATION_MAIN) -o $(BINDIR)/multithread_matrix_multiplication
-
-run-multithreaded-matrix-multiplication: multithreaded-matrix-multiplication
-	$(BINDIR)/multithread_matrix_multiplication
-
-multithreaded-merge-sort: $(BINDIR)
-	$(CC) $(CFLAGS) -fopenmp -lpthread $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(PART_1_COMMONS_SRC) $(QUICKSORT_SRC) $(MULTITHREADED_MERGE_SORT_SRC) $(MULTITHREADED_MERGE_SORT_MAIN) -o $(BINDIR)/multithread_merge_sort
-
-run-multithreaded-merge-sort: multithreaded-merge-sort
-	$(BINDIR)/multithread_merge_sort
-
-chapter-26-problems: $(BINDIR)
-	$(CC) $(CFLAGS) -fopenmp -lpthread \
-	$(COMMON_SRC) \
-	$(PART_7_COMMONS_SRC) \
-	$(PART_1_COMMONS_SRC) \
-	$(QUICKSORT_SRC) \
-	$(MULTITHREADED_MERGE_SORT_SRC) \
-	$(CHAPTER_26_PROBLEMS_SRC) \
-	-o $(BINDIR)/chapter_26_problems
-
-run-chapter-26-problems: chapter-26-problems
-	$(BINDIR)/chapter_26_problems
-
-# Chapter 27
-waiting-for-an-elevator: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(WAITING_FOR_AN_ELEVATOR_SRC) \
-	$(WAITING_FOR_AN_ELEVATOR_MAIN) -o $(BINDIR)/waiting-for-an-elevator
-
-run-waiting-for-an-elevator: waiting-for-an-elevator
-	$(BINDIR)/waiting-for-an-elevator
-
-maintaining-a-search-list: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(MAINTAINING_A_SEARCH_LIST_SRC) \
-	$(MAINTAINING_A_SEARCH_LIST_MAIN) -o $(BINDIR)/maintaining-a-search-list
-
-run-maintaining-a-search-list: maintaining-a-search-list
-	$(BINDIR)/maintaining-a-search-list
-
-online-cache-management: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(ONLINE_CACHE_MANAGEMENT_SRC) $(ONLINE_CACHE_MANAGEMENT_MAIN) -o $(BINDIR)/online_cache_management
-
-assembly-online-cache-management: $(SRCDIR)/part_7_selected_topics/27_online_algorithms/3_online_cache_management/online_cache_management.c
-	$(CC) $(CFLAGS) -S $< -o $(SRCDIR)/part_7_selected_topics/27_online_algorithms/3_online_cache_management/online_cache_management.s
-
-run-online-cache-management: online-cache-management
-	$(BINDIR)/online_cache_management
-
-chapter-27-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(CHAPTER_27_PROBLEMS_SRC) -o $(BINDIR)/chapter_27_problems
-
-run-chapter-27-problems: chapter-27-problems
-	$(BINDIR)/chapter_27_problems
-
-# Chapter 28
-solving-systems-of-linear-equations: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC) $(SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_MAIN) -o $(BINDIR)/solving_systems_of_linear_equations
-
-run-solving-systems-of-linear-equations: solving-systems-of-linear-equations
-	$(BINDIR)/solving_systems_of_linear_equations
-
-inverting-matrices: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC) $(INVERTING_MATRICES_SRC) $(INVERTING_MATRICES_MAIN) -o $(BINDIR)/inverting_matrices
-
-run-inverting-matrices: inverting-matrices
-	$(BINDIR)/inverting_matrices
-
-polynomial-least-squares: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-    $(SOLVING_SYSTEMS_OF_LINEAR_EQUATIONS_SRC) \
-    $(INVERTING_MATRICES_SRC) \
-    $(POLYNOMIAL_LEAST_SQUARES_SRC) \
-    $(POLYNOMIAL_LEAST_SQUARES_MAIN) \
-    -o $(BINDIR)/polynomial_least_squares
-
-run-polynomial-least-squares: polynomial-least-squares
-	$(BINDIR)/polynomial_least_squares
-
-chapter-28-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) src/part_7_selected_topics/28_matrix_operations/problems.c -o $(BINDIR)/chapter_28_problems
-
-run-chapter-28-problems: chapter-28-problems
-	$(BINDIR)/chapter_28_problems
-
-# Chapter 29
-
-# Chapter 30
-representing-polynomials: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(REPRESENTING_POLYNOMIALS_SRC) $(REPRESENTING_POLYNOMIALS_MAIN) -o $(BINDIR)/representing_polynomials
-
-run-representing-polynomials: representing-polynomials
-	$(BINDIR)/representing_polynomials
-
-the-dft-and-fft: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(THE_DFT_AND_FFT_SRC) $(THE_DFT_AND_FFT_MAIN) -o $(BINDIR)/the_dft_and_fft
-
-run-the-dft-and-fft: the-dft-and-fft
-	$(BINDIR)/the_dft_and_fft
-
-efficient_fft_implementations: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(EFFICIENT_FFT_IMPLEMENTATION_SRC) $(EFFICIENT_FFT_IMPLEMENTATION_MAIN) -o $(BINDIR)/efficient_fft_implementations
-
-run_efficient_fft_implementations: efficient_fft_implementations
-	$(BINDIR)/efficient_fft_implementations
-
-chapter-30-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) $(SRCDIR)/part_7_selected_topics/30_polynomials_and_the_fft/problems.c -o $(BINDIR)/chapter_30_problems
-
-run-chapter-30-problems: chapter-30-problems
-	$(BINDIR)/chapter_30_problems
-
-# Chapter 31
-elementary-number-theoretic-notions: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(ELEMENTARY_NUMBER_THEORETIC_NOTIONS_SRC) \
-	$(ELEMENTARY_NUMBER_THEORETIC_NOTIONS_MAIN) \
-	-o $(BINDIR)/elementary_number_theoretic_notions
-
-run-elementary-number-theoretic-notions: elementary-number-theoretic-notions
-	$(BINDIR)/elementary_number_theoretic_notions
-
-greatest-common-divisor: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(GREATEST_COMMON_DIVISOR_SRC) \
-	$(GREATEST_COMMON_DIVISOR_MAIN) \
-	-o $(BINDIR)/greatest-common-divisor
-
-run-greatest-common-divisor: greatest-common-divisor
-	$(BINDIR)/greatest-common-divisor
-
-solving-modular-linear-equations: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(GREATEST_COMMON_DIVISOR_SRC) \
-	$(SOLVING_MODULAR_LINEAR_EQAUTIONS_SRC) \
-	$(SOLVING_MODULAR_LINEAR_EQAUTIONS_MAIN) \
-	-o $(BINDIR)/solving-modular-linear-equations
-
-run-solving-modular-linear-equations: solving-modular-linear-equations
-	$(BINDIR)/solving-modular-linear-equations
-
-chinese-remainder-theorem: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(GREATEST_COMMON_DIVISOR_SRC) \
-	$(CHINESE_REMAINDER_THEOREM_SRC) \
-	$(CHINESE_REMAINDER_THEOREM_MAIN) \
-	-o $(BINDIR)/chinese-remainder-theorem
-
-run-chinese-remainder-theorem: chinese-remainder-theorem
-	$(BINDIR)/chinese-remainder-theorem
-
-powers-of-an-element: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(POWERS_OF_AN_ELEMENT_SRC) \
-	$(POWERS_OF_AN_ELEMENT_MAIN) \
-	-o $(BINDIR)/powers-of-an-element
-
-run-powers-of-an-element: powers-of-an-element
-	$(BINDIR)/powers-of-an-element
-
-the-rsa-public-key-cryptosystem: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(GREATEST_COMMON_DIVISOR_SRC) \
-	$(POWERS_OF_AN_ELEMENT_SRC) \
-	$(CHINESE_REMAINDER_THEOREM_SRC) \
-	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC) \
-	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_MAIN) \
-	-o $(BINDIR)/the-rsa-public-key-cryptosystem
-
-run-the-rsa-public-key-cryptosystem: the-rsa-public-key-cryptosystem
-	$(BINDIR)/the-rsa-public-key-cryptosystem
-
-primality-testing: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(GREATEST_COMMON_DIVISOR_SRC) \
-	$(POWERS_OF_AN_ELEMENT_SRC) \
-	$(CHINESE_REMAINDER_THEOREM_SRC) \
-	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC) \
-	$(PRIMALITY_TESTING_SRC) \
-	$(PRIMALITY_TESTING_MAIN) \
-	-o $(BINDIR)/primality-testing
-
-run-primality-testing: primality-testing
-	$(BINDIR)/primality-testing
-
-chapter-31-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(GREATEST_COMMON_DIVISOR_SRC) \
-	$(POWERS_OF_AN_ELEMENT_SRC) \
-	$(CHINESE_REMAINDER_THEOREM_SRC) \
-	$(THE_RSA_PUBLIC_KEY_CRYPTOSYSTEM_SRC) \
-	$(PRIMALITY_TESTING_SRC) \
-	src/part_7_selected_topics/31_number-theoretic_algorithms/problems.c \
-	-o $(BINDIR)/chapter-31-problems
-
-run-chapter-31-problems: chapter-31-problems
-	$(BINDIR)/chapter-31-problems
-
-# Chapter 32
-the-naive-string-matching-algorithm: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(THE_NAIVE_STRING_MATCHING_ALGORITHM_SRC) \
-	$(THE_NAIVE_STRING_MATCHING_ALGORITHM_MAIN) \
-	-o $(BINDIR)/the-naive-string-matching-algorithm
-
-run-the-naive-string-matching-algorithm: the-naive-string-matching-algorithm
-	$(BINDIR)/the-naive-string-matching-algorithm
-
-the-rabin-karp-algorithm: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(POWERS_OF_AN_ELEMENT_SRC) \
-	$(THE_RABIN_KARP_ALGORITHM_SRC) \
-	$(THE_RABIN_KARP_ALGORITHM_MAIN) \
-	-o $(BINDIR)/the-rabin-karp-algorithm
-
-run-the-rabin-karp-algorithm: the-rabin-karp-algorithm
-	$(BINDIR)/the-rabin-karp-algorithm
-
-string-matching-with-finite-automata: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(STRING_MATCHING_WITH_FINITE_AUTOMATA_SRC) \
-	$(STRING_MATCHING_WITH_FINITE_AUTOMATA_MAIN) \
-	-o $(BINDIR)/string-matching-with-finite-automata
-
-run-string-matching-with-finite-automata: string-matching-with-finite-automata
-	$(BINDIR)/string-matching-with-finite-automata
-
-the-knuth-morris-pratt-algorithm: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(THE_KNUTH_MORRIS_PRATT_ALGORITHM_SRC) \
-	$(THE_KNUTH_MORRIS_PRATT_ALGORITHM_MAIN) \
-	-o $(BINDIR)/the-knuth-morris-pratt-algorithm
-
-run-the-knuth-morris-pratt-algorithm: the-knuth-morris-pratt-algorithm
-	$(BINDIR)/the-knuth-morris-pratt-algorithm
-
-suffix-arrays: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(SUFFIX_ARRAYS_SRC) \
-	$(SUFFIX_ARRAYS_MAIN) \
-	-o $(BINDIR)/suffix-arrays
-
-run-suffix-arrays: suffix-arrays
-	$(BINDIR)/suffix-arrays
-
-chapter-32-problems: $(BINDIR)
-	$(CC) $(CFLAGS) $(COMMON_SRC) $(PART_7_COMMONS_SRC) \
-	$(CHAPTER_32_PROBLEMS_SRC) \
-	$(THE_KNUTH_MORRIS_PRATT_ALGORITHM_SRC) \
-	-o $(BINDIR)/chapter-32-problems
-
-run-chapter-32-problems: chapter-32-problems
-	$(BINDIR)/chapter-32-problems
-
-# ============================================================================
-# UTILITY TARGETS
-# ============================================================================
+assembly-online-cache-management: $(ONLINE_CACHE_MANAGEMENT)
+	$(CC) $(CFLAGS) -S $< -o $(<:.c=.s)
 
 clean:
-	rm -rf $(BINDIR)
-	
+	$(call RMDIR,$(BINDIR))
