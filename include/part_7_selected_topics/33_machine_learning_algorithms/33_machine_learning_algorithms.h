@@ -92,6 +92,62 @@ void test_randomized_weighted_majority(void);
 // CHAPTER 33.3: Gradient descent
 // ============================================================================
 
+#define GD_N_DIM 2
+#define GD_GAMMA 0.1
+
+typedef void (*GradientFunc)(const double* x, double* grad, int n);
+
+void gradient_descent(
+    GradientFunc gradient,
+    const double* x0,
+    int n,
+    double gamma,
+    int T,
+    double* xAvg
+);
+void test_gradient_descent(void);
+
+#define GD_BOX_LOWER 0.0
+#define GD_BOX_UPPER 1.5
+
+typedef void (*ProjectionFunc)(const double* y, double* x, int n);
+
+void gradient_descent_constrained(
+    GradientFunc gradient,
+    ProjectionFunc project,
+    const double* x0,
+    int n,
+    double gamma,
+    int T,
+    double* xAvg
+);
+void test_gradient_descent_constrained(void);
+
+#define GD_N_FEATURES 2
+#define GD_N_POINTS 5
+
+void squared_error_gradient(
+    const double* w,
+    const double* x,
+    const double* y,
+    int n,
+    int m,
+    double* grad
+);
+void test_squared_error_gradient(void);
+
+#define GD_KMEANS_GAMMA 0.1
+
+void kmeans_gradient_descent(
+    ClusteringPoint* points,
+    int nPoints,
+    int nDim,
+    int k,
+    double gamma,
+    int T,
+    ClusteringCentroid* centroids
+);
+void test_kmeans_gradient_descent(void);
 
 
 // ============================================================================

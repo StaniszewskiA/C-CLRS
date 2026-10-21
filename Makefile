@@ -448,10 +448,12 @@ chapter-32-problems_SRC                  := $(P7_COMMONS) $(KMP) $(CH32)/problem
 CH33 := $(P7)/33_machine_learning_algorithms
 CLUSTERING             := $(CH33)/1_clustering/clustering.c
 MULTIPLICATIVE_WEIGHTS := $(CH33)/2_multiplicative_weight_update_method/multiplicative_weight_update_method.c
+GRADIENT_DESCENT       := $(CH33)/3_gradient_descent/gradient_descent.c
 
-PROGRAMS += clustering multiplicative-weights
+PROGRAMS += clustering multiplicative-weights gradient-descent
 clustering_SRC             := $(P7_COMMONS) $(call app,$(CLUSTERING))
 multiplicative-weights_SRC := $(P7_COMMONS) $(call app,$(MULTIPLICATIVE_WEIGHTS))
+gradient-descent_SRC       := $(P7_COMMONS) $(call app,$(GRADIENT_DESCENT))
 
 # ============================================================================
 # RULES
