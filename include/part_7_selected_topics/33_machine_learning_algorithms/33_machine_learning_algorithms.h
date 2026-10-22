@@ -154,4 +154,17 @@ void test_kmeans_gradient_descent(void);
 // PROBLEMS
 // ============================================================================
 
+#define NEWTON_N_ITERS 6
+
+typedef double (*RealFunc)(double x);
+
+int newton_method(
+    RealFunc f,
+    RealFunc fPrime,
+    double x0,
+    int T,
+    double* xs
+);
+void test_newton_method(void);
+
 #endif 

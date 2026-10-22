@@ -450,10 +450,11 @@ CLUSTERING             := $(CH33)/1_clustering/clustering.c
 MULTIPLICATIVE_WEIGHTS := $(CH33)/2_multiplicative_weight_update_method/multiplicative_weight_update_method.c
 GRADIENT_DESCENT       := $(CH33)/3_gradient_descent/gradient_descent.c
 
-PROGRAMS += clustering multiplicative-weights gradient-descent
+PROGRAMS += clustering multiplicative-weights gradient-descent chapter-33-problems
 clustering_SRC             := $(P7_COMMONS) $(call app,$(CLUSTERING))
 multiplicative-weights_SRC := $(P7_COMMONS) $(call app,$(MULTIPLICATIVE_WEIGHTS))
 gradient-descent_SRC       := $(P7_COMMONS) $(call app,$(GRADIENT_DESCENT))
+chapter-33-problems_SRC    := $(P7_COMMONS) $(CH33)/problems.c
 
 # ============================================================================
 # RULES
