@@ -167,4 +167,15 @@ int newton_method(
 );
 void test_newton_method(void);
 
+void hedge(
+    const int* preds,
+    const int* outcomes,
+    int T,
+    int n,
+    double epsilon,
+    double* weights,
+    int* p
+);
+void test_hedge(void);
+
 #endif 

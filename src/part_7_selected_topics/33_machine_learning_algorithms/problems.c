@@ -1,6 +1,6 @@
 #include "part_7_selected_topics/33_machine_learning_algorithms/33_machine_learning_algorithms.h"
 
-#define TASK 1
+#define TASK 2
 
 // 33-1
 int newton_method(
@@ -82,11 +82,155 @@ void test_newton_method(void) {
     );
 }
 
+// 33-2
+void hedge(
+    const int* preds,
+    const int* outs,
+    int T,
+    int n,
+    double eps,
+    double* weights,
+    int* p
+) {
+    for (int i = 0; i < n; ++i) weights[i] = 1.0;
+    double decay = exp(-eps);
+
+    for (int t = 0; t < T; ++t) {
+        const int* q = &preds[t * n];
+
+        double Z = 0.0;
+        for (int i = 0; i < n; ++i) Z += weights[i];
+
+        // pick expert i with the probability p_i = w_i / Z
+        double r = (double)rand() / ((double)RAND_MAX + 1.0) * Z;
+        int chosen = n - 1;
+        for (int i = 0; i < n; ++i) {
+            r -= weights[i];
+            if (r < 0.0) {
+                chosen = i;
+                break;
+            }
+        }
+
+        p[t] = q[chosen];
+
+        for (int i = 0; i < n; ++i)
+            if (q[i] != outs[t]) weights[i] *= decay;
+    }
+}
+
+static int hedge_count_mistakes(
+    const int* guesses,
+    const int* outs,
+    int T,
+    int stride
+) {
+    int mistakes = 0;
+    for (int t = 0; t < T; ++t)
+        if (guesses[t * stride] != outs[t]) mistakes++;
+
+    return mistakes;
+}
+
+void test_hedge(void) {
+    srand(time(NULL));
+
+    int outs[MWU_N_ROUNDS] = {1, 0, 1, 1, 0, 0, 1, 0, 1, 1};
+    int preds[MWU_N_ROUNDS][MWU_N_EXPERTS] = {
+        {1, 0, 0, 1},
+        {1, 1, 0, 0},
+        {1, 1, 1, 0},
+        {1, 0, 1, 0},
+        {0, 1, 1, 0},
+        {1, 0, 0, 1},
+        {1, 1, 0, 1},
+        {0, 0, 1, 1},
+        {1, 1, 0, 0},
+        {0, 1, 1, 0}
+    };
+
+    int T = ARRAY_SIZE(outs);
+    int n = ARRAY_SIZE(preds[0]);
+    double weights[MWU_N_EXPERTS];
+    int p[MWU_N_ROUNDS];
+
+    int mStar = T;
+    for (int i = 0; i < n; ++i) {
+        int mistakes = hedge_count_mistakes(
+                &preds[0][i],
+                outs,
+                T,
+                n
+            );
+        if (mistakes < mStar) mStar = mistakes;
+    }
+
+    // eps = sqrt(ln n / T) balances ln(n) / eps and eps T
+    double epss[] = {0.1, 0.25, sqrt(log(n) / T), 0.75};
+    int nEpss = ARRAY_SIZE(epss);
+
+    print_separator("Hedge (33-2)");
+    printf("m* = %d, n = %d, T = %d, %d runs per eps\n",
+        mStar, n, T, MWU_N_TRIALS
+    );
+    printf("  eps | average | exact E[M] | m* + ln(n) / eps + eps T\n");
+
+    for (int e = 0; e < nEpss; ++e) {
+        double eps = epss[e];
+
+        long totalMistakes = 0;
+        for (int trial = 0; trial < MWU_N_TRIALS; ++trial) {
+            hedge(
+                &preds[0][0],
+                outs,
+                T,
+                n,
+                eps,
+                weights,
+                p
+            );
+            totalMistakes += hedge_count_mistakes(p, outs, T, 1);
+        }
+
+        // weights do not depend on the random choices, so E[M] = sum of F_t
+        double w[MWU_N_EXPERTS];
+        for (int i = 0; i < n; ++i) w[i] = 1.0;
+        double expected = 0.0;
+
+        for (int t = 0; t < T; ++t) {
+            double Z = 0.0;
+            double wrong = 0.0;
+
+            for (int i = 0; i < n; ++i) {
+                Z += w[i];
+                if (preds[t][i] != outs[t]) wrong += w[i];
+            }
+
+            expected += wrong / Z;
+
+            for (int i = 0; i < n; ++i) {
+                if (preds[t][i] != outs[t]) w[i] *= exp(-eps);
+            }
+        }
+
+        double bound = mStar + log(n) / eps + eps * T;
+
+        printf("%5.3f | %7.4f | %10.4f | %.4f\n",
+            eps, (double)totalMistakes / MWU_N_TRIALS, expected, bound
+        );
+    }
+}
+
 int main(void) {
     switch (TASK)
     {
         case 1: {
             test_newton_method();
+            break;
+        }
+
+        case 2: {
+            test_hedge();
             break;
         }
 
