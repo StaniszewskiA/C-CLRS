@@ -1,6 +1,6 @@
 #include "part_7_selected_topics/33_machine_learning_algorithms/33_machine_learning_algorithms.h"
 
-#define TASK 2
+#define TASK 3
 
 // 33-1
 int newton_method(
@@ -221,6 +221,127 @@ void test_hedge(void) {
     }
 }
 
+// 33-4
+void stochastic_gradient_descent(
+    const double* x,
+    const double* y,
+    int n,
+    double a0,
+    double b0,
+    double gamma,
+    int T,
+    double* aAvg,
+    double* bAvg
+) {
+    double sumA = 0.0;
+    double sumB = 0.0;
+    double a = a0;
+    double b = b0;
+
+    for (int t = 0; t < T; ++t) {
+        sumA += a;
+        sumB += b;
+
+        int i = rand() % n;
+        double e = a * x[i] + b - y[i];
+
+        a -= gamma * 2.0 * e * x[i];
+        b -= gamma * 2.0 * e;
+    }
+
+    *aAvg = sumA / T;
+    *bAvg = sumB / T;
+}
+
+static double sgd_mean_squared_error(
+    const double* x,
+    const double* y,
+    int n,
+    double a,
+    double b
+) {
+    double sum = 0.0;
+    for (int i = 0; i < n; ++i) {
+        double e = a * x[i] + b - y[i];
+        sum += e * e;
+    }
+
+    return sum / n;
+}
+
+void test_stochastic_gradient_descent(void) {
+    srand(time(NULL));
+
+    double x[SGD_N_POINTS] = {0.0, 1.0, 2.0, 3.0, 4.0};
+    double y[SGD_N_POINTS] = {1.2, 2.9, 5.1, 7.0, 8.8};
+    int n = ARRAY_SIZE(x);
+
+    double meanX = 0.0;
+    double meanY = 0.0;
+    for (int i = 0; i < n; ++i) {
+        meanX += x[i] / n;
+        meanY += y[i] / n;
+    }
+    double cov = 0.0;
+    double var = 0.0;
+    for (int i = 0; i < n; ++i) {
+        cov += (x[i] - meanX) * (y[i] - meanY);
+        var += (x[i] - meanX) * (x[i] - meanX);
+    }
+    double aStar = cov / var;
+    double bStar = meanY - aStar * meanX;
+    double fStar = sgd_mean_squared_error(
+        x,
+        y,
+        n,
+        aStar,
+        bStar
+    );
+
+    int iters[] = {10, 100, 1000, 10000};
+    int nIters = ARRAY_SIZE(iters);
+
+    print_separator("Stochastic gradient descent (33-4)");
+    printf("n = %d points, gamma = %.3f, (a0, b0) = (0, 0), %d runs per T\n",
+        n, SGD_GAMMA, SGD_N_TRIALS
+    );
+    printf("least squares: a* = %.6f, b* = %.6f, F(a*, b*) = %.6f\n",
+        aStar, bStar, fStar
+    );
+    printf("     T | a-avg (one run) | b-avg (one run) | average F(w-avg) - F(w*)\n");
+
+    for (int k = 0; k < nIters; ++k) {
+        double a;
+        double b;
+        double totalError = 0.0;
+
+        for (int trial = 0; trial < SGD_N_TRIALS; ++trial) {
+            stochastic_gradient_descent(
+                x,
+                y,
+                n,
+                0.0,
+                0.0,
+                SGD_GAMMA,
+                iters[k],
+                &a,
+                &b
+            );
+            totalError += sgd_mean_squared_error(
+                x,
+                y,
+                n,
+                a,
+                b
+            ) - fStar;
+        }
+
+        printf("%6d | %15.6f | %15.6f | %.6f\n",
+            iters[k], a, b, totalError / SGD_N_TRIALS
+        );
+    }
+}
+
 int main(void) {
     switch (TASK)
     {
@@ -231,6 +352,11 @@ int main(void) {
 
         case 2: {
             test_hedge();
+            break;
+        }
+
+        case 3: {
+            test_stochastic_gradient_descent();
             break;
         }
 

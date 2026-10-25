@@ -178,4 +178,21 @@ void hedge(
 );
 void test_hedge(void);
 
+#define SGD_N_POINTS 5
+#define SGD_GAMMA 0.01
+#define SGD_N_TRIALS 1000
+
+void stochastic_gradient_descent(
+    const double* x,
+    const double* y,
+    int n,
+    double a0,
+    double b0,
+    double gamma,
+    int T,
+    double* aAvg,
+    double* bAvg
+);
+void test_stochastic_gradient_descent(void);
+
 #endif 
