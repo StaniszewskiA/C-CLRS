@@ -456,6 +456,23 @@ multiplicative-weights_SRC := $(P7_COMMONS) $(call app,$(MULTIPLICATIVE_WEIGHTS)
 gradient-descent_SRC       := $(P7_COMMONS) $(call app,$(GRADIENT_DESCENT))
 chapter-33-problems_SRC    := $(P7_COMMONS) $(CH33)/problems.c
 
+# Chapter 34
+CH34 := $(P7)/34_np-completeness
+POLYNOMIAL_TIME              := $(CH34)/1_polynomial_time/polynomial_time.c
+POLYNOMIAL_TIME_VERIFICATION := $(CH34)/2_polynomial-time_verification/polynomial-time_verification.c
+NP_COMPLETENESS_REDUCIBILITY := $(CH34)/3_np-completeness_and_reducibility/np-completeness_and_reducibility.c
+NP_COMPLETENESS_PROOFS       := $(CH34)/4_np-completeness_proofs/np-completeness_proofs.c
+NP_COMPLETE_PROBLEMS         := $(CH34)/5_np-complete_problems/np-complete_problems.c
+
+PROGRAMS += polynomial-time polynomial-time-verification np-completeness-and-reducibility \
+            np-completeness-proofs np-complete-problems chapter-34-problems
+polynomial-time_SRC                  := $(P7_COMMONS) $(call app,$(POLYNOMIAL_TIME))
+polynomial-time-verification_SRC     := $(P7_COMMONS) $(call app,$(POLYNOMIAL_TIME_VERIFICATION))
+np-completeness-and-reducibility_SRC := $(P7_COMMONS) $(call app,$(NP_COMPLETENESS_REDUCIBILITY))
+np-completeness-proofs_SRC           := $(P7_COMMONS) $(call app,$(NP_COMPLETENESS_PROOFS))
+np-complete-problems_SRC             := $(P7_COMMONS) $(call app,$(NP_COMPLETE_PROBLEMS))
+chapter-34-problems_SRC              := $(P7_COMMONS) $(CH34)/problems.c
+
 # ============================================================================
 # RULES
 # ============================================================================
