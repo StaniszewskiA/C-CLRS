@@ -8,6 +8,11 @@
 // CHAPTER 34.1: Polynomial time
 // ============================================================================
 
+#define ENC_N_VERTICES 8
+
+char* convert_matrix_to_lists(const char* x);
+char* convert_lists_to_matrix(const char* y);
+void test_encoding_conversion(void);
 
 
 // ============================================================================

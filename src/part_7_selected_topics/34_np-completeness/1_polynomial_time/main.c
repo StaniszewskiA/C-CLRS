@@ -5,6 +5,11 @@
 int main(void) {
     switch (TASK)
     {
+        case 1: {
+            test_encoding_conversion();
+            break;
+        }
+
         default:
             break;
     }
