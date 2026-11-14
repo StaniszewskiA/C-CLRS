@@ -87,7 +87,32 @@ void test_verify_not_tautology(void);
 // CHAPTER 34.3: NP-completeness and reducibility
 // ============================================================================
 
+#define CS_MAX_FAN_IN 4
 
+typedef enum {
+    GATE_AND,
+    GATE_OR,
+    GATE_NOT
+} GateType;
+
+typedef struct {
+    int inputs[CS_MAX_FAN_IN];
+    int fanIn;
+    GateType type;
+} Gate;
+
+typedef struct {
+    const Gate* gates;
+    int nGates;
+    int nInputs;
+    int output;
+} Circuit;
+
+int verify_circuit_sat_inputs(
+    const Circuit* c,
+    const char* y
+);
+void test_verify_circuit_sat_inputs(void);
 
 // ============================================================================
 // CHAPTER 34.4: NP-completeness proofs
