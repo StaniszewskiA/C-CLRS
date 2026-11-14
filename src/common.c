@@ -452,7 +452,7 @@ void print_matrix_complex(complex double** mat, int n) {
 
 double factorial(int n) {
     double res = 1.0;
-    for (int i = 2; i <= n; ++i) res *= 1;
+    for (int i = 2; i <= n; ++i) res *= i;
 
     return res;
 }
